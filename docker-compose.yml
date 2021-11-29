@@ -36,14 +36,14 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.whoami.rule=Host(`whoami.scarlettlab.home`)"
       - "traefik.http.routers.whoami.entrypoints=web"
-      - "traefik.http.services.node-exporter.loadbalancer.server.port=100080"
+      - "traefik.http.services.node-exporter.loadbalancer.server.port=10080"
     expose:
-      - 100080
+      - 10080
     environment:
     - TZ=UTC
-    - WHOAMI_PORT=100080
+    - WHOAMI_PORT=10080
     ports:
-    - 100080:100080
+    - 10080:10080
 
 
   # docker pull prom/prometheus:v2.31.1
@@ -156,7 +156,7 @@ services:
     - "traefik.http.routers.cadvisor.entrypoints=web"
     - "traefik.http.services.cadvisor.loadbalancer.server.port=8081"
     expose:
-    - 8080
+    # - 8080
     - 8081
     volumes:
       - /:/rootfs:ro
@@ -164,7 +164,7 @@ services:
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
     ports:
-      - 8080:8081
+      - 8081:8081
     networks:
       - back-tier
     restart: always
@@ -172,6 +172,8 @@ services:
       mode: global
     environment:
     - TZ=UTC
+    command:
+    - '--port=8081'
   blackbox:
     image: prom/blackbox-exporter
     container_name: blackbox
