@@ -150,21 +150,21 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor
     container_name: cadvisor
-    labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.scarlettlab.home`)"
-    - "traefik.http.routers.cadvisor.entrypoints=web"
-    - "traefik.http.services.cadvisor.loadbalancer.server.port=8081"
-    expose:
-    # - 8080
-    - 8081
+    # labels:
+    # - "traefik.enable=true"
+    # - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.scarlettlab.home`)"
+    # - "traefik.http.routers.cadvisor.entrypoints=web"
+    # - "traefik.http.services.cadvisor.loadbalancer.server.port=8081"
+    # expose:
+    # # - 8080
+    # - 8081
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
-    ports:
-      - 8081:8081
+    # ports:
+    #   - 8081:8081
     networks:
       - back-tier
     restart: always
@@ -172,6 +172,7 @@ services:
       mode: global
     environment:
     - TZ=UTC
+    entrypoint: ["/usr/bin/cadvisor", "-logtostderr"]
     command:
     - '--port=8081'
   blackbox:
@@ -232,6 +233,9 @@ services:
     restart: always
     environment:
     - TZ=UTC
+    # username - admin
+    # password - foobar (Password is stored in the `/grafana/config.monitoring` env file)
+
 
 
   # scope:

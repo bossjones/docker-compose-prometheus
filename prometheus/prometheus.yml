@@ -106,7 +106,7 @@ scrape_configs:
       module: [http_2xx]  # Look for a HTTP 200 response.
     static_configs:
       - targets:
-        - 'http://24.193.239.148:18000' # Target to probe with http on port 8080.
+        - 'http://192.168.1.164:18000' # Target to probe with http on port 8080.
     relabel_configs:
       - source_labels: [__address__]
         # Target: This allows you to use a relabel_config object to select targets to scrape and relabel metadata created by any service discovery mechanism.
