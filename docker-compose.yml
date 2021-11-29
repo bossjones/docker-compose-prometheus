@@ -1,0 +1,326 @@
+version: '3.7'
+
+volumes:
+    prometheus_data: {}
+    grafana_data: {}
+    netdataconfig:
+    netdatalib:
+    netdatacache:
+
+networks:
+  front-tier:
+  back-tier:
+
+services:
+
+  # docker pull prom/prometheus:v2.31.1
+  prometheus:
+    image: prom/prometheus:v2.31.1
+    container_name: prometheus
+    tty: true
+    stdin_open: true
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.listen-address=0.0.0.0:19090'
+      - '--log.level=debug'
+    ports:
+      - 19090:19090
+    links:
+      - cadvisor:cadvisor
+      - alertmanager:alertmanager
+#      - pushgateway:pushgateway
+    depends_on:
+      - cadvisor
+#      - pushgateway
+    networks:
+      - back-tier
+    restart: always
+#    deploy:
+#      placement:
+#        constraints:
+#          - node.hostname == ${HOSTNAME}
+
+  node-exporter:
+    image: prom/node-exporter
+    container_name: node-exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - --collector.filesystem.ignored-mount-points
+      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+    ports:
+      - 19100:19100
+    networks:
+      - back-tier
+    restart: always
+    deploy:
+      mode: global
+
+  alertmanager:
+    image: prom/alertmanager
+    container_name: alertmanager
+    tty: true
+    stdin_open: true
+    ports:
+      - 19093:19093
+    volumes:
+      - ./alertmanager/:/etc/alertmanager/
+    networks:
+      - back-tier
+    restart: always
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+      - '--verbose'
+      - '--alertmanager.url=http://localhost:19093'
+#    deploy:
+#      placement:
+#        constraints:
+#          - node.hostname == ${HOSTNAME}
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor
+    container_name: cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - 18080:18080
+    networks:
+      - back-tier
+    restart: always
+    deploy:
+      mode: global
+  blackbox:
+    image: prom/blackbox-exporter
+    container_name: blackbox
+    tty: true
+    stdin_open: true
+    ports:
+    - 19115:19115
+    # volumes:
+    #   - /:/rootfs:ro
+    #   - /var/run:/var/run:rw
+    #   - /sys:/sys:ro
+    #   - /var/lib/docker/:/var/lib/docker:ro
+    volumes:
+    - ./blackbox/config:/config
+    command:
+      - '--config.file=/config/blackbox.yml'
+      - '--web.listen-address=:19115'
+    networks:
+      - back-tier
+    restart: always
+    deploy:
+      mode: global
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    user: "472"
+    depends_on:
+      - prometheus
+    ports:
+      - 13000:13000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    env_file:
+      - ./grafana/config.monitoring
+    networks:
+      - back-tier
+      - front-tier
+    restart: always
+
+
+  # scope:
+  #   image: weaveworks/scope:latest
+  #   container_name: scope
+  #   network_mode: "host"
+  #   pid: "host"
+  #   privileged: true
+  #   labels:
+  #     - "works.weave.role=system"
+  #   volumes:
+  #     - "/var/run/docker.sock:/var/run/docker.sock:rw"
+  #   command:
+  #     - "--probe.docker=true"
+  #   restart: unless-stopped
+  #   cap_add:
+  #     - SYS_PTRACE
+  #   security_opt:
+  #     - apparmor:unconfined
+
+  # # SOURCE docker run --rm -v /var/run/docker.sock:/var/run/docker.sock leoverto/docker-network-graph
+  # networkgraph:
+  #   image: leoverto/docker-network-graph
+  #   container_name: networkgraph
+  #   cap_add:
+  #     - ALL
+  #   security_opt:
+  #     - apparmor:unconfined
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+
+  #   depends_on:
+  #     - prometheus
+  #   networks:
+  #     - back-tier
+  #     - front-tier
+  #   tty: true
+  #   stdin_open: true
+  #   command:
+  #   - '-f'
+  #   - '/dev/null'
+  #   entrypoint: "tail"
+  #   environment:
+  #   - TZ=UTC
+  zsh:
+    image: ubuntu:focal
+    container_name: zsh
+    # hostname: example.com # set to fqdn of host
+    # ports:
+    #   - 19999:19999
+    restart: unless-stopped
+    cap_add:
+      - ALL
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
+    depends_on:
+      - prometheus
+    networks:
+      - back-tier
+      - front-tier
+    tty: true
+    stdin_open: true
+    command:
+    - '-f'
+    - '/dev/null'
+    entrypoint: "tail"
+    environment:
+    - TZ=UTC
+  #  apt-get update;
+  #  apt-get install bash-completion zsh git net-tools curl wget dnsutils sudo vim build-essential -y;
+  #  wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+  #  chmod +x install.sh
+  #  ./install.sh
+  #  mkdir -p /usr/local/src;
+  #  git clone https://github.com/bossjones/debug-tools /usr/local/src/debug-tools;
+  #  curl -L 'https://raw.githubusercontent.com/bossjones/debug-tools/master/install-config-sample-ubuntu' > /usr/local/bin/install-config
+  #  sed -i 's,10.3.0,16.11.1,g' /usr/local/bin/install-config
+  #  cat /usr/local/bin/install-config
+  #  cd /usr/local/src/debug-tools;
+  #  ./update-bossjones-debug-tools
+  #  export TZ=UTC
+  #  ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+    # apt-get install -y \
+    # apache2-utils \
+    # bash \
+    # bind-tools \
+    # bird \
+    # bridge-utils \
+    # busybox-extras \
+    # calicoctl \
+    # conntrack-tools \
+    # ctop \
+    # curl \
+    # dhcping \
+    # drill \
+    # ethtool \
+    # file \
+    # fping \
+    # httpie \
+    # iftop \
+    # iperf \
+    # iproute2 \
+    # ipset \
+    # iptables \
+    # iptraf-ng \
+    # iputils \
+    # ipvsadm \
+    # jq \
+    # libc6-compat \
+    # liboping \
+    # mtr \
+    # net-snmp-tools \
+    # netcat-openbsd \
+    # netgen \
+    # nftables \
+    # ngrep \
+    # nmap \
+    # nmap-nping \
+    # openssl \
+    # py-crypto \
+    # py2-virtualenv \
+    # python2 \
+    # scapy \
+    # socat \
+    # strace \
+    # tcpdump \
+    # tcptraceroute \
+    # termshark \
+    # tshark \
+    # util-linux \
+    # vim \
+    # websocat \
+    # nethogs
+
+    # export PYENV_VERSIONS_TO_INSTALL="3.9.0\n"
+    # export PYENV_ROOT=/.pyenv
+    # export PATH="${PYENV_ROOT}/bin:${PYENV_ROOT}/shims:$PATH"
+    # export RBENV_ROOT=~/.rbenv
+    # export RBENV_VERSION=2.7.2
+    # export NODE_VERSION_TO_INSTALL=16.11.1
+    # export PATH="$HOME/.fnm:${RBENV_ROOT}/shims:${RBENV_ROOT}/bin:$PATH"
+
+
+#  pushgateway:
+#    image: prom/pushgateway
+#    restart: always
+#    expose:
+#      - 9091
+#    ports:
+#      - "9091:9091"
+#    networks:
+#      - back-tier
+
+  # netdata:
+  #   image: netdata/netdata
+  #   container_name: netdata
+  #   hostname: example.com # set to fqdn of host
+  #   ports:
+  #     - 19999:19999
+  #   restart: unless-stopped
+  #   cap_add:
+  #     - SYS_PTRACE
+  #   security_opt:
+  #     - apparmor:unconfined
+  #   volumes:
+  #     - netdataconfig:/etc/netdata
+  #     - netdatalib:/var/lib/netdata
+  #     - netdatacache:/var/cache/netdata
+  #     - /etc/passwd:/host/etc/passwd:ro
+  #     - /etc/group:/host/etc/group:ro
+  #     - /proc:/host/proc:ro
+  #     - /sys:/host/sys:ro
+  #     - /etc/os-release:/host/etc/os-release:ro
+  #   depends_on:
+  #   - grafana
