@@ -12,11 +12,42 @@ networks:
   back-tier:
 
 services:
+  # SOURCE: https://doc.traefik.io/traefik/user-guides/docker-compose/basic-example/
+  # SOURCE: https://doc.traefik.io/traefik/user-guides/docker-compose/basic-example/
+  traefik:
+    image: "traefik:v2.5"
+    container_name: "traefik"
+    command:
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  whoami:
+    image: "traefik/whoami"
+    container_name: "simple-service"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.scarlettlab.home`)"
+      - "traefik.http.routers.whoami.entrypoints=web"
+    environment:
+    - TZ=UTC
 
   # docker pull prom/prometheus:v2.31.1
   prometheus:
     image: prom/prometheus:v2.31.1
     container_name: prometheus
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.prometheus.rule=Host(`prometheus.scarlettlab.home`)"
+    - "traefik.http.routers.prometheus.entrypoints=web"
+    - "traefik.http.services.prometheus.loadbalancer.server.port=19090"
     tty: true
     stdin_open: true
     volumes:
@@ -45,10 +76,17 @@ services:
 #      placement:
 #        constraints:
 #          - node.hostname == ${HOSTNAME}
+    environment:
+    - TZ=UTC
 
   node-exporter:
     image: prom/node-exporter
     container_name: node-exporter
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.node-exporter.rule=Host(`node-exporter.scarlettlab.home`)"
+    - "traefik.http.routers.node-exporter.entrypoints=web"
+    - "traefik.http.services.node-exporter.loadbalancer.server.port=19100"
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -65,10 +103,17 @@ services:
     restart: always
     deploy:
       mode: global
+    environment:
+    - TZ=UTC
 
   alertmanager:
     image: prom/alertmanager
     container_name: alertmanager
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.alertmanager.rule=Host(`alertmanager.scarlettlab.home`)"
+    - "traefik.http.routers.alertmanager.entrypoints=web"
+    - "traefik.http.services.prometheus.loadbalancer.server.port=19093"
     tty: true
     stdin_open: true
     ports:
@@ -81,8 +126,10 @@ services:
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
-      - '--verbose'
+      # - '-v'
       - '--alertmanager.url=http://localhost:19093'
+    environment:
+    - TZ=UTC
 #    deploy:
 #      placement:
 #        constraints:
@@ -90,6 +137,11 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor
     container_name: cadvisor
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.scarlettlab.home`)"
+    - "traefik.http.routers.cadvisor.entrypoints=web"
+    - "traefik.http.services.cadvisor.loadbalancer.server.port=18080"
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
@@ -102,9 +154,16 @@ services:
     restart: always
     deploy:
       mode: global
+    environment:
+    - TZ=UTC
   blackbox:
     image: prom/blackbox-exporter
     container_name: blackbox
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.blackbox.rule=Host(`blackbox.scarlettlab.home`)"
+    - "traefik.http.routers.blackbox.entrypoints=web"
+    - "traefik.http.services.blackbox.loadbalancer.server.port=19115"
     tty: true
     stdin_open: true
     ports:
@@ -124,10 +183,17 @@ services:
     restart: always
     deploy:
       mode: global
+    environment:
+    - TZ=UTC
 
   grafana:
     image: grafana/grafana
     container_name: grafana
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.grafana.rule=Host(`grafana.scarlettlab.home`)"
+    - "traefik.http.routers.grafana.entrypoints=web"
+    - "traefik.http.services.grafana.loadbalancer.server.port=13000"
     user: "472"
     depends_on:
       - prometheus
@@ -142,6 +208,8 @@ services:
       - back-tier
       - front-tier
     restart: always
+    environment:
+    - TZ=UTC
 
 
   # scope:
