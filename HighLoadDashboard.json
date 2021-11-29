@@ -132,7 +132,7 @@
       "panels": [
         {
           "aliasColors": {
-            "ALERTS{alertname=\"high_load\",alertstate=\"firing\",instance=\"node-exporter:19100\",job=\"prometheus\"}": "#BF1B00"
+            "ALERTS{alertname=\"high_load\",alertstate=\"firing\",instance=\"node-exporter:9100\",job=\"prometheus\"}": "#BF1B00"
           },
           "bars": false,
           "datasource": "${DS_PROMETHEUS}",

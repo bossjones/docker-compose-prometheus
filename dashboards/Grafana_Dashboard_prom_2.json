@@ -44,7 +44,7 @@
         {
           "aliasColors": {
             "prometheus": "#C15C17",
-            "{instance=\"localhost:19090\",job=\"prometheus\"}": "#CCA300"
+            "{instance=\"localhost:9090\",job=\"prometheus\"}": "#CCA300"
           },
           "bars": false,
           "dashLength": 10,
@@ -471,7 +471,7 @@
         {
           "aliasColors": {
             "prometheus": "#F9BA8F",
-            "{instance=\"localhost:19090\",interval=\"5s\",job=\"prometheus\"}": "#F9BA8F"
+            "{instance=\"localhost:9090\",interval=\"5s\",job=\"prometheus\"}": "#F9BA8F"
           },
           "bars": false,
           "dashLength": 10,

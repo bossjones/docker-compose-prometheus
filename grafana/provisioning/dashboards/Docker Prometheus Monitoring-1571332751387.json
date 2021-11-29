@@ -1038,7 +1038,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(node_filesystem_free_bytes {job=\"node-exporter\", instance=~\".*19100\", device=~\"/dev/.*\", mountpoint!=\"/var/lib/docker/aufs\"}) ",
+          "expr": "sum(node_filesystem_free_bytes {job=\"node-exporter\", instance=~\".*9100\", device=~\"/dev/.*\", mountpoint!=\"/var/lib/docker/aufs\"}) ",
           "format": "time_series",
           "interval": "2m",
           "intervalFactor": 2,

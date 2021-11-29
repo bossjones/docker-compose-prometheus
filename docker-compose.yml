@@ -36,8 +36,15 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.whoami.rule=Host(`whoami.scarlettlab.home`)"
       - "traefik.http.routers.whoami.entrypoints=web"
+      - "traefik.http.services.node-exporter.loadbalancer.server.port=100080"
+    expose:
+      - 100080
     environment:
     - TZ=UTC
+    - WHOAMI_PORT=100080
+    ports:
+    - 100080:100080
+
 
   # docker pull prom/prometheus:v2.31.1
   prometheus:
@@ -47,7 +54,9 @@ services:
     - "traefik.enable=true"
     - "traefik.http.routers.prometheus.rule=Host(`prometheus.scarlettlab.home`)"
     - "traefik.http.routers.prometheus.entrypoints=web"
-    - "traefik.http.services.prometheus.loadbalancer.server.port=19090"
+    - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+    expose:
+    - 9090
     tty: true
     stdin_open: true
     volumes:
@@ -58,10 +67,10 @@ services:
       - '--storage.tsdb.path=/prometheus'
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
-      - '--web.listen-address=0.0.0.0:19090'
+      - '--web.listen-address=0.0.0.0:9090'
       - '--log.level=debug'
     ports:
-      - 19090:19090
+      - 9090:9090
     links:
       - cadvisor:cadvisor
       - alertmanager:alertmanager
@@ -86,7 +95,7 @@ services:
     - "traefik.enable=true"
     - "traefik.http.routers.node-exporter.rule=Host(`node-exporter.scarlettlab.home`)"
     - "traefik.http.routers.node-exporter.entrypoints=web"
-    - "traefik.http.services.node-exporter.loadbalancer.server.port=19100"
+    - "traefik.http.services.node-exporter.loadbalancer.server.port=9100"
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -96,8 +105,10 @@ services:
       - '--path.sysfs=/host/sys'
       - --collector.filesystem.ignored-mount-points
       - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+    expose:
+    - 9100
     ports:
-      - 19100:19100
+      - 9100:9100
     networks:
       - back-tier
     restart: always
@@ -113,11 +124,13 @@ services:
     - "traefik.enable=true"
     - "traefik.http.routers.alertmanager.rule=Host(`alertmanager.scarlettlab.home`)"
     - "traefik.http.routers.alertmanager.entrypoints=web"
-    - "traefik.http.services.prometheus.loadbalancer.server.port=19093"
+    - "traefik.http.services.prometheus.loadbalancer.server.port=9093"
     tty: true
     stdin_open: true
+    expose:
+    - 9093
     ports:
-      - 19093:19093
+      - 9093:9093
     volumes:
       - ./alertmanager/:/etc/alertmanager/
     networks:
@@ -127,7 +140,7 @@ services:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
       # - '-v'
-      # - '--alertmanager.url=http://localhost:19093'
+      # - '--alertmanager.url=http://localhost:9093'
     environment:
     - TZ=UTC
 #    deploy:
@@ -141,14 +154,17 @@ services:
     - "traefik.enable=true"
     - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.scarlettlab.home`)"
     - "traefik.http.routers.cadvisor.entrypoints=web"
-    - "traefik.http.services.cadvisor.loadbalancer.server.port=18080"
+    - "traefik.http.services.cadvisor.loadbalancer.server.port=8081"
+    expose:
+    - 8080
+    - 8081
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
     ports:
-      - 18080:18080
+      - 8080:8081
     networks:
       - back-tier
     restart: always
@@ -163,11 +179,13 @@ services:
     - "traefik.enable=true"
     - "traefik.http.routers.blackbox.rule=Host(`blackbox.scarlettlab.home`)"
     - "traefik.http.routers.blackbox.entrypoints=web"
-    - "traefik.http.services.blackbox.loadbalancer.server.port=19115"
+    - "traefik.http.services.blackbox.loadbalancer.server.port=9115"
     tty: true
     stdin_open: true
     ports:
-    - 19115:19115
+    - 9115:9115
+    expose:
+    - 9115
     # volumes:
     #   - /:/rootfs:ro
     #   - /var/run:/var/run:rw
@@ -177,7 +195,7 @@ services:
     - ./blackbox/config:/config
     command:
       - '--config.file=/config/blackbox.yml'
-      - '--web.listen-address=:19115'
+      - '--web.listen-address=:9115'
     networks:
       - back-tier
     restart: always
@@ -193,12 +211,14 @@ services:
     - "traefik.enable=true"
     - "traefik.http.routers.grafana.rule=Host(`grafana.scarlettlab.home`)"
     - "traefik.http.routers.grafana.entrypoints=web"
-    - "traefik.http.services.grafana.loadbalancer.server.port=13000"
+    - "traefik.http.services.grafana.loadbalancer.server.port=3000"
     user: "472"
     depends_on:
       - prometheus
+    expose:
+    - 3000
     ports:
-      - 13000:13000
+      - 3000:3000
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning/:/etc/grafana/provisioning/

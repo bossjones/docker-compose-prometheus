@@ -23,7 +23,7 @@ alerting:
   - scheme: http
     static_configs:
     - targets:
-      - "alertmanager:19093"
+      - "alertmanager:9093"
 
 # A scrape configuration containing exactly one endpoint to scrape:
 # Here it's Prometheus itself.
@@ -36,7 +36,7 @@ scrape_configs:
     scrape_interval: 5s
 
     static_configs:
-        - targets: ['localhost:19090']
+        - targets: ['localhost:9090']
 
 
   - job_name: 'cadvisor'
@@ -48,10 +48,10 @@ scrape_configs:
     - names:
       - 'tasks.cadvisor'
       type: 'A'
-      port: 18080
+      port: 8080
 
 #     static_configs:
-#          - targets: ['cadvisor:18080']
+#          - targets: ['cadvisor:8080']
 
   - job_name: 'node-exporter'
 
@@ -62,7 +62,7 @@ scrape_configs:
     - names:
       - 'tasks.node-exporter'
       type: 'A'
-      port: 19100
+      port: 9100
 
 #  - job_name: 'pushgateway'
 #    scrape_interval: 10s
@@ -73,7 +73,7 @@ scrape_configs:
 #      port: 9091
 
 #     static_configs:
-#          - targets: ['node-exporter:19100']
+#          - targets: ['node-exporter:9100']
 
   - job_name: 'blackbox'
     metrics_path: /probe
@@ -81,7 +81,7 @@ scrape_configs:
       module: [http_2xx]  # Look for a HTTP 200 response.
     static_configs:
       - targets:
-        - blackbox:19115    # Target to probe with http.
+        - blackbox:9115    # Target to probe with http.
     #     # - http://prometheus.io    # Target to probe with http.
     #     # - https://prometheus.io   # Target to probe with https.
     #     - http://24.193.239.148:18000 # Target to probe with http on port 8080.
@@ -91,7 +91,7 @@ scrape_configs:
       - source_labels: [__param_target]
         target_label: instance
       - target_label: __address__
-        replacement: blackbox:19115  # The blackbox exporter's real hostname:port.
+        replacement: blackbox:9115  # The blackbox exporter's real hostname:port.
 
   # NOTE: https://prometheus.io/docs/guides/multi-target-exporter/
   # To fix this, we will use relabeling. Relabeling is useful here because behind the scenes many things in Prometheus are configured with internal labels. The details are complicated and out of scope for this guide. Hence we will limit ourselves to the necessary. But if you want to know more check out this talk. For now it suffices if you understand this:
@@ -114,4 +114,4 @@ scrape_configs:
       - source_labels: [__param_target]
         target_label: instance
       - target_label: __address__
-        replacement: 172.16.249.129:19115  # The blackbox exporter's real hostname:port.
+        replacement: 172.16.249.129:9115  # The blackbox exporter's real hostname:port.
