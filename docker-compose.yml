@@ -72,11 +72,11 @@ services:
     ports:
       - 9090:9090
     links:
-      - cadvisor:cadvisor
+      # - cadvisor:cadvisor
       - alertmanager:alertmanager
 #      - pushgateway:pushgateway
-    depends_on:
-      - cadvisor
+    # depends_on:
+    #   - cadvisor
 #      - pushgateway
     networks:
       - back-tier
@@ -147,34 +147,34 @@ services:
 #      placement:
 #        constraints:
 #          - node.hostname == ${HOSTNAME}
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor
-    container_name: cadvisor
-    # labels:
-    # - "traefik.enable=true"
-    # - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.scarlettlab.home`)"
-    # - "traefik.http.routers.cadvisor.entrypoints=web"
-    # - "traefik.http.services.cadvisor.loadbalancer.server.port=8081"
-    # expose:
-    # # - 8080
-    # - 8081
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:rw
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-    # ports:
-    #   - 8081:8081
-    networks:
-      - back-tier
-    restart: always
-    deploy:
-      mode: global
-    environment:
-    - TZ=UTC
-    entrypoint: ["/usr/bin/cadvisor", "-logtostderr"]
-    command:
-    - '--port=8081'
+  # cadvisor:
+  #   image: gcr.io/cadvisor/cadvisor
+  #   container_name: cadvisor
+  #   # labels:
+  #   # - "traefik.enable=true"
+  #   # - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.scarlettlab.home`)"
+  #   # - "traefik.http.routers.cadvisor.entrypoints=web"
+  #   # - "traefik.http.services.cadvisor.loadbalancer.server.port=8081"
+  #   # expose:
+  #   # # - 8080
+  #   # - 8081
+  #   volumes:
+  #     - /:/rootfs:ro
+  #     - /var/run:/var/run:rw
+  #     - /sys:/sys:ro
+  #     - /var/lib/docker/:/var/lib/docker:ro
+  #   # ports:
+  #   #   - 8081:8081
+  #   networks:
+  #     - back-tier
+  #   restart: always
+  #   deploy:
+  #     mode: global
+  #   environment:
+  #   - TZ=UTC
+  #   entrypoint: ["/usr/bin/cadvisor", "-logtostderr"]
+  #   command:
+  #   - '--port=8081'
   blackbox:
     image: prom/blackbox-exporter
     container_name: blackbox
@@ -206,6 +206,7 @@ services:
       mode: global
     environment:
     - TZ=UTC
+    network_mode: "host"
 
   grafana:
     image: grafana/grafana
