@@ -127,7 +127,7 @@ services:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
       # - '-v'
-      - '--alertmanager.url=http://localhost:19093'
+      # - '--alertmanager.url=http://localhost:19093'
     environment:
     - TZ=UTC
 #    deploy:
