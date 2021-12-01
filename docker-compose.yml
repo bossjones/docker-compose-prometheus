@@ -87,6 +87,10 @@ services:
 #          - node.hostname == ${HOSTNAME}
     environment:
     - TZ=UTC
+    # extra_hosts:
+    # - "host.docker.internal:host-gateway"
+    # SEE: https://stackoverflow.com/questions/31324981/how-to-access-host-port-from-docker-container/43541732#43541732
+    # https://stackoverflow.com/questions/56909896/prometheus-in-docker-container-cannot-scrape-target-on-host/56910057
 
   node-exporter:
     image: prom/node-exporter
