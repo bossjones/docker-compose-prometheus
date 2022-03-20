@@ -4,4 +4,4 @@
     # - https://blackdata.xam.dk:5001;blackdata.xam.dk;external;internetbox
     - http://192.168.1.1;internetbox;local;internetbox
     # - http://192.168.1.42;blackdata;local;orbirouter-attic
-    - http://192.168.1.164:18000/metrics;cerebrobot;external;internetbox
+    - http://192.168.1.91:18000/metrics;cerebrobot;external;internetbox
