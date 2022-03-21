@@ -273,8 +273,8 @@ services:
     - "traefik.http.routers.prometheus.rule=Host(`unifi-poller.scarlettlab.home`)"
     - "traefik.http.routers.prometheus.entrypoints=web"
     - "traefik.http.services.prometheus.loadbalancer.server.port=9130"
-    environment:
-    - TZ=UTC
+    # environment:
+    # - TZ=UTC
     #   - UP_INFLUXDB_DB=${INFLUXDB_DB}
     #   - UP_INFLUXDB_USER=${INFLUXDB_ADMIN_USER}
     #   - UP_INFLUXDB_PASS=${INFLUXDB_ADMIN_PASSWORD}
