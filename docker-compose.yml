@@ -289,7 +289,7 @@ services:
     logging:
       driver: loki
       options:
-        loki-url: ${UP_LOKI_URL}/loki/api/v1/push
+        loki-url: http://192.168.1.98:3100/loki/api/v1/push
   
   unifi-poller:
     restart: always
