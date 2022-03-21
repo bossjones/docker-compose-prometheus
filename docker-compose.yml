@@ -87,7 +87,7 @@ services:
     depends_on:
       - influxdb
     environment:
-      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_URL=${INFLUXDB_URL}
       - INFLUXDB_USERNAME=${INFLUXDB_ADMIN_USER}
       - INFLUXDB_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
       - TZ=UTC
