@@ -264,7 +264,7 @@ services:
     - TZ=UTC
     # network_mode: "host"
     # network_mode: host
-  
+
   loki:
     restart: always
     image: grafana/loki:2.4.1
@@ -286,8 +286,8 @@ services:
     - "traefik.http.routers.prometheus.entrypoints=web"
     - "traefik.http.services.prometheus.loadbalancer.server.port=3100"
     command: -config.file=/loki/loki-config.yaml
-    
-  
+
+
   unifi-poller:
     restart: always
     image: golift/unifi-poller:${POLLER_TAG}
