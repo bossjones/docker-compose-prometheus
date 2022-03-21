@@ -264,7 +264,29 @@ services:
     - TZ=UTC
     # network_mode: "host"
     # network_mode: host
-
+  
+  loki:
+    restart: always
+    image: grafana/loki:2.4.1
+    ports:
+      - "3100:3100"
+      - "9096:9096"
+    container_name: loki
+    tty: true
+    stdin_open: true
+    env_file:
+      - ./env
+    volumes:
+    - ./loki/etc/loki:/loki
+    depends_on:
+      - unifi-poller
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.prometheus.rule=Host(`loki.scarlettlab.home`)"
+    - "traefik.http.routers.prometheus.entrypoints=web"
+    - "traefik.http.services.prometheus.loadbalancer.server.port=3100"
+    command: -config.file=/loki/loki-config.yaml
+  
   unifi-poller:
     restart: always
     image: golift/unifi-poller:${POLLER_TAG}
