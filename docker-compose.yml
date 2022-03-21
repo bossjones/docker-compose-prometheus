@@ -37,6 +37,10 @@ services:
 
   whoami:
     image: "traefik/whoami"
+    command:
+    # It tells whoami to start listening on 2001 instead of 80
+    - --port 10080
+    - --name whoami
     container_name: "simple-service"
     labels:
       - "traefik.enable=true"
@@ -47,7 +51,7 @@ services:
       - 10080
     environment:
     - TZ=UTC
-    - WHOAMI_PORT=10080
+    - WHOAMI_PORT_NUMBER=10080
     ports:
     - 10080:10080
 
