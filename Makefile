@@ -80,3 +80,6 @@ down:
 .PHONY: viz
 viz:
 	docker run --rm -it --name dcv -v $(PWD):/input pmsipilot/docker-compose-viz render -m image docker-compose.yml
+
+chrome:
+	bash scripts/open-all.sh
