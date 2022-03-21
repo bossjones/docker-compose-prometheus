@@ -282,7 +282,7 @@ services:
     - "traefik.http.routers.grafana.rule=Host(`grafana.scarlettlab.home`)"
     - "traefik.http.routers.grafana.entrypoints=web"
     - "traefik.http.services.grafana.loadbalancer.server.port=3000"
-    user: "472"
+    # user: "472"
     depends_on:
       - prometheus
     expose:
@@ -293,7 +293,9 @@ services:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning/:/etc/grafana/provisioning/
     env_file:
-      - ./grafana/config.monitoring
+      - ./env
+    # env_file:
+    #   - ./grafana/config.monitoring
     # networks:
     #   - back-tier
     #   - front-tier
