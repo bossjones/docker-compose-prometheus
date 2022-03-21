@@ -1,11 +1,17 @@
 version: '3.7'
 
+# for the unifipoller bits
+# https://github.com/unpoller/unpoller/blob/master/init/docker/docker-compose.yml
+
 volumes:
     prometheus_data: {}
     grafana_data: {}
     netdataconfig:
     netdatalib:
     netdatacache:
+    influxdb-storage:
+    chronograf-storage:
+    grafana-storage:
 
 networks:
   front-tier:
@@ -45,6 +51,46 @@ services:
     ports:
     - 10080:10080
 
+  influxdb:
+    restart: always
+    image: influxdb:1.8
+    container_name: influxdb
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.prometheus.rule=Host(`influxdb.scarlettlab.home`)"
+    - "traefik.http.routers.prometheus.entrypoints=web"
+    - "traefik.http.services.prometheus.loadbalancer.server.port=8086"
+    ports:
+      - '8086:8086'
+    volumes:
+      - influxdb-storage:/var/lib/influxdb
+    environment:
+      - INFLUXDB_DB=${INFLUXDB_DB}
+      - INFLUXDB_HTTP_AUTH_ENABLED=${INFLUXDB_HTTP_AUTH_ENABLED}
+      - INFLUXDB_ADMIN_USER=${INFLUXDB_ADMIN_USER}
+      - INFLUXDB_ADMIN_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
+      - TZ=UTC
+
+  chronograf:
+    restart: always
+    image: chronograf:latest
+    container_name: chronograf
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.prometheus.rule=Host(`chronograf.scarlettlab.home`)"
+    - "traefik.http.routers.prometheus.entrypoints=web"
+    - "traefik.http.services.prometheus.loadbalancer.server.port=8888"
+    ports:
+      - '8888:8888'
+    volumes:
+      - chronograf-storage:/var/lib/chronograf
+    depends_on:
+      - influxdb
+    environment:
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_USERNAME=${INFLUXDB_ADMIN_USER}
+      - INFLUXDB_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
+      - TZ=UTC
 
   # docker pull prom/prometheus:v2.31.1
   prometheus:
@@ -78,8 +124,8 @@ services:
     # depends_on:
     #   - cadvisor
 #      - pushgateway
-    networks:
-      - back-tier
+    # networks:
+    #   - back-tier
     restart: always
 #    deploy:
 #      placement:
@@ -113,8 +159,8 @@ services:
     - 9100
     ports:
       - 9100:9100
-    networks:
-      - back-tier
+    # networks:
+    #   - back-tier
     restart: always
     deploy:
       mode: global
@@ -137,8 +183,8 @@ services:
       - 9093:9093
     volumes:
       - ./alertmanager/:/etc/alertmanager/
-    networks:
-      - back-tier
+    # networks:
+    #   - back-tier
     restart: always
     command:
       - '--config.file=/etc/alertmanager/config.yml'
@@ -204,8 +250,8 @@ services:
     command:
       - '--config.file=/config/blackbox.yml'
       - '--web.listen-address=:9115'
-    networks:
-      - back-tier
+    # networks:
+    #   - back-tier
     restart: always
     deploy:
       mode: global
@@ -213,6 +259,20 @@ services:
     - TZ=UTC
     # network_mode: "host"
     # network_mode: host
+
+  # unifi-poller:
+  #   restart: always
+  #   image: golift/unifi-poller:${POLLER_TAG}
+  #   environment:
+  #     - UP_INFLUXDB_DB=${INFLUXDB_DB}
+  #     - UP_INFLUXDB_USER=${INFLUXDB_ADMIN_USER}
+  #     - UP_INFLUXDB_PASS=${INFLUXDB_ADMIN_PASSWORD}
+  #     - UP_INFLUXDB_URL=http://influxdb:8086
+  #     - UP_UNIFI_DEFAULT_USER=${UNIFI_USER}
+  #     - UP_UNIFI_DEFAULT_PASS=${UNIFI_PASS}
+  #     - UP_UNIFI_DEFAULT_URL=${UNIFI_URL}
+  #     - UP_POLLER_DEBUG=${POLLER_DEBUG}
+  #     - UP_UNIFI_DEFAULT_SAVE_DPI=${POLLER_SAVE_DPI}
 
   grafana:
     image: grafana/grafana
@@ -234,12 +294,15 @@ services:
       - ./grafana/provisioning/:/etc/grafana/provisioning/
     env_file:
       - ./grafana/config.monitoring
-    networks:
-      - back-tier
-      - front-tier
+    # networks:
+    #   - back-tier
+    #   - front-tier
     restart: always
     environment:
     - TZ=UTC
+    # - GF_SECURITY_ADMIN_USER=${GRAFANA_USERNAME}
+    # - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    - GF_INSTALL_PLUGINS=grafana-clock-panel,natel-discrete-panel,grafana-piechart-panel
     # username - admin
     # password - foobar (Password is stored in the `/grafana/config.monitoring` env file)
 
@@ -306,9 +369,9 @@ services:
       - /etc/os-release:/host/etc/os-release:ro
     depends_on:
       - prometheus
-    networks:
-      - back-tier
-      - front-tier
+    # networks:
+    #   - back-tier
+    #   - front-tier
     tty: true
     stdin_open: true
     command:
