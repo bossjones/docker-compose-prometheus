@@ -270,6 +270,8 @@ services:
     container_name: unifi-poller
     tty: true
     stdin_open: true
+    env_file:
+      - ./env
     labels:
     - "traefik.enable=true"
     - "traefik.http.routers.prometheus.rule=Host(`unifi-poller.scarlettlab.home`)"
