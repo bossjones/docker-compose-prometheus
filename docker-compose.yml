@@ -286,10 +286,7 @@ services:
     - "traefik.http.routers.prometheus.entrypoints=web"
     - "traefik.http.services.prometheus.loadbalancer.server.port=3100"
     command: -config.file=/loki/loki-config.yaml
-    logging:
-      driver: loki
-      options:
-        loki-url: http://192.168.1.98:3100/loki/api/v1/push
+    
   
   unifi-poller:
     restart: always
@@ -307,6 +304,10 @@ services:
     - "traefik.http.routers.prometheus.rule=Host(`unifi-poller.scarlettlab.home`)"
     - "traefik.http.routers.prometheus.entrypoints=web"
     - "traefik.http.services.prometheus.loadbalancer.server.port=9130"
+    depends_on:
+      - influxdb
+      - grafana
+      - loki
     # environment:
     # - TZ=UTC
     #   - UP_INFLUXDB_DB=${INFLUXDB_DB}
@@ -318,6 +319,10 @@ services:
     #   - UP_UNIFI_DEFAULT_URL=${UNIFI_URL}
     #   - UP_POLLER_DEBUG=${POLLER_DEBUG}
     #   - UP_UNIFI_DEFAULT_SAVE_DPI=${POLLER_SAVE_DPI}
+    logging:
+      driver: loki
+      options:
+        loki-url: http://192.168.1.98:3100/loki/api/v1/push
 
   grafana:
     image: grafana/grafana
