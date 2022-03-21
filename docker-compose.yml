@@ -260,19 +260,29 @@ services:
     # network_mode: "host"
     # network_mode: host
 
-  # unifi-poller:
-  #   restart: always
-  #   image: golift/unifi-poller:${POLLER_TAG}
-  #   environment:
-  #     - UP_INFLUXDB_DB=${INFLUXDB_DB}
-  #     - UP_INFLUXDB_USER=${INFLUXDB_ADMIN_USER}
-  #     - UP_INFLUXDB_PASS=${INFLUXDB_ADMIN_PASSWORD}
-  #     - UP_INFLUXDB_URL=http://influxdb:8086
-  #     - UP_UNIFI_DEFAULT_USER=${UNIFI_USER}
-  #     - UP_UNIFI_DEFAULT_PASS=${UNIFI_PASS}
-  #     - UP_UNIFI_DEFAULT_URL=${UNIFI_URL}
-  #     - UP_POLLER_DEBUG=${POLLER_DEBUG}
-  #     - UP_UNIFI_DEFAULT_SAVE_DPI=${POLLER_SAVE_DPI}
+  unifi-poller:
+    restart: always
+    image: golift/unifi-poller:${POLLER_TAG}
+    ports:
+      - "9130:9130/tcp"
+      - "9130:9130/udp"
+    container_name: unifi-poller
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.prometheus.rule=Host(`unifi-poller.scarlettlab.home`)"
+    - "traefik.http.routers.prometheus.entrypoints=web"
+    - "traefik.http.services.prometheus.loadbalancer.server.port=9130"
+    environment:
+    - TZ=UTC
+    #   - UP_INFLUXDB_DB=${INFLUXDB_DB}
+    #   - UP_INFLUXDB_USER=${INFLUXDB_ADMIN_USER}
+    #   - UP_INFLUXDB_PASS=${INFLUXDB_ADMIN_PASSWORD}
+    #   - UP_INFLUXDB_URL=http://influxdb:8086
+    #   - UP_UNIFI_DEFAULT_USER=${UNIFI_USER}
+    #   - UP_UNIFI_DEFAULT_PASS=${UNIFI_PASS}
+    #   - UP_UNIFI_DEFAULT_URL=${UNIFI_URL}
+    #   - UP_POLLER_DEBUG=${POLLER_DEBUG}
+    #   - UP_UNIFI_DEFAULT_SAVE_DPI=${POLLER_SAVE_DPI}
 
   grafana:
     image: grafana/grafana
