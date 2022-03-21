@@ -70,6 +70,8 @@ services:
       - INFLUXDB_ADMIN_USER=${INFLUXDB_ADMIN_USER}
       - INFLUXDB_ADMIN_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
       - TZ=UTC
+    env_file:
+      - ./env
 
   chronograf:
     restart: always
@@ -91,6 +93,8 @@ services:
       - INFLUXDB_USERNAME=${INFLUXDB_ADMIN_USER}
       - INFLUXDB_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
       - TZ=UTC
+    env_file:
+      - ./env
 
   # docker pull prom/prometheus:v2.31.1
   prometheus:
