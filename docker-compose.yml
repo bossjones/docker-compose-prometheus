@@ -237,7 +237,8 @@ services:
     tty: true
     stdin_open: true
     ports:
-    - 9115:9115
+    - "9115:9115/tcp"
+    - "9115:9115/udp"
     expose:
     - 9115
     # volumes:

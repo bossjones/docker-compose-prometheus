@@ -145,7 +145,8 @@ scrape_configs:
       - source_labels: [__param_target]
         target_label: instance
       - target_label: __address__
-        replacement: 192.168.1.102:9115  # The blackbox exporter's real hostname:port.
+        replacement: 192.168.1.98:9115  # The blackbox exporter's real hostname:port.
+        # replacement: 192.168.1.102:9115  # The blackbox exporter's real hostname:port.
 
   - job_name: 'ping'
     metrics_path: /probe
@@ -175,4 +176,5 @@ scrape_configs:
       - source_labels: [instance]
         target_label: __param_target
       - target_label: __address__
-        replacement: 192.168.1.102:9115  # The blackbox exporter's real hostname:port.
+        # replacement: 192.168.1.102:9115  # The blackbox exporter's real hostname:port.
+        replacement: 192.168.1.98:9115  # The blackbox exporter's real hostname:port.
