@@ -13,9 +13,9 @@ volumes:
     chronograf-storage:
     grafana-storage:
 
-networks:
-  front-tier:
-  back-tier:
+# networks:
+#   front-tier:
+#   back-tier:
 
 services:
   # SOURCE: https://doc.traefik.io/traefik/user-guides/docker-compose/basic-example/
