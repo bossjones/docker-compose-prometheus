@@ -311,7 +311,8 @@ services:
       - influxdb
       - grafana
       - loki
-    # environment:
+    environment:
+    - UP_WEBSERVER_ENABLE=true
     # - TZ=UTC
     #   - UP_INFLUXDB_DB=${INFLUXDB_DB}
     #   - UP_INFLUXDB_USER=${INFLUXDB_ADMIN_USER}
