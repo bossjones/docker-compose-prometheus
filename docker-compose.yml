@@ -298,6 +298,7 @@ services:
     ports:
       - "9130:9130/tcp"
       - "9130:9130/udp"
+      - "37288:37288"
     container_name: unifi-poller
     tty: true
     stdin_open: true
