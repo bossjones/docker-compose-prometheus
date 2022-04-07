@@ -363,7 +363,7 @@ services:
       - PGID=1000
       - TZ=UTC
     volumes:
-      - ./heimdall:/config
+      - ./docker-heimdall/config:/config
     ports:
       - 4040:4040
       - 4443:4443
