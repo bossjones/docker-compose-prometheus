@@ -716,6 +716,7 @@ services:
       - /etc/machine-id:/etc/machine-id:ro
       - ./promtail/var/run/promtail:/var/run/promtail
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /home/pi/dev/bossjones/elk-docker/rsyslog-conf/log:/log
       # - ${DATADIR}/promtail/config/promtail-config.yaml:/etc/promtail/promtail-config.ya
     ports:
       - "9080:9080"

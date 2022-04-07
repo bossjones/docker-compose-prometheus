@@ -200,6 +200,15 @@ scrape_configs:
         miner: boss-monitor
         job: varlogs
         __path__: /var/log/*log
+
+  - job_name: rsyslogng
+    static_configs:
+    - targets:
+        - localhost
+      labels:
+        miner: boss-monitor
+        job: rsyslogng
+        __path__: /log
         
   - job_name: journal
     journal:
