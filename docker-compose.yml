@@ -270,6 +270,7 @@ services:
     # SOURCE: https://github.com/rafaribe/home-ops/blob/d9e283fd3ddc42a9891c8a12fe82fa128657798a/provision/ansible/backup-server/roles/syncthing/templates/agent.yml
     image: unibaktr/cadvisor:0.39.1
     container_name: cadvisor
+    privileged: true
     labels:
     - "traefik.enable=true"
     - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.scarlettlab.home`)"
@@ -696,11 +697,11 @@ services:
     image: grafana/promtail:2.4.2
     restart: unless-stopped
     volumes:
-      # - /var/log:/var/log
+      - /var/log:/var/log:ro
       - ./promtail/promtail-gateway.yaml:/etc/promtail/promtail-gateway.yaml:ro
-      - /var/log/journal/:/var/log/journal/
-      - /run/log/journal/:/run/log/journal/
-      - /etc/machine-id:/etc/machine-id
+      - /var/log/journal/:/var/log/journal/:ro
+      - /run/log/journal/:/run/log/journal/:ro
+      - /etc/machine-id:/etc/machine-id:ro
       - ./promtail/var/run/promtail:/var/run/promtail
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       # - ${DATADIR}/promtail/config/promtail-config.yaml:/etc/promtail/promtail-config.ya
@@ -721,3 +722,5 @@ services:
     - "traefik.http.routers.promtail.rule=Host(`promtail.scarlettlab.home`)"
     - "traefik.http.routers.promtail.entrypoints=web"
     - "traefik.http.services.promtail.loadbalancer.server.port=9080"
+    depends_on:
+      - loki
