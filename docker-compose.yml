@@ -1,4 +1,13 @@
 version: '3.7'
+# Since only root has access to /var/lib/docker and I'm running the Grafana agent under its own user on the host itself, changing the permissions to that directory seemed like a bad idea to me. After a bit of research I figured out how to make this work using the journald driver, which works nicely.
+# SOURCE: https://gist.github.com/ruanbekker/c6fa9bc6882e6f324b4319c5e3622460?permalink_comment_id=4009155#gistcomment-4009155
+x-logging:
+  &default-logging
+  driver: "journald"
+  options: 
+    # tag: "{{.Name}}"
+    tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+
 
 # for the unifipoller bits
 # https://github.com/unpoller/unpoller/blob/master/init/docker/docker-compose.yml
@@ -34,26 +43,35 @@ services:
       - "8080:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
   whoami:
-    image: "traefik/whoami"
-    command:
-    # It tells whoami to start listening on 2001 instead of 80
-    - --port 10080
-    - --name whoami
+    image: "traefik/whoami:v1.8.0"
+    # command:
+    # # It tells whoami to start listening on 2001 instead of 80
+    # - '--port 10080'
+    # - '--name whoami'
     container_name: "whoami"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.whoami.rule=Host(`whoami.scarlettlab.home`)"
       - "traefik.http.routers.whoami.entrypoints=web"
-      - "traefik.http.services.node-exporter.loadbalancer.server.port=10080"
+      - "traefik.http.services.whoami.loadbalancer.server.port=10080"
     expose:
       - 10080
     environment:
     - TZ=UTC
     - WHOAMI_PORT_NUMBER=10080
+    - WHOAMI_NAME=whoami
     ports:
     - 10080:10080
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
   influxdb:
     restart: always
@@ -76,6 +94,10 @@ services:
       - TZ=UTC
     env_file:
       - ./env
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
   chronograf:
     restart: always
@@ -99,6 +121,10 @@ services:
       - TZ=UTC
     env_file:
       - ./env
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
   # docker pull prom/prometheus:v2.31.1
   prometheus:
@@ -174,6 +200,10 @@ services:
       mode: global
     environment:
     - TZ=UTC
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
   alertmanager:
     image: prom/alertmanager
@@ -205,6 +235,10 @@ services:
 #      placement:
 #        constraints:
 #          - node.hostname == ${HOSTNAME}
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
   # cadvisor:
   #   image: gcr.io/cadvisor/cadvisor
   #   container_name: cadvisor
@@ -233,6 +267,40 @@ services:
   #   entrypoint: ["/usr/bin/cadvisor", "-logtostderr"]
   #   command:
   #   - '--port=8081'
+  cadvisor:
+    # SOURCE: https://github.com/rafaribe/home-ops/blob/d9e283fd3ddc42a9891c8a12fe82fa128657798a/provision/ansible/backup-server/roles/syncthing/templates/agent.yml
+    image: unibaktr/cadvisor:0.39.1
+    container_name: cadvisor
+    privileged: true
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.scarlettlab.home`)"
+    - "traefik.http.routers.cadvisor.entrypoints=web"
+    - "traefik.http.services.cadvisor.loadbalancer.server.port=8081"
+    volumes:
+        - /:/rootfs:ro
+        # - /var/run:/var/run:ro
+        - /var/run:/var/run:rw
+        - /sys:/sys:ro
+        - /var/lib/docker/:/var/lib/docker:ro
+        - /dev/disk/:/dev/disk:ro
+        - /etc/machine-id/:/etc/machine-id:ro
+    devices:
+        - /dev/kmsg:/dev/kmsg:ro
+    # networks:
+    #   - services
+    ports:
+        - "8081:8081"
+    expose:
+      - 8081
+    restart: always
+    command:
+      - '--port=8081'
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+  
   blackbox:
     image: prom/blackbox-exporter
     privileged: true
@@ -268,6 +336,64 @@ services:
     - TZ=UTC
     # network_mode: "host"
     # network_mode: host
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+  
+  # heimdall:
+  #   image: linuxserver/heimdall
+  #   container_name: heimdall
+  #   restart: always
+  #   environment:
+  #     # - PUID=${PUID}
+  #     # - PGID=${PGID}
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=UTC
+  #   volumes:
+  #     - ./heimdall:/config
+  #   ports:
+  #     - 9089:9089
+  #     - 9443:9443
+  #   labels:
+  #   - "traefik.enable=true"
+  #   - "traefik.http.routers.heimdall.rule=Host(`heimdall.scarlettlab.home`)"
+  #   - "traefik.http.routers.heimdall.entrypoints=web"
+  #   - "traefik.http.services.heimdall.loadbalancer.server.port=9089"
+  #   tty: true
+  #   stdin_open: true
+  #   expose:
+  #   - 9080
+  #   - 9443
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+    
+  # nfs-server:
+  #   # SOURCE: # SOURCE: https://github.com/rafaribe/home-ops/blob/d9e283fd3ddc42a9891c8a12fe82fa128657798a/provision/ansible/backup-server/roles/syncthing/templates/agent.yml
+  #   image: heywoodlh/docker-nfs-server
+  #   container_name: nfs-server
+  #   hostname: nfs-server
+  #   environment: 
+  #     - NFS_EXPORT_0=/data/
+  #   volumes:
+  #     - *data-services-volume 
+  #     - /lib/modules:/lib/modules:ro
+  #   cap_add:
+  #     - SYS_ADMIN
+  #     - SYS_MODULE
+  #   ports:
+  #     - 2049:2049
+  #  # security_opt:
+  #    # - apparmor=erichough-nfs
+  #   privileged: true
+  #   restart: always
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
   loki:
     restart: always
@@ -288,6 +414,22 @@ services:
     - "traefik.http.routers.prometheus.entrypoints=web"
     - "traefik.http.services.prometheus.loadbalancer.server.port=3100"
     command: -config.file=/loki/loki-config.yaml
+  
+  # https://github.com/grafana/loki/blob/34a4b242bf1de7eae3f8f6594253adccf8de05cd/production/docker/docker-compose-ha-memberlist.yaml
+  # # Since the Loki containers are running as user 10001 and the mounted data volume is owned by root,
+  # # Loki would not have permissions to create the directories.
+  # # Therefore the init container changes permissions of the mounted directory.
+  # init:
+  #   image: grafana/loki:2.4.2
+  #   user: root
+  #   entrypoint:
+  #     - "chown"
+  #     - "10001:10001"
+  #     - "/loki"
+  #   volumes:
+  #     - ./loki:/loki
+  #   networks:
+  #     - loki
 
 
   unifi-poller:
@@ -381,43 +523,43 @@ services:
   #     - "/var/run/docker.sock:/var/run/docker.sock:rw"
   #   command:
   #     - "--probe.docker=true"
-  #   restart: unless-stopped
+  #   restart: always
   #   cap_add:
   #     - SYS_PTRACE
   #   security_opt:
   #     - apparmor:unconfined
 
-  # # SOURCE docker run --rm -v /var/run/docker.sock:/var/run/docker.sock leoverto/docker-network-graph
-  # networkgraph:
-  #   image: leoverto/docker-network-graph
-  #   container_name: networkgraph
-  #   cap_add:
-  #     - ALL
-  #   security_opt:
-  #     - apparmor:unconfined
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock
-
-  #   depends_on:
-  #     - prometheus
-  #   networks:
-  #     - back-tier
-  #     - front-tier
-  #   tty: true
-  #   stdin_open: true
-  #   command:
-  #   - '-f'
-  #   - '/dev/null'
-  #   entrypoint: "tail"
-  #   environment:
-  #   - TZ=UTC
+  # SOURCE docker run --rm -v /var/run/docker.sock:/var/run/docker.sock leoverto/docker-network-graph
+  networkgraph:
+    image: leoverto/docker-network-graph
+    container_name: networkgraph
+    cap_add:
+      - ALL
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./networkgraph:/networkgraph
+    depends_on:
+      - prometheus
+    # networks:
+    #   - back-tier
+    #   - front-tier
+    tty: true
+    stdin_open: true
+    command:
+    - '-f'
+    - '/dev/null'
+    entrypoint: "tail"
+    environment:
+    - TZ=UTC
   zsh:
     image: ubuntu:focal
     container_name: zsh
     # hostname: example.com # set to fqdn of host
     # ports:
     #   - 19999:19999
-    restart: unless-stopped
+    restart: always
     cap_add:
       - ALL
     security_opt:
@@ -533,7 +675,7 @@ services:
   #   hostname: example.com # set to fqdn of host
   #   ports:
   #     - 19999:19999
-  #   restart: unless-stopped
+  #   restart: always
   #   cap_add:
   #     - SYS_PTRACE
   #   security_opt:
@@ -549,3 +691,37 @@ services:
   #     - /etc/os-release:/host/etc/os-release:ro
   #   depends_on:
   #   - grafana
+
+  promtail:
+    # SOURCE: https://github.com/gilmrt/docker-compose/blob/5d8d7b3746fba48ba5f559f9913e56ae3d881eee/metrics/docker-compose.yml
+    container_name: promtail
+    image: grafana/promtail:2.4.2
+    restart: always
+    volumes:
+      - /var/log:/var/log:ro
+      - ./promtail/promtail-gateway.yaml:/etc/promtail/promtail-gateway.yaml:ro
+      - /var/log/journal/:/var/log/journal/:ro
+      - /run/log/journal/:/run/log/journal/:ro
+      - /etc/machine-id:/etc/machine-id:ro
+      - ./promtail/var/run/promtail:/var/run/promtail
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      # - ${DATADIR}/promtail/config/promtail-config.yaml:/etc/promtail/promtail-config.ya
+    ports:
+      - "9080:9080"
+    expose:
+    - 9080
+    # command: -config.file=/etc/promtail/promtail-config.yaml
+    command: -config.file=/etc/promtail/promtail-gateway.yaml
+    environment:
+    - TZ=UTC
+    tty: true
+    stdin_open: true
+    env_file:
+      - ./env
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.promtail.rule=Host(`promtail.scarlettlab.home`)"
+    - "traefik.http.routers.promtail.entrypoints=web"
+    - "traefik.http.services.promtail.loadbalancer.server.port=9080"
+    depends_on:
+      - loki
