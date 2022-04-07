@@ -1,7 +1,12 @@
 #!/usr/bin/with-contenv bash
 
 sed -i "s,listen 80 default_server,listen 4040 default_server,g" /defaults/default
-sed -i "s,listen 443 ssl,listen 4443 ssl;,g" /defaults/default
+sed -i "s,listen 443 ssl,listen 4443 ssl,g" /defaults/default
 cat /defaults/default
 
-cp -a /defaults/default /etc/nginx/conf.d/
+sed -i "s,listen 80 default_server,listen 4040 default_server,g" /config/nginx/site-confs/default
+
+sed -i "s,listen 443 ssl,listen 4443 ssl,g" /config/nginx/site-confs/default
+cat /config/nginx/site-confs/default
+
+# cp -a /defaults/default /etc/nginx/conf.d/
