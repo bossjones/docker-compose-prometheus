@@ -323,67 +323,68 @@ scrape_configs:
   # # running on the same host as Promtail.
   # consulagent_sd_configs:
   #   [ - <consulagent_sd_config> ... ]
-  
-    metrics:
-      wal_directory: /tmp/agent
-      wal_cleanup_age: 12h
-      wal_cleanup_period: 30m
-      global:
-        scrape_interval: 1m
-        scrape_timeout: 15s
-        external_labels:
-          miner: boss-monitor
-        remote_write:
-          - url: "http://192.168.1.98:8086"
-            # basic_auth:
-            #   username: "{{ target_prometheus_username }}"
-            #   password: "{{ target_prometheus_password }}"
-      configs:
-        - name: cadvisor
-          scrape_configs:
-            - job_name: cadvisor
-              scrape_interval: 20s
-              scrape_timeout: 10s
-              static_configs:
-                # - targets: ["cadvisor:8081"]
-                - targets: ["192.168.1.98:8081"]
-              relabel_configs:
-                - source_labels: [__address__]
-                  regex: ".*"
-                  target_label: instance
-                  replacement: boss-monitor
-                - source_labels: [__address__]
-                  regex: ".*"
-                  target_label: node
-                  replacement: boss-monitor
-        - name: docker-daemon
-          scrape_configs:
-            - job_name: docker-daemon
-              scrape_interval: 20s
-              scrape_timeout: 10s
-              static_configs:
-                - targets: ["host.docker.internal:9323"]
-              relabel_configs:
-                - source_labels: [__address__]
-                  regex: ".*"
-                  target_label: instance
-                  replacement: boss-monitor
-                - source_labels: [__address__]
-                  regex: ".*"
-                  target_label: node
-                  replacement: boss-monitor
-integrations:
-  node_exporter:
-    enabled: true
-    rootfs_path: /
-    sysfs_path: /sys
-    procfs_path: /proc
-    relabel_configs:
-    - source_labels: [__address__]
-      regex: ".*"
-      target_label: instance
-      replacement: boss-monitor
-    - source_labels: [__address__]
-      regex: ".*"
-      target_label: node
-      replacement: boss-monitor
+
+# metrics:
+#       wal_directory: /tmp/agent
+#       wal_cleanup_age: 12h
+#       wal_cleanup_period: 30m
+#       global:
+#         scrape_interval: 1m
+#         scrape_timeout: 15s
+#         external_labels:
+#           miner: boss-monitor
+#         remote_write:
+#           - url: "http://192.168.1.98:8086"
+#             # basic_auth:
+#             #   username: "{{ target_prometheus_username }}"
+#             #   password: "{{ target_prometheus_password }}"
+#       configs:
+#         - name: cadvisor
+#           scrape_configs:
+#             - job_name: cadvisor
+#               scrape_interval: 20s
+#               scrape_timeout: 10s
+#               static_configs:
+#                 # - targets: ["cadvisor:8081"]
+#                 - targets: ["192.168.1.98:8081"]
+#               relabel_configs:
+#                 - source_labels: [__address__]
+#                   regex: ".*"
+#                   target_label: instance
+#                   replacement: boss-monitor
+#                 - source_labels: [__address__]
+#                   regex: ".*"
+#                   target_label: node
+#                   replacement: boss-monitor
+#         - name: docker-daemon
+#           scrape_configs:
+#             - job_name: docker-daemon
+#               scrape_interval: 20s
+#               scrape_timeout: 10s
+#               static_configs:
+#                 - targets: ["host.docker.internal:9323"]
+#               relabel_configs:
+#                 - source_labels: [__address__]
+#                   regex: ".*"
+#                   target_label: instance
+#                   replacement: boss-monitor
+#                 - source_labels: [__address__]
+#                   regex: ".*"
+#                   target_label: node
+#                   replacement: boss-monitor
+
+# integrations:
+#   node_exporter:
+#     enabled: true
+#     rootfs_path: /
+#     sysfs_path: /sys
+#     procfs_path: /proc
+#     relabel_configs:
+#     - source_labels: [__address__]
+#       regex: ".*"
+#       target_label: instance
+#       replacement: boss-monitor
+#     - source_labels: [__address__]
+#       regex: ".*"
+#       target_label: node
+#       replacement: boss-monitor
