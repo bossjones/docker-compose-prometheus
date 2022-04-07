@@ -341,35 +341,36 @@ services:
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
   
-  # heimdall:
-  #   image: linuxserver/heimdall
-  #   container_name: heimdall
-  #   restart: always
-  #   environment:
-  #     # - PUID=${PUID}
-  #     # - PGID=${PGID}
-  #     - PUID=1000
-  #     - PGID=1000
-  #     - TZ=UTC
-  #   volumes:
-  #     - ./heimdall:/config
-  #   ports:
-  #     - 9089:9089
-  #     - 9443:9443
-  #   labels:
-  #   - "traefik.enable=true"
-  #   - "traefik.http.routers.heimdall.rule=Host(`heimdall.scarlettlab.home`)"
-  #   - "traefik.http.routers.heimdall.entrypoints=web"
-  #   - "traefik.http.services.heimdall.loadbalancer.server.port=9089"
-  #   tty: true
-  #   stdin_open: true
-  #   expose:
-  #   - 9080
-  #   - 9443
-  #   logging:
-  #     driver: json-file
-  #     options:
-  #       tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+  heimdall:
+    image: linuxserver/heimdall
+    build: ./docker-heimdall
+    container_name: heimdall
+    restart: always
+    environment:
+      # - PUID=${PUID}
+      # - PGID=${PGID}
+      - PUID=1000
+      - PGID=1000
+      - TZ=UTC
+    volumes:
+      - ./heimdall:/config
+    ports:
+      - 4040:4040
+      - 4443:4443
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.heimdall.rule=Host(`heimdall.scarlettlab.home`)"
+    - "traefik.http.routers.heimdall.entrypoints=web"
+    - "traefik.http.services.heimdall.loadbalancer.server.port=4040"
+    tty: true
+    stdin_open: true
+    expose:
+    - 4040
+    - 4443
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
     
   # nfs-server:
   #   # SOURCE: # SOURCE: https://github.com/rafaribe/home-ops/blob/d9e283fd3ddc42a9891c8a12fe82fa128657798a/provision/ansible/backup-server/roles/syncthing/templates/agent.yml

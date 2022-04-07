@@ -1,0 +1,6 @@
+#!/usr/bin/with-contenv bash
+
+sed -i "s,listen 80 default_server,listen 4040 default_server,g" /defaults/default
+sed -i "s,listen 443 ssl,listen 4443 ssl;,g" /defaults/default
+
+cat /defaults/default
