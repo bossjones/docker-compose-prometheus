@@ -270,7 +270,8 @@ services:
   #   - '--port=8081'
   cadvisor:
     # SOURCE: https://github.com/rafaribe/home-ops/blob/d9e283fd3ddc42a9891c8a12fe82fa128657798a/provision/ansible/backup-server/roles/syncthing/templates/agent.yml
-    image: unibaktr/cadvisor:0.39.1
+    # image: unibaktr/cadvisor:0.39.1
+    image: gcr.io/cadvisor/cadvisor:latest
     container_name: cadvisor
     privileged: true
     labels:
@@ -295,8 +296,13 @@ services:
     expose:
       - 8081
     restart: always
-    command:
+    entrypoint:
+      - /usr/bin/cadvisor 
       - '--port=8081'
+      - -logtostderr 
+      - -disable_metrics=referenced_memory,cpu_topology,resctrl,udp,advtcp,sched,hugetlb,memory_numa,tcp,process,accelerator,disk
+    # command:
+    #   - 
     logging:
       driver: json-file
       options:
