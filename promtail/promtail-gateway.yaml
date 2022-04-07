@@ -208,7 +208,7 @@ scrape_configs:
       labels:
         miner: boss-monitor
         job: rsyslogng
-        __path__: /log
+        __path__: /log/client_logs/*/*log
         
   - job_name: journal
     journal:
