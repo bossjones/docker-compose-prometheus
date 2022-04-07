@@ -274,6 +274,7 @@ services:
     image: gcr.io/cadvisor/cadvisor:latest
     container_name: cadvisor
     privileged: true
+    userns_mode: "host"
     labels:
     - "traefik.enable=true"
     - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.scarlettlab.home`)"
@@ -282,7 +283,7 @@ services:
     volumes:
         - /:/rootfs:ro
         # - /var/run:/var/run:ro
-        - /var/run:/var/run:rw
+        - /var/run:/var/run:ro
         - /sys:/sys:ro
         - /var/lib/docker/:/var/lib/docker:ro
         - /dev/disk/:/dev/disk:ro
