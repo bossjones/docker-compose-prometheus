@@ -4,5 +4,5 @@ id promtail
 
 mkdir -p /promtail || true
 chown promtail:promtail /promtail
-touch /tmp/positions
-chown promtail:promtail /tmp/positions.yaml
+touch /promtail/positions.yaml
+chown promtail:promtail /promtail/positions.yaml

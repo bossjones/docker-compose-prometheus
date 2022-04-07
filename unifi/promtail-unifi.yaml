@@ -1,10 +1,26 @@
 # NOTE: Not
 # SOURCE: https://grafana.com/docs/loki/latest/clients/promtail/configuration/
 server:
-    http_listen_port: 9080
+    http_listen_port: 9088
     grpc_listen_port: 0
     log_level: "info"
 
+positions:
+    filename: /promtail/positions.yaml
+    
+    # # Location of positions file
+    # [filename: <string> | default = "/var/log/positions.yaml"]
+    
+    # # How often to update the positions file
+    # [sync_period: <duration> | default = 10s]
+    
+    # # Whether to ignore & later overwrite positions files that are corrupted
+    # [ignore_invalid_yaml: <boolean> | default = false]
+
+  
+clients:
+    - url: http://192.168.1.98:3100/loki/api/v1/push
+    
 scrape_configs:
   - job_name: unifisrv
     static_configs:
