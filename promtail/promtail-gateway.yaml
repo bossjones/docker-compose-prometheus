@@ -345,7 +345,8 @@ metrics:
           scrape_interval: 20s
           scrape_timeout: 10s
           static_configs:
-            - targets: ["cadvisor:8081"]
+            # - targets: ["cadvisor:8081"]
+            - targets: ["192.168.1.98:8081"]
           relabel_configs:
             - source_labels: [__address__]
               regex: ".*"
