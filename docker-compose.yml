@@ -298,10 +298,12 @@ services:
       - 8081
     restart: always
     entrypoint:
-      - /usr/bin/cadvisor 
+      - /usr/bin/cadvisor
+      - --v=6
+      - '--listen_ip=0.0.0.0'
       - '--port=8081'
-      - -logtostderr 
-      - -disable_metrics=referenced_memory,cpu_topology,resctrl,udp,advtcp,sched,hugetlb,memory_numa,tcp,process,accelerator,disk
+      - --logtostderr 
+      - --disable_metrics=referenced_memory,cpu_topology,resctrl,udp,advtcp,sched,hugetlb,memory_numa,tcp,process,accelerator,disk
     # command:
     #   - 
     logging:
