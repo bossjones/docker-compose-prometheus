@@ -194,7 +194,7 @@ services:
       - 9100:9100
     # networks:
     #   - back-tier
-    restart: unless-stopped
+    restart: always
     deploy:
       mode: global
     environment:
@@ -292,7 +292,7 @@ services:
         - "8081:8081"
     expose:
       - 8081
-    restart: unless-stopped
+    restart: always
     command:
       - '--port=8081'
     logging:
@@ -343,7 +343,7 @@ services:
   # heimdall:
   #   image: linuxserver/heimdall
   #   container_name: heimdall
-  #   restart: unless-stopped
+  #   restart: always
   #   environment:
   #     # - PUID=${PUID}
   #     # - PGID=${PGID}
@@ -388,7 +388,7 @@ services:
   #  # security_opt:
   #    # - apparmor=erichough-nfs
   #   privileged: true
-  #   restart: unless-stopped
+  #   restart: always
   #   logging:
   #     driver: json-file
   #     options:
@@ -522,7 +522,7 @@ services:
   #     - "/var/run/docker.sock:/var/run/docker.sock:rw"
   #   command:
   #     - "--probe.docker=true"
-  #   restart: unless-stopped
+  #   restart: always
   #   cap_add:
   #     - SYS_PTRACE
   #   security_opt:
@@ -558,7 +558,7 @@ services:
     # hostname: example.com # set to fqdn of host
     # ports:
     #   - 19999:19999
-    restart: unless-stopped
+    restart: always
     cap_add:
       - ALL
     security_opt:
@@ -674,7 +674,7 @@ services:
   #   hostname: example.com # set to fqdn of host
   #   ports:
   #     - 19999:19999
-  #   restart: unless-stopped
+  #   restart: always
   #   cap_add:
   #     - SYS_PTRACE
   #   security_opt:
@@ -695,7 +695,7 @@ services:
     # SOURCE: https://github.com/gilmrt/docker-compose/blob/5d8d7b3746fba48ba5f559f9913e56ae3d881eee/metrics/docker-compose.yml
     container_name: promtail
     image: grafana/promtail:2.4.2
-    restart: unless-stopped
+    restart: always
     volumes:
       - /var/log:/var/log:ro
       - ./promtail/promtail-gateway.yaml:/etc/promtail/promtail-gateway.yaml:ro
