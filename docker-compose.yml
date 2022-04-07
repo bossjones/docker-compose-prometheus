@@ -194,7 +194,7 @@ services:
       - 9100:9100
     # networks:
     #   - back-tier
-    restart: always
+    restart: unless-stopped
     deploy:
       mode: global
     environment:
@@ -277,7 +277,8 @@ services:
     - "traefik.http.services.cadvisor.loadbalancer.server.port=8081"
     volumes:
         - /:/rootfs:ro
-        - /var/run:/var/run:ro
+        # - /var/run:/var/run:ro
+        - /var/run:/var/run:rw
         - /sys:/sys:ro
         - /var/lib/docker/:/var/lib/docker:ro
         - /dev/disk/:/dev/disk:ro
@@ -690,13 +691,18 @@ services:
   #   - grafana
 
   promtail:
+    # SOURCE: https://github.com/gilmrt/docker-compose/blob/5d8d7b3746fba48ba5f559f9913e56ae3d881eee/metrics/docker-compose.yml
     container_name: promtail
     image: grafana/promtail:2.4.2
     restart: unless-stopped
     volumes:
-      - /var/log:/var/log
-      - ./promtail:/etc/promtail/
-      # - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      # - /var/log:/var/log
+      - ./promtail/promtail-gateway.yaml:/etc/promtail/promtail-gateway.yaml:ro
+      - /var/log/journal/:/var/log/journal/
+      - /run/log/journal/:/run/log/journal/
+      - /etc/machine-id:/etc/machine-id
+      - ./promtail/var/run/promtail:/var/run/promtail
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
       # - ${DATADIR}/promtail/config/promtail-config.yaml:/etc/promtail/promtail-config.ya
     ports:
       - "9080:9080"
