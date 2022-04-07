@@ -1,5 +1,6 @@
 # NOTE: Not
 # SOURCE: https://grafana.com/docs/loki/latest/clients/promtail/configuration/
+# SOURCE: https://github.com/coopsymbiotic/coopsymbiotic-ansible/blob/07a07c52c8cbe1fa918bc24c6725d5f7b03a7d29/roles/promtail/templates/etc/promtail.yaml
 server:
     http_listen_port: 9080
     grpc_listen_port: 0
@@ -201,14 +202,60 @@ scrape_configs:
         job: varlogs
         __path__: /var/log/*log
 
-  - job_name: rsyslogng
+  # - job_name: rsyslogng
+  #   static_configs:
+  #   - targets:
+  #       - localhost
+  #     labels:
+  #       miner: boss-monitor
+  #       job: rsyslogng
+  #       __path__: /log/client_logs/*/*log
+        
+  - job_name: remotebootlog
     static_configs:
     - targets:
         - localhost
       labels:
         miner: boss-monitor
-        job: rsyslogng
-        __path__: /log/client_logs/*/*log
+        job: remotebootlog
+        __path__: /log/client_logs/*/boot.log
+      
+  - job_name: remotemessages
+    static_configs:
+    - targets:
+        - localhost
+      labels:
+        miner: boss-monitor
+        job: remotemessages
+        __path__: /log/client_logs/*/messages.log
+      
+  - job_name: remotecron
+    static_configs:
+    - targets:
+        - localhost
+      labels:
+        miner: boss-monitor
+        job: remotecron
+        __path__: /log/client_logs/*/cron.log
+      
+  - job_name: remotesecure
+    static_configs:
+    - targets:
+        - localhost
+      labels:
+        miner: boss-monitor
+        job: remotesecure
+        __path__: /log/client_logs/*/secure.log
+
+  - job_name: remoteuncategorized
+    static_configs:
+    - targets:
+        - localhost
+      labels:
+        miner: boss-monitor
+        job: remoteuncategorized
+        __path__: /log/client_logs/*/uncategorized.log
+        
         
   - job_name: journal
     journal:
@@ -241,8 +288,19 @@ scrape_configs:
     relabel_configs:
       # - source_labels: ['__syslog_message_hostname']
       #   target_label: 'hostname'
+      - source_labels: ['__syslog_connection_ip_address']
+        target_label: 'ip_address'
+      - source_labels: ['__syslog_message_severity']
+        target_label: 'severity'
+      - source_labels: ['__syslog_message_facility']
+        target_label: 'facility'
+      - source_labels: ['__syslog_message_app_name']
+        target_label: 'app'
+      - source_labels: ['__syslog_message_hostname']
+        target_label: 'host'
       - action: labelmap
         regex: __syslog_message_(.+)
+        
         
   # # SOURCE: https://github.com/rafaribe/home-ops/blob/d9e283fd3ddc42a9891c8a12fe82fa128657798a/provision/ansible/backup-server/roles/syncthing/templates/agent.yml
   # - job_name: system
