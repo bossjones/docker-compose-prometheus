@@ -1,0 +1,388 @@
+# NOTE: Not
+# SOURCE: https://grafana.com/docs/loki/latest/clients/promtail/configuration/
+server:
+    http_listen_port: 9080
+    grpc_listen_port: 0
+    log_level: "debug"
+    
+    # # Disable the HTTP and GRPC server.
+    # [disable: <boolean> | default = false]
+    
+    # # HTTP server listen host
+    # [http_listen_address: <string>]
+    
+    # # HTTP server listen port (0 means random port)
+    # [http_listen_port: <int> | default = 80]
+    
+    # # gRPC server listen host
+    # [grpc_listen_address: <string>]
+    
+    # # gRPC server listen port (0 means random port)
+    # [grpc_listen_port: <int> | default = 9095]
+    
+    # # Register instrumentation handlers (/metrics, etc.)
+    # [register_instrumentation: <boolean> | default = true]
+    
+    # # Timeout for graceful shutdowns
+    # [graceful_shutdown_timeout: <duration> | default = 30s]
+    
+    # # Read timeout for HTTP server
+    # [http_server_read_timeout: <duration> | default = 30s]
+    
+    # # Write timeout for HTTP server
+    # [http_server_write_timeout: <duration> | default = 30s]
+    
+    # # Idle timeout for HTTP server
+    # [http_server_idle_timeout: <duration> | default = 120s]
+    
+    # # Max gRPC message size that can be received
+    # [grpc_server_max_recv_msg_size: <int> | default = 4194304]
+    
+    # # Max gRPC message size that can be sent
+    # [grpc_server_max_send_msg_size: <int> | default = 4194304]
+    
+    # # Limit on the number of concurrent streams for gRPC calls (0 = unlimited)
+    # [grpc_server_max_concurrent_streams: <int> | default = 100]
+    
+    # # Log only messages with the given severity or above. Supported values [debug,
+    # # info, warn, error]
+    # [log_level: <string> | default = "info"]
+    
+    # # Base path to server all API routes from (e.g., /v1/).
+    # [http_path_prefix: <string>]
+    
+    # # Target managers check flag for Promtail readiness, if set to false the check is ignored
+    # [health_check_target: <bool> | default = true]
+  
+positions:
+    filename: /tmp/positions.yaml
+    
+    # # Location of positions file
+    # [filename: <string> | default = "/var/log/positions.yaml"]
+    
+    # # How often to update the positions file
+    # [sync_period: <duration> | default = 10s]
+    
+    # # Whether to ignore & later overwrite positions files that are corrupted
+    # [ignore_invalid_yaml: <boolean> | default = false]
+
+  
+clients:
+    - url: http://192.168.1.98:3100/loki/api/v1/push
+      # # The URL where Loki is listening, denoted in Loki as http_listen_address and
+      # # http_listen_port. If Loki is running in microservices mode, this is the HTTP
+      # # URL for the Distributor. Path to the push API needs to be included.
+      # # Example: http://example.com:3100/loki/api/v1/push
+      # url: <string>
+      
+      # # The tenant ID used by default to push logs to Loki. If omitted or empty
+      # # it assumes Loki is running in single-tenant mode and no X-Scope-OrgID header
+      # # is sent.
+      # [tenant_id: <string>]
+      
+      # # Maximum amount of time to wait before sending a batch, even if that
+      # # batch isn't full.
+      # [batchwait: <duration> | default = 1s]
+      
+      # # Maximum batch size (in bytes) of logs to accumulate before sending
+      # # the batch to Loki.
+      # [batchsize: <int> | default = 1048576]
+      
+      # # If using basic auth, configures the username and password
+      # # sent.
+      # basic_auth:
+      #   # The username to use for basic auth
+      #   [username: <string>]
+      
+      #   # The password to use for basic auth
+      #   [password: <string>]
+      
+      #   # The file containing the password for basic auth
+      #   [password_file: <filename>]
+      
+      # # Optional OAuth 2.0 configuration
+      # # Cannot be used at the same time as basic_auth or authorization
+      # oauth2:
+      #   # Client id and secret for oauth2
+      #   [client_id: <string>]
+      #   [client_secret: <secret>]
+      
+      #   # Read the client secret from a file
+      #   # It is mutually exclusive with `client_secret`
+      #   [client_secret_file: <filename>]
+      
+      #   # Optional scopes for the token request
+      #   scopes:
+      #     [ - <string> ... ]
+      
+      #   # The URL to fetch the token from
+      #   token_url: <string>
+      
+      #   # Optional parameters to append to the token URL
+      #   endpoint_params:
+      #     [ <string>: <string> ... ]
+      
+      # # Bearer token to send to the server.
+      # [bearer_token: <secret>]
+      
+      # # File containing bearer token to send to the server.
+      # [bearer_token_file: <filename>]
+      
+      # # HTTP proxy server to use to connect to the server.
+      # [proxy_url: <string>]
+      
+      # # If connecting to a TLS server, configures how the TLS
+      # # authentication handshake will operate.
+      # tls_config:
+      #   # The CA file to use to verify the server
+      #   [ca_file: <string>]
+      
+      #   # The cert file to send to the server for client auth
+      #   [cert_file: <filename>]
+      
+      #   # The key file to send to the server for client auth
+      #   [key_file: <filename>]
+      
+      #   # Validates that the server name in the server's certificate
+      #   # is this value.
+      #   [server_name: <string>]
+      
+      #   # If true, ignores the server certificate being signed by an
+      #   # unknown CA.
+      #   [insecure_skip_verify: <boolean> | default = false]
+      
+      # # Configures how to retry requests to Loki when a request
+      # # fails.
+      # # Default backoff schedule:
+      # # 0.5s, 1s, 2s, 4s, 8s, 16s, 32s, 64s, 128s, 256s(4.267m)
+      # # For a total time of 511.5s(8.5m) before logs are lost
+      # backoff_config:
+      #   # Initial backoff time between retries
+      #   [min_period: <duration> | default = 500ms]
+      
+      #   # Maximum backoff time between retries
+      #   [max_period: <duration> | default = 5m]
+      
+      #   # Maximum number of retries to do
+      #   [max_retries: <int> | default = 10]
+      
+      # # Static labels to add to all logs being sent to Loki.
+      # # Use map like {"foo": "bar"} to add a label foo with
+      # # value bar.
+      # # These can also be specified from command line:
+      # # -client.external-labels=k1=v1,k2=v2
+      # # (or --client.external-labels depending on your OS)
+      # # labels supplied by the command line are applied
+      # # to all clients configured in the `clients` section.
+      # # NOTE: values defined in the config file will replace values
+      # # defined on the command line for a given client if the
+      # # label keys are the same.
+      # external_labels:
+      #   [ <labelname>: <labelvalue> ... ]
+      
+      # # Maximum time to wait for a server to respond to a request
+      # [timeout: <duration> | default = 10s]
+      
+      # # A comma-separated list of labels to include in the stream lag metric `promtail_stream_lag_seconds`.
+      # # The default value is "filename". A "host" label is always included.
+      # # The stream lag metric indicates which streams are falling behind on writes to Loki;
+      # # be mindful about using too many labels, as it can increase cardinality.
+      # [stream_lag_labels: <string> | default = "filename"]
+
+
+  
+scrape_configs:
+  - job_name: system
+    static_configs:
+    - targets:
+        - localhost
+      labels:
+        miner: boss-monitor
+        job: varlogs
+        __path__: /var/log/*log
+        
+  - job_name: journal
+    journal:
+      json: true
+      max_age: 12h
+      path: /var/log/journal
+      labels:
+        job: systemd-journal
+    relabel_configs:
+      - source_labels: ['__journal__systemd_unit']
+        target_label: 'unit'
+      - source_labels: ['__journal_container_name']
+        target_label: 'container'
+      - source_labels: ['__journal_syslog_identifier']
+        target_label: 'syslog_identifier'
+      - source_labels: ['__journal__hostname']
+        target_label: 'hostname'
+      - source_labels: ['__journal__comm']
+        target_label: 'comm'
+      - source_labels: ['__journal__uid']
+        target_label: 'uid'
+        
+  - job_name: syslog
+    syslog:
+      listen_address: 0.0.0.0:9514
+      idle_timeout: 60s
+      label_structured_data: yes
+      labels:
+        job: "syslog"
+    relabel_configs:
+      # - source_labels: ['__syslog_message_hostname']
+      #   target_label: 'hostname'
+      - action: labelmap
+        regex: __syslog_message_(.+)
+        
+  # # SOURCE: https://github.com/rafaribe/home-ops/blob/d9e283fd3ddc42a9891c8a12fe82fa128657798a/provision/ansible/backup-server/roles/syncthing/templates/agent.yml
+  # - job_name: system
+  #   static_configs:
+  #   - targets:
+  #       - localhost
+  #     labels:
+  #       miner: boss-monitor
+  #       job: varlogs
+  #       __path__: //var/log/*log
+
+  - job_name: containers
+    static_configs:
+    - targets:
+        - localhost
+      labels:
+        server: boss-monitor
+        job: containerlogs
+        __path__: /var/lib/docker/containers/*/*log
+    pipeline_stages:
+    - json:
+        expressions:
+          output: log
+          stream: stream
+          attrs:
+    - json:
+        expressions:
+          tag:
+        source: attrs
+    - regex:
+        expression: (?P<container_name>(?:[^|]*[^|]))
+        source: tag
+    - timestamp:
+        format: RFC3339Nano
+        source: time
+    - labels:
+        stream:
+        container_name:
+    - output:
+        source: output
+
+  # # Name to identify this scrape config in the Promtail UI.
+  # job_name: <string>
+  
+  # # Describes how to transform logs from targets.
+  # [pipeline_stages: <pipeline_stages>]
+  
+  # # Describes how to scrape logs from the journal.
+  # [journal: <journal_config>]
+  
+  # # Describes how to receive logs from syslog.
+  # [syslog: <syslog_config>]
+  
+  # # Describes how to receive logs via the Loki push API, (e.g. from other Promtails or the Docker Logging Driver)
+  # [loki_push_api: <loki_push_api_config>]
+  
+  # # Describes how to scrape logs from the Windows event logs.
+  # [windows_events: <windows_events_config>]
+  
+  # # Describes how to fetch logs from Kafka via a Consumer group.
+  # [kafka: <kafka_config>]
+  
+  # # Describes how to relabel targets to determine if they should
+  # # be processed.
+  # relabel_configs:
+  #   - [<relabel_config>]
+  
+  # # Static targets to scrape.
+  # static_configs:
+  #   - [<static_config>]
+  
+  # # Files containing targets to scrape.
+  # file_sd_configs:
+  #   - [<file_sd_configs>]
+  
+  # # Describes how to discover Kubernetes services running on the
+  # # same host.
+  # kubernetes_sd_configs:
+  #   - [<kubernetes_sd_config>]
+  
+  # # Describes how to use the Consul Catalog API to discover services registered with the
+  # # consul cluster.
+  # consul_sd_configs:
+  #   [ - <consul_sd_config> ... ]
+  
+  # # Describes how to use the Consul Agent API to discover services registered with the consul agent
+  # # running on the same host as Promtail.
+  # consulagent_sd_configs:
+  #   [ - <consulagent_sd_config> ... ]
+  
+metrics:
+  wal_directory: /tmp/agent
+  wal_cleanup_age: 12h
+  wal_cleanup_period: 30m
+  global:
+    scrape_interval: 1m
+    scrape_timeout: 15s
+    external_labels:
+      miner: boss-monitor
+    remote_write:
+      - url: "http://192.168.1.98:8086"
+        # basic_auth:
+        #   username: "{{ target_prometheus_username }}"
+        #   password: "{{ target_prometheus_password }}"
+  configs:
+    - name: cadvisor
+      scrape_configs:
+        - job_name: cadvisor
+          scrape_interval: 20s
+          scrape_timeout: 10s
+          static_configs:
+            - targets: ["cadvisor:8081"]
+          relabel_configs:
+            - source_labels: [__address__]
+              regex: ".*"
+              target_label: instance
+              replacement: boss-monitor
+            - source_labels: [__address__]
+              regex: ".*"
+              target_label: node
+              replacement: boss-monitor
+    - name: docker-daemon
+      scrape_configs:
+        - job_name: docker-daemon
+          scrape_interval: 20s
+          scrape_timeout: 10s
+          static_configs:
+            - targets: ["host.docker.internal:9323"]
+          relabel_configs:
+            - source_labels: [__address__]
+              regex: ".*"
+              target_label: instance
+              replacement: boss-monitor
+            - source_labels: [__address__]
+              regex: ".*"
+              target_label: node
+              replacement: boss-monitor
+integrations:
+  node_exporter:
+    enabled: true
+    rootfs_path: /
+    sysfs_path: /sys
+    procfs_path: /proc
+    relabel_configs:
+    - source_labels: [__address__]
+      regex: ".*"
+      target_label: instance
+      replacement: boss-monitor
+    - source_labels: [__address__]
+      regex: ".*"
+      target_label: node
+      replacement: boss-monitor
