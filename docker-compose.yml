@@ -288,6 +288,8 @@ services:
     #   - services
     ports:
         - "8081:8081"
+    expose:
+      - 8081
     restart: unless-stopped
     command:
       - '--port=8081'
