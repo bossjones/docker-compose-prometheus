@@ -52,8 +52,8 @@ services:
     image: "traefik/whoami"
     command:
     # It tells whoami to start listening on 2001 instead of 80
-    - --port 10080
-    - --name whoami
+    - -port 10080
+    - -name whoami
     container_name: "whoami"
     labels:
       - "traefik.enable=true"
