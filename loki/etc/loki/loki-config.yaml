@@ -29,6 +29,9 @@ schema_config:
 ruler:
   alertmanager_url: http://192.168.1.98:9093
 
+limits_config:
+  ingestion_rate_mb: 64
+  ingestion_burst_size_mb: 64
 
 
 # SOURCE: https://linuxblog.xyz/posts/grafana-loki/
