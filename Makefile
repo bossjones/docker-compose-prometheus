@@ -83,3 +83,15 @@ viz:
 
 chrome:
 	bash scripts/open-all.sh
+
+loki-dashboards:
+	wget https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-chunks.json -P dashboards/
+	wget https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-deletion.json -P dashboards/
+	wget https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-logs.json -P dashboards/
+	wget https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-mixin-recording-rules.json -P dashboards/
+	wget https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-operational.json -P dashboards/
+	wget https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-reads-resources.json -P dashboards/
+	wget https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-reads.json -P dashboards/
+	wget https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-retention.json -P dashboards/
+	wget https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-writes-resources.json -P dashboards/
+	wget https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-writes.json -P dashboards/
