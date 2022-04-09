@@ -691,9 +691,9 @@ scrape_configs:
           #     expression: ".*\\r.*"
           #     replace: ""
           # take string encoded part, and turn it into json
-          - replace:
-              expression: ".*null.*"
-              replace: ""
+          # - replace:
+          #     expression: ".*null.*"
+          #     replace: ""
           - replace:
               expression: "(.+)"
               replace: "{{fromJson .Value}}"
