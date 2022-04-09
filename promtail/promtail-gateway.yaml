@@ -692,6 +692,9 @@ scrape_configs:
           #     replace: ""
           # take string encoded part, and turn it into json
           - replace:
+              expression: ".*null.*"
+              replace: ""
+          - replace:
               expression: "(.+)"
               replace: "{{fromJson .Value}}"
               source: fluentd_message
