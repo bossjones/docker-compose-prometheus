@@ -5,69 +5,69 @@ server:
     http_listen_port: 9080
     grpc_listen_port: 0
     log_level: "info"
-    
+
     # # Disable the HTTP and GRPC server.
     # [disable: <boolean> | default = false]
-    
+
     # # HTTP server listen host
     # [http_listen_address: <string>]
-    
+
     # # HTTP server listen port (0 means random port)
     # [http_listen_port: <int> | default = 80]
-    
+
     # # gRPC server listen host
     # [grpc_listen_address: <string>]
-    
+
     # # gRPC server listen port (0 means random port)
     # [grpc_listen_port: <int> | default = 9095]
-    
+
     # # Register instrumentation handlers (/metrics, etc.)
     # [register_instrumentation: <boolean> | default = true]
-    
+
     # # Timeout for graceful shutdowns
     # [graceful_shutdown_timeout: <duration> | default = 30s]
-    
+
     # # Read timeout for HTTP server
     # [http_server_read_timeout: <duration> | default = 30s]
-    
+
     # # Write timeout for HTTP server
     # [http_server_write_timeout: <duration> | default = 30s]
-    
+
     # # Idle timeout for HTTP server
     # [http_server_idle_timeout: <duration> | default = 120s]
-    
+
     # # Max gRPC message size that can be received
     # [grpc_server_max_recv_msg_size: <int> | default = 4194304]
-    
+
     # # Max gRPC message size that can be sent
     # [grpc_server_max_send_msg_size: <int> | default = 4194304]
-    
+
     # # Limit on the number of concurrent streams for gRPC calls (0 = unlimited)
     # [grpc_server_max_concurrent_streams: <int> | default = 100]
-    
+
     # # Log only messages with the given severity or above. Supported values [debug,
     # # info, warn, error]
     # [log_level: <string> | default = "info"]
-    
+
     # # Base path to server all API routes from (e.g., /v1/).
     # [http_path_prefix: <string>]
-    
+
     # # Target managers check flag for Promtail readiness, if set to false the check is ignored
     # [health_check_target: <bool> | default = true]
-  
+
 positions:
     filename: /tmp/positions.yaml
-    
+
     # # Location of positions file
     # [filename: <string> | default = "/var/log/positions.yaml"]
-    
+
     # # How often to update the positions file
     # [sync_period: <duration> | default = 10s]
-    
+
     # # Whether to ignore & later overwrite positions files that are corrupted
     # [ignore_invalid_yaml: <boolean> | default = false]
 
-  
+
 clients:
     - url: http://192.168.1.98:3100/loki/api/v1/push
       # # The URL where Loki is listening, denoted in Loki as http_listen_address and
@@ -75,83 +75,83 @@ clients:
       # # URL for the Distributor. Path to the push API needs to be included.
       # # Example: http://example.com:3100/loki/api/v1/push
       # url: <string>
-      
+
       # # The tenant ID used by default to push logs to Loki. If omitted or empty
       # # it assumes Loki is running in single-tenant mode and no X-Scope-OrgID header
       # # is sent.
       # [tenant_id: <string>]
-      
+
       # # Maximum amount of time to wait before sending a batch, even if that
       # # batch isn't full.
       # [batchwait: <duration> | default = 1s]
-      
+
       # # Maximum batch size (in bytes) of logs to accumulate before sending
       # # the batch to Loki.
       # [batchsize: <int> | default = 1048576]
-      
+
       # # If using basic auth, configures the username and password
       # # sent.
       # basic_auth:
       #   # The username to use for basic auth
       #   [username: <string>]
-      
+
       #   # The password to use for basic auth
       #   [password: <string>]
-      
+
       #   # The file containing the password for basic auth
       #   [password_file: <filename>]
-      
+
       # # Optional OAuth 2.0 configuration
       # # Cannot be used at the same time as basic_auth or authorization
       # oauth2:
       #   # Client id and secret for oauth2
       #   [client_id: <string>]
       #   [client_secret: <secret>]
-      
+
       #   # Read the client secret from a file
       #   # It is mutually exclusive with `client_secret`
       #   [client_secret_file: <filename>]
-      
+
       #   # Optional scopes for the token request
       #   scopes:
       #     [ - <string> ... ]
-      
+
       #   # The URL to fetch the token from
       #   token_url: <string>
-      
+
       #   # Optional parameters to append to the token URL
       #   endpoint_params:
       #     [ <string>: <string> ... ]
-      
+
       # # Bearer token to send to the server.
       # [bearer_token: <secret>]
-      
+
       # # File containing bearer token to send to the server.
       # [bearer_token_file: <filename>]
-      
+
       # # HTTP proxy server to use to connect to the server.
       # [proxy_url: <string>]
-      
+
       # # If connecting to a TLS server, configures how the TLS
       # # authentication handshake will operate.
       # tls_config:
       #   # The CA file to use to verify the server
       #   [ca_file: <string>]
-      
+
       #   # The cert file to send to the server for client auth
       #   [cert_file: <filename>]
-      
+
       #   # The key file to send to the server for client auth
       #   [key_file: <filename>]
-      
+
       #   # Validates that the server name in the server's certificate
       #   # is this value.
       #   [server_name: <string>]
-      
+
       #   # If true, ignores the server certificate being signed by an
       #   # unknown CA.
       #   [insecure_skip_verify: <boolean> | default = false]
-      
+
       # # Configures how to retry requests to Loki when a request
       # # fails.
       # # Default backoff schedule:
@@ -160,13 +160,13 @@ clients:
       # backoff_config:
       #   # Initial backoff time between retries
       #   [min_period: <duration> | default = 500ms]
-      
+
       #   # Maximum backoff time between retries
       #   [max_period: <duration> | default = 5m]
-      
+
       #   # Maximum number of retries to do
       #   [max_retries: <int> | default = 10]
-      
+
       # # Static labels to add to all logs being sent to Loki.
       # # Use map like {"foo": "bar"} to add a label foo with
       # # value bar.
@@ -180,10 +180,10 @@ clients:
       # # label keys are the same.
       # external_labels:
       #   [ <labelname>: <labelvalue> ... ]
-      
+
       # # Maximum time to wait for a server to respond to a request
       # [timeout: <duration> | default = 10s]
-      
+
       # # A comma-separated list of labels to include in the stream lag metric `promtail_stream_lag_seconds`.
       # # The default value is "filename". A "host" label is always included.
       # # The stream lag metric indicates which streams are falling behind on writes to Loki;
@@ -191,7 +191,7 @@ clients:
       # [stream_lag_labels: <string> | default = "filename"]
 
 
-  
+
 scrape_configs:
   - job_name: system
     static_configs:
@@ -210,8 +210,8 @@ scrape_configs:
   #       miner: boss-monitor
   #       job: rsyslogng
   #       __path__: /log/client_logs/*/*log
-        
-        
+
+
   - job_name: rsyslogng
     static_configs:
     - targets:
@@ -233,41 +233,80 @@ scrape_configs:
         selector: '{job="rsyslogng"} |~ ".* promtail\\[.*"'
         action: drop
         drop_counter_reason: promtail_noisy_error
-    
+
     # EXAMPLE: Apr 18 20:24:04 UniFiSecurityGateway3P kernel: [LAN_LOCAL-default-A]IN=eth1 OUT= MAC=80:2a:a8:00:11:33:00:11:22:33:44:66:08:00 SRC=192.168.1.8 DST=192.168.1.1 LEN=52 TOS=0x00 PREC=0x00 TTL=64 ID=61516 DF PROTO=TCP SPT=8080 DPT=45096 WINDOW=246 RES=0x00 ACK URGP=0
     # EXAMPLE: Apr 18 20:54:31 UniFiSecurityGateway3P kernel: [WAN_LOCAL-4000-D]IN=eth0 OUT= MAC=80:2a:a8:00:11:33:00:11:22:33:44:66:08:00 SRC=172.217.10.138 DST=192.168.0.3 LEN=115 TOS=0x00 PREC=0x00 TTL=122 ID=53703 PROTO=TCP SPT=443 DPT=52170 WINDOW=294 RES=0x00 ACK PSH URGP=0
     # EXAMPLE: Apr 18 20:54:32 UniFiSecurityGateway3P kernel: [LAN_LOCAL-default-A]IN=eth1 OUT= MAC=80:2a:a8:00:11:33:00:11:22:33:44:66:08:00 SRC=192.168.1.212 DST=192.168.1.1 LEN=102 TOS=0x00 PREC=0x00 TTL=64 ID=2810 PROTO=UDP SPT=61080 DPT=53 LEN=82
     # SOURCE: https://grokconstructor.appspot.com/do/constructionstep
     - match:
-        selector: '{job="rsyslogng"} |~ ".*kernel.*"'
+        # selector: '{job="rsyslogng"} |~ ".*kernel.*"'
+        selector: '{container_name="bossjones/fluentd-elasticsearch:v4.0.0"}'
         stages:
         - regex:
             # Example: "Apr  7 18:56:11 ubnt kernel: "
-            expression: '^(?P<month>(\b(?:[Jj]an(?:uary|uar)?|[Ff]eb(?:ruary|ruar)?|[Mm](?:a|ä)?r(?:ch|z)?|[Aa]pr(?:il)?|[Mm]a(?:y|i)?|[Jj]un(?:e|i)?|[Jj]ul(?:y)?|[Aa]ug(?:ust)?|[Ss]ep(?:tember)?|[Oo](?:c|k)?t(?:ober)?|[Nn]ov(?:ember)?|[Dd]e(?:c|z)(?:ember)?)\b))(\s*)(?P<daynum>(?:(?:0[1-9])|(?:[12][0-9])|(?:3[01])|[1-9])) (?P<time>((?!<[0-9])((?:2[0123]|[01]?[0-9])):((?:[0-5][0-9]))(?::((?:(?:[0-5]?[0-9]|60)(?:[:.,][0-9]+)?)))(?![0-9])))(\s*)(?P<hostname>(\b(?:[0-9A-Za-z][0-9A-Za-z-]{0,62})(?:\.(?:[0-9A-Za-z][0-9A-Za-z-]{0,62}))*(\.?|\b)))(\s*)(?:(\s*))?((?P<process_name>\b\w+\b):)(?:(\s*))?'
+            expression: '(?P<time>^((\d\d){1,2})-((?:0?[1-9]|1[0-2]))-((?:(?:0[1-9])|(?:[12][0-9])|(?:3[01])|[1-9])) (([^0-9]?)((?:2[0123]|[01]?[0-9])):((?:[0-5][0-9]))(?::((?:(?:[0-5]?[0-9]|60)(?:[:.,][0-9]+)?)))([^0-9]?)) ((?:Z|[+-]((?:2[0123]|[01]?[0-9]))(?::?((?:[0-5][0-9])))))) (?P<fluentd_label>.*?): (?P<fluentd_message>.*)'
         - labels:
-            month:
-            daynum:
-            hostname:
-            process_name:
-            proc: "kernel"
-            
-        - regex:
-            # Example: [LAN_LOCAL-default-A]
-            expression: '(?:(\[(?P<firewall_interface>\b\w+\b)-(?P<firewall_rule_index>\b\w+\b)-(?P<firewall_rule_action>\b\w+\b)\]))'
-        - labels:
-            firewall_interface:
-            firewall_rule_index:
-            firewall_rule_action:
-            
-        - regex:
-            # Example: [LAN_LOCAL-default-A]
-            expression: '(?:(\[(?P<firewall_interface>\b\w+\b)-(?P<firewall_rule_index>\b\w+\b)-(?P<firewall_rule_action>\b\w+\b)\]))?'
-        - labels:
-            firewall_interface:
-            firewall_rule_index:
-            firewall_rule_action:
-            
-        
+            time:
+            fluentd_message:
+
+        - json:
+            expressions:
+              output: fluentd_message
+              hostname: hostname
+              timestamp: time
+              message: message
+              process_name: process_name
+              firewall_interface: firewall_interface
+              firewall_rule_index: firewall_rule_index
+              firewall_rule_action: firewall_rule_action
+              iptables_output_device: iptables_output_device
+              mac: mac
+              destination_mac: destination_mac
+              source_mac: source_mac
+              iptables_ether_type: iptables_ether_type
+              firewall_destination_ip: firewall_destination_ip
+              firewall_packet_length: firewall_packet_length
+              firewall_tos: firewall_tos
+              firewall_precidence_field: firewall_precidence_field
+              firewall_ttl: firewall_ttl
+              firewall_id: firewall_id
+              firewall_dont_fragment: firewall_dont_fragment
+              firewall_nf_protocol: firewall_nf_protocol
+              firewall_spt: firewall_spt
+              firewall_dtp: firewall_dtp
+              firewall_tcp_opts: firewall_tcp_opts
+              remote_ip: remote_ip
+              extra:
+        - json:
+            expressions:
+              geoip:
+            source: extra
+
+        - timestamp:
+            source: time
+            format: "2022-04-08 22:40:46.000000000 +0000"
+
+        - output:
+            # # Name from extracted data to use for the log entry.
+            source: message
+
+        # - regex:
+        #     # Example: [LAN_LOCAL-default-A]
+        #     expression: '(?:(\[(?P<firewall_interface>\b\w+\b)-(?P<firewall_rule_index>\b\w+\b)-(?P<firewall_rule_action>\b\w+\b)\]))'
+        # - labels:
+        #     firewall_interface:
+        #     firewall_rule_index:
+        #     firewall_rule_action:
+
+        # - regex:
+        #     # Example: [LAN_LOCAL-default-A]
+        #     expression: '(?:(\[(?P<firewall_interface>\b\w+\b)-(?P<firewall_rule_index>\b\w+\b)-(?P<firewall_rule_action>\b\w+\b)\]))?'
+        # - labels:
+        #     firewall_interface:
+        #     firewall_rule_index:
+        #     firewall_rule_action:
+
+
   - job_name: remotebootlog
     static_configs:
     - targets:
@@ -276,7 +315,7 @@ scrape_configs:
         miner: boss-monitor
         job: remotebootlog
         __path__: /log/client_logs/*/boot.log
-      
+
   - job_name: remotemessages
     static_configs:
     - targets:
@@ -285,7 +324,7 @@ scrape_configs:
         miner: boss-monitor
         job: remotemessages
         __path__: /log/client_logs/*/messages.log
-      
+
   - job_name: remotecron
     static_configs:
     - targets:
@@ -294,7 +333,7 @@ scrape_configs:
         miner: boss-monitor
         job: remotecron
         __path__: /log/client_logs/*/cron.log
-      
+
   - job_name: remotesecure
     static_configs:
     - targets:
@@ -312,8 +351,8 @@ scrape_configs:
         miner: boss-monitor
         job: remoteuncategorized
         __path__: /log/client_logs/*/uncategorized.log
-        
-        
+
+
   - job_name: journal
     journal:
       json: true
@@ -334,7 +373,7 @@ scrape_configs:
         target_label: 'comm'
       - source_labels: ['__journal__uid']
         target_label: 'uid'
-        
+
       # SOURCE: https://github.com/open-io/ansible-role-openio-promtail/blob/b0d4ee9d50a41f03395db4dfead60d26fad62f0c/templates/config.yml.j2
       # Extract hostname
       - action: replace
@@ -542,7 +581,7 @@ scrape_configs:
         regex: '^(loki|promtail|elasticsearch|kibana|filebeat)$'
         source_labels: ['service_type']
 
-        
+
   - job_name: syslog
     syslog:
       listen_address: 0.0.0.0:9514
@@ -565,8 +604,8 @@ scrape_configs:
         target_label: 'host'
       - action: labelmap
         regex: __syslog_message_(.+)
-        
-        
+
+
   # # SOURCE: https://github.com/rafaribe/home-ops/blob/d9e283fd3ddc42a9891c8a12fe82fa128657798a/provision/ansible/backup-server/roles/syncthing/templates/agent.yml
   # - job_name: system
   #   static_configs:
@@ -609,48 +648,48 @@ scrape_configs:
 
   # # Name to identify this scrape config in the Promtail UI.
   # job_name: <string>
-  
+
   # # Describes how to transform logs from targets.
   # [pipeline_stages: <pipeline_stages>]
-  
+
   # # Describes how to scrape logs from the journal.
   # [journal: <journal_config>]
-  
+
   # # Describes how to receive logs from syslog.
   # [syslog: <syslog_config>]
-  
+
   # # Describes how to receive logs via the Loki push API, (e.g. from other Promtails or the Docker Logging Driver)
   # [loki_push_api: <loki_push_api_config>]
-  
+
   # # Describes how to scrape logs from the Windows event logs.
   # [windows_events: <windows_events_config>]
-  
+
   # # Describes how to fetch logs from Kafka via a Consumer group.
   # [kafka: <kafka_config>]
-  
+
   # # Describes how to relabel targets to determine if they should
   # # be processed.
   # relabel_configs:
   #   - [<relabel_config>]
-  
+
   # # Static targets to scrape.
   # static_configs:
   #   - [<static_config>]
-  
+
   # # Files containing targets to scrape.
   # file_sd_configs:
   #   - [<file_sd_configs>]
-  
+
   # # Describes how to discover Kubernetes services running on the
   # # same host.
   # kubernetes_sd_configs:
   #   - [<kubernetes_sd_config>]
-  
+
   # # Describes how to use the Consul Catalog API to discover services registered with the
   # # consul cluster.
   # consul_sd_configs:
   #   [ - <consul_sd_config> ... ]
-  
+
   # # Describes how to use the Consul Agent API to discover services registered with the consul agent
   # # running on the same host as Promtail.
   # consulagent_sd_configs:
