@@ -4,7 +4,7 @@ version: '3.7'
 x-logging:
   &default-logging
   driver: "journald"
-  options: 
+  options:
     # tag: "{{.Name}}"
     tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
@@ -302,15 +302,15 @@ services:
       - --v=6
       - '--listen_ip=0.0.0.0'
       - '--port=8081'
-      - --logtostderr 
+      - --logtostderr
       - --disable_metrics=referenced_memory,cpu_topology,resctrl,udp,advtcp,sched,hugetlb,memory_numa,tcp,process,accelerator,disk
     # command:
-    #   - 
+    #   -
     logging:
       driver: json-file
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
-  
+
   blackbox:
     image: prom/blackbox-exporter
     privileged: true
@@ -350,7 +350,7 @@ services:
       driver: json-file
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
-  
+
   heimdall:
     image: linuxserver/heimdall
     build: ./docker-heimdall
@@ -381,16 +381,16 @@ services:
       driver: json-file
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
-    
+
   # nfs-server:
   #   # SOURCE: # SOURCE: https://github.com/rafaribe/home-ops/blob/d9e283fd3ddc42a9891c8a12fe82fa128657798a/provision/ansible/backup-server/roles/syncthing/templates/agent.yml
   #   image: heywoodlh/docker-nfs-server
   #   container_name: nfs-server
   #   hostname: nfs-server
-  #   environment: 
+  #   environment:
   #     - NFS_EXPORT_0=/data/
   #   volumes:
-  #     - *data-services-volume 
+  #     - *data-services-volume
   #     - /lib/modules:/lib/modules:ro
   #   cap_add:
   #     - SYS_ADMIN
@@ -425,7 +425,7 @@ services:
     - "traefik.http.routers.prometheus.entrypoints=web"
     - "traefik.http.services.prometheus.loadbalancer.server.port=3100"
     command: -config.file=/loki/loki-config.yaml
-  
+
   # https://github.com/grafana/loki/blob/34a4b242bf1de7eae3f8f6594253adccf8de05cd/production/docker/docker-compose-ha-memberlist.yaml
   # # Since the Loki containers are running as user 10001 and the mounted data volume is owned by root,
   # # Loki would not have permissions to create the directories.
@@ -711,6 +711,7 @@ services:
     volumes:
       - /var/log:/var/log:ro
       - ./promtail/promtail-gateway.yaml:/etc/promtail/promtail-gateway.yaml:ro
+      - ./promtail/promtail-debug.yaml:/etc/promtail/promtail-debug.yaml:ro
       - /var/log/journal/:/var/log/journal/:ro
       - /run/log/journal/:/run/log/journal/:ro
       - /etc/machine-id:/etc/machine-id:ro
