@@ -193,14 +193,14 @@ clients:
 
 
 scrape_configs:
-  - job_name: system
-    static_configs:
-    - targets:
-        - localhost
-      labels:
-        miner: boss-monitor
-        job: varlogs
-        __path__: /var/log/*log
+  # - job_name: system
+  #   static_configs:
+  #   - targets:
+  #       - localhost
+  #     labels:
+  #       miner: boss-monitor
+  #       job: varlogs
+  #       __path__: /var/log/*log
 
   # - job_name: rsyslogng
   #   static_configs:
@@ -219,7 +219,7 @@ scrape_configs:
       labels:
         miner: boss-monitor
         job: rsyslogng
-        __path__: /log/client_logs/*/*.log
+        __path__: /log/client_logs/*/messages.log
     pipeline_stages:
     - match:
         selector: '{job="rsyslogng"} |~ ".*sshd.*Received disconnect from .* Bye Bye .preauth.*"'
@@ -316,14 +316,14 @@ scrape_configs:
         job: remotebootlog
         __path__: /log/client_logs/*/boot.log
 
-  - job_name: remotemessages
-    static_configs:
-    - targets:
-        - localhost
-      labels:
-        miner: boss-monitor
-        job: remotemessages
-        __path__: /log/client_logs/*/messages.log
+  # - job_name: remotemessages
+  #   static_configs:
+  #   - targets:
+  #       - localhost
+  #     labels:
+  #       miner: boss-monitor
+  #       job: remotemessages
+  #       __path__: /log/client_logs/*/messages.log
 
   - job_name: remotecron
     static_configs:
