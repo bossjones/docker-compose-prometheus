@@ -29,6 +29,22 @@ scrape_configs:
         job: my-stdin-logs
 
     pipeline_stages:
+    ################################################################################
+    # remove all noise
+    ################################################################################
+    - match:
+      selector: '{job="containerlogs"} |~ ".*firewall_source_ip is empty string.*"'
+      action: drop
+      drop_counter_reason: promtail_noisy_error
+    - match:
+      selector: '{job="containerlogs"} |~ ".* ath0: track: .*"'
+      action: drop
+      drop_counter_reason: promtail_noisy_error
+    - match:
+      selector: '{job="containerlogs"} |~ ".* ubnt_protocol.ubnt_protocol_recv(): failed to decrypt the message.*"'
+      action: drop
+      drop_counter_reason: promtail_noisy_error
+
     # generic catch all for all docker containers
     - json:
         expressions:
@@ -51,6 +67,8 @@ scrape_configs:
         container_name:
     - output:
         source: output
+
+    # REMOVE ALL NOISE
 
     # EXAMPLE: https://github.com/nautible/nautible-infra/blob/34914fb370aacbdd46150cea7ed72c677ca60044/ArgoCD/ecosystems/base/observation/promtail/application.yaml
     - match: # unifi logs
