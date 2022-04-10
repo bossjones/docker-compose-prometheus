@@ -149,7 +149,7 @@ services:
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
       - '--web.listen-address=0.0.0.0:9090'
-      - '--log.level=debug'
+      - '--log.level=info'
     ports:
       - 9090:9090
     links:
@@ -172,6 +172,11 @@ services:
     # - "host.docker.internal:host-gateway"
     # SEE: https://stackoverflow.com/questions/31324981/how-to-access-host-port-from-docker-container/43541732#43541732
     # https://stackoverflow.com/questions/56909896/prometheus-in-docker-container-cannot-scrape-target-on-host/56910057
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+
 
   node-exporter:
     image: prom/node-exporter
@@ -541,168 +546,60 @@ services:
   #   security_opt:
   #     - apparmor:unconfined
 
-  # SOURCE docker run --rm -v /var/run/docker.sock:/var/run/docker.sock leoverto/docker-network-graph
-  networkgraph:
-    image: leoverto/docker-network-graph
-    container_name: networkgraph
-    cap_add:
-      - ALL
-    security_opt:
-      - apparmor:unconfined
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./networkgraph:/networkgraph
-    depends_on:
-      - prometheus
-    # networks:
-    #   - back-tier
-    #   - front-tier
-    tty: true
-    stdin_open: true
-    command:
-    - '-f'
-    - '/dev/null'
-    entrypoint: "tail"
-    environment:
-    - TZ=UTC
-  zsh:
-    image: ubuntu:focal
-    container_name: zsh
-    # hostname: example.com # set to fqdn of host
-    # ports:
-    #   - 19999:19999
-    restart: always
-    cap_add:
-      - ALL
-    security_opt:
-      - apparmor:unconfined
-    volumes:
-      - /etc/passwd:/host/etc/passwd:ro
-      - /etc/group:/host/etc/group:ro
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /etc/os-release:/host/etc/os-release:ro
-    depends_on:
-      - prometheus
-    # networks:
-    #   - back-tier
-    #   - front-tier
-    tty: true
-    stdin_open: true
-    command:
-    - '-f'
-    - '/dev/null'
-    entrypoint: "tail"
-    environment:
-    - TZ=UTC
-  #  apt-get update;
-  #  apt-get install bash-completion zsh git net-tools curl wget dnsutils sudo vim build-essential -y;
-  #  wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh
-  #  chmod +x install.sh
-  #  ./install.sh
-  #  mkdir -p /usr/local/src;
-  #  git clone https://github.com/bossjones/debug-tools /usr/local/src/debug-tools;
-  #  curl -L 'https://raw.githubusercontent.com/bossjones/debug-tools/master/install-config-sample-ubuntu' > /usr/local/bin/install-config
-  #  sed -i 's,10.3.0,16.11.1,g' /usr/local/bin/install-config
-  #  cat /usr/local/bin/install-config
-  #  cd /usr/local/src/debug-tools;
-  #  ./update-bossjones-debug-tools
-  #  export TZ=UTC
-  #  ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
-    # apt-get install -y \
-    # apache2-utils \
-    # bash \
-    # bind-tools \
-    # bird \
-    # bridge-utils \
-    # busybox-extras \
-    # calicoctl \
-    # conntrack-tools \
-    # ctop \
-    # curl \
-    # dhcping \
-    # drill \
-    # ethtool \
-    # file \
-    # fping \
-    # httpie \
-    # iftop \
-    # iperf \
-    # iproute2 \
-    # ipset \
-    # iptables \
-    # iptraf-ng \
-    # iputils \
-    # ipvsadm \
-    # jq \
-    # libc6-compat \
-    # liboping \
-    # mtr \
-    # net-snmp-tools \
-    # netcat-openbsd \
-    # netgen \
-    # nftables \
-    # ngrep \
-    # nmap \
-    # nmap-nping \
-    # openssl \
-    # py-crypto \
-    # py2-virtualenv \
-    # python2 \
-    # scapy \
-    # socat \
-    # strace \
-    # tcpdump \
-    # tcptraceroute \
-    # termshark \
-    # tshark \
-    # util-linux \
-    # vim \
-    # websocat \
-    # nethogs
-
-    # export PYENV_VERSIONS_TO_INSTALL="3.9.0\n"
-    # export PYENV_ROOT=/.pyenv
-    # export PATH="${PYENV_ROOT}/bin:${PYENV_ROOT}/shims:$PATH"
-    # export RBENV_ROOT=~/.rbenv
-    # export RBENV_VERSION=2.7.2
-    # export NODE_VERSION_TO_INSTALL=16.11.1
-    # export PATH="$HOME/.fnm:${RBENV_ROOT}/shims:${RBENV_ROOT}/bin:$PATH"
-
-
-#  pushgateway:
-#    image: prom/pushgateway
-#    restart: always
-#    expose:
-#      - 9091
-#    ports:
-#      - "9091:9091"
-#    networks:
-#      - back-tier
-
-  # netdata:
-  #   image: netdata/netdata
-  #   container_name: netdata
-  #   hostname: example.com # set to fqdn of host
-  #   ports:
-  #     - 19999:19999
-  #   restart: always
+  # # SOURCE docker run --rm -v /var/run/docker.sock:/var/run/docker.sock leoverto/docker-network-graph
+  # networkgraph:
+  #   image: leoverto/docker-network-graph
+  #   container_name: networkgraph
   #   cap_add:
-  #     - SYS_PTRACE
+  #     - ALL
   #   security_opt:
   #     - apparmor:unconfined
   #   volumes:
-  #     - netdataconfig:/etc/netdata
-  #     - netdatalib:/var/lib/netdata
-  #     - netdatacache:/var/cache/netdata
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - ./networkgraph:/networkgraph
+  #   depends_on:
+  #     - prometheus
+  #   # networks:
+  #   #   - back-tier
+  #   #   - front-tier
+  #   tty: true
+  #   stdin_open: true
+  #   command:
+  #   - '-f'
+  #   - '/dev/null'
+  #   entrypoint: "tail"
+  #   environment:
+  #   - TZ=UTC
+  # zsh:
+  #   image: ubuntu:focal
+  #   container_name: zsh
+  #   # hostname: example.com # set to fqdn of host
+  #   # ports:
+  #   #   - 19999:19999
+  #   restart: always
+  #   cap_add:
+  #     - ALL
+  #   security_opt:
+  #     - apparmor:unconfined
+  #   volumes:
   #     - /etc/passwd:/host/etc/passwd:ro
   #     - /etc/group:/host/etc/group:ro
   #     - /proc:/host/proc:ro
   #     - /sys:/host/sys:ro
   #     - /etc/os-release:/host/etc/os-release:ro
   #   depends_on:
-  #   - grafana
+  #     - prometheus
+  #   # networks:
+  #   #   - back-tier
+  #   #   - front-tier
+  #   tty: true
+  #   stdin_open: true
+  #   command:
+  #   - '-f'
+  #   - '/dev/null'
+  #   entrypoint: "tail"
+  #   environment:
+  #   - TZ=UTC
 
   promtail:
     # SOURCE: https://github.com/gilmrt/docker-compose/blob/5d8d7b3746fba48ba5f559f9913e56ae3d881eee/metrics/docker-compose.yml
