@@ -304,7 +304,7 @@ services:
     restart: always
     entrypoint:
       - /usr/bin/cadvisor
-      - --v=6
+      # - --v=6
       - '--listen_ip=0.0.0.0'
       - '--port=8081'
       - --logtostderr
