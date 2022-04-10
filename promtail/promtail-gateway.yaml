@@ -642,6 +642,8 @@ scrape_configs:
     - timestamp:
         format: RFC3339Nano
         source: time
+    - output:
+        source: output
     # #################################################
     # # non unifi logs
     # #################################################
