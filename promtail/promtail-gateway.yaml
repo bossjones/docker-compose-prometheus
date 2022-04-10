@@ -625,7 +625,9 @@ scrape_configs:
         job: containerlogs
         __path__: /var/lib/docker/containers/*/*log
     pipeline_stages:
-    # - docker:
+    ################################################################################
+    # generic catch all for all docker containers
+    ################################################################################
     - json:
         expressions:
           output: log
@@ -642,8 +644,34 @@ scrape_configs:
     - timestamp:
         format: RFC3339Nano
         source: time
+    - labels:
+        stream:
+        container_name:
     - output:
         source: output
+
+    # EXAMPLE: https://github.com/nautible/nautible-infra/blob/34914fb370aacbdd46150cea7ed72c677ca60044/ArgoCD/ecosystems/base/observation/promtail/application.yaml
+    - match: # unifi logs
+        # unifi iptable logs
+        # selector: '{container_name="bossjones/fluentd-elasticsearch:v4.0.0"} |~ ".*unifi.syslog.*"'
+        selector: '{container_name="bossjones/fluentd-elasticsearch:v4.0.0"} |~ ".*unifi.syslog.*"'
+        stages:
+        - regex:
+            expression: '(?P<fluentd_time>^((\d\d){1,2})-((?:0?[1-9]|1[0-2]))-((?:(?:0[1-9])|(?:[12][0-9])|(?:3[01])|[1-9])) (([^0-9]?)((?:2[0123]|[01]?[0-9])):((?:[0-5][0-9]))(?::((?:(?:[0-5]?[0-9]|60)(?:[:.,][0-9]+)?)))([^0-9]?)) ((?:Z|[+-]((?:2[0123]|[01]?[0-9]))(?::?((?:[0-5][0-9])))))) (?P<fluentd_label>.*?): (?P<fluentd_message>.*)'
+            source: output
+        - labels:
+            stream:
+            container_name:
+            fluentd_time:
+            fluentd_label:
+            fluentd_message:
+        - replace:
+            expression: "(.+)"
+            replace: "{{fromJson .Value}}"
+            source: fluentd_message
+        - output:
+            source: fluentd_message
+
     # #################################################
     # # non unifi logs
     # #################################################
