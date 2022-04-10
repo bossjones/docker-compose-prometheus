@@ -485,7 +485,7 @@ services:
       driver: loki
       options:
         loki-url: http://192.168.1.98:3100/loki/api/v1/push
-        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+        # tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
         # loki-url: "http://host.docker.internal:3100/loki/api/v1/push"
     # extra_hosts:
     # # See https://stackoverflow.com/questions/48546124/what-is-linux-equivalent-of-host-docker-internal/67158212#67158212
