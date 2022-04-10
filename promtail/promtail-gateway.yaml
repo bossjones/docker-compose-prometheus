@@ -637,6 +637,7 @@ scrape_configs:
               output: log
               stream: stream
               attrs:
+              time:
         - json:
             expressions:
               tag:
@@ -647,15 +648,36 @@ scrape_configs:
         - timestamp:
             format: RFC3339Nano
             source: time
+        - regex:
+            expression: '(?P<fluentd_time>^((\d\d){1,2})-((?:0?[1-9]|1[0-2]))-((?:(?:0[1-9])|(?:[12][0-9])|(?:3[01])|[1-9])) (([^0-9]?)((?:2[0123]|[01]?[0-9])):((?:[0-5][0-9]))(?::((?:(?:[0-5]?[0-9]|60)(?:[:.,][0-9]+)?)))([^0-9]?)) ((?:Z|[+-]((?:2[0123]|[01]?[0-9]))(?::?((?:[0-5][0-9])))))) (?P<fluentd_label>.*?): (?P<fluentd_message>\{.*\})'
+            source: output
         - labels:
             stream:
             container_name:
+            fluentd_time:
+            fluentd_label:
+            fluentd_message:
+        # - json:
+        #     expressions:
+        #       log_line: fluentd_message
+        #     source: fluentd_message
+        # - replace:
+        #     expression: ".*\\r.*"
+        #     replace: ""
+        # take string encoded part, and turn it into json
+        # - replace:
+        #     expression: ".*null.*"
+        #     replace: ""
+        - replace:
+            expression: "(.+)"
+            replace: "{{fromJson .Value}}"
+            source: fluentd_message
         - output:
             source: output
 
-    #################################################
-    # unifi logs
-    #################################################
+    # #################################################
+    # # unifi logs
+    # #################################################
     # - match:
     #     selector: '{job="containerlogs"} |~ ".*unifi.syslog.*"'
     #     stages:
