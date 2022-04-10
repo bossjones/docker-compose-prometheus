@@ -58,6 +58,10 @@ scrape_configs:
     - drop:
         expression: ".* failed to decrypt the message.*"
         # source: fluentd_message
+    - match:
+      # drop all logs for all containers that don't have --log-opt: tag: "{{:ImageName}}|{{:Name}}"
+      selector: '{job="containerlogs",container_name=""}'
+      action: drop
     - output:
         source: output
 
