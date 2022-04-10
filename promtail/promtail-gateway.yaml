@@ -630,6 +630,7 @@ scrape_configs:
     #################################################
     - match:
         # selector: '{job="containerlogs"} !~ ".*unifi.syslog.*"'
+        selector: '{job="containerlogs"}'
         stages:
         - json:
             expressions:
