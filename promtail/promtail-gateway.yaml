@@ -625,7 +625,23 @@ scrape_configs:
         job: containerlogs
         __path__: /var/lib/docker/containers/*/*log
     pipeline_stages:
-    - docker:
+    # - docker:
+    - json:
+        expressions:
+          output: log
+          stream: stream
+          attrs:
+          time:
+    - json:
+        expressions:
+          tag:
+        source: attrs
+    - regex:
+        expression: (?P<container_name>(?:[^|]*[^|]))
+        source: tag
+    - timestamp:
+        format: RFC3339Nano
+        source: time
     # #################################################
     # # non unifi logs
     # #################################################
