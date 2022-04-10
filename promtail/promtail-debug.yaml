@@ -49,6 +49,15 @@ scrape_configs:
     - labels:
         stream:
         container_name:
+    - drop:
+        expression: ".*firewall_source_ip is empty string.*"
+        # source: fluentd_message
+    - drop:
+        expression: ".* ath0: track: .*"
+        # source: fluentd_message
+    - drop:
+        expression: ".* failed to decrypt the message.*"
+        # source: fluentd_message
     - output:
         source: output
 

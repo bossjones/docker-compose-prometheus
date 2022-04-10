@@ -663,6 +663,15 @@ scrape_configs:
     - labels:
         stream:
         container_name:
+    - drop:
+        expression: ".*firewall_source_ip is empty string.*"
+        # source: fluentd_message
+    - drop:
+        expression: ".* ath0: track: .*"
+        # source: fluentd_message
+    - drop:
+        expression: ".* failed to decrypt the message.*"
+        # source: fluentd_message
     - output:
         source: output
 
@@ -675,18 +684,9 @@ scrape_configs:
         - regex:
             expression: '(?P<fluentd_time>^((\d\d){1,2})-((?:0?[1-9]|1[0-2]))-((?:(?:0[1-9])|(?:[12][0-9])|(?:3[01])|[1-9])) (([^0-9]?)((?:2[0123]|[01]?[0-9])):((?:[0-5][0-9]))(?::((?:(?:[0-5]?[0-9]|60)(?:[:.,][0-9]+)?)))([^0-9]?)) ((?:Z|[+-]((?:2[0123]|[01]?[0-9]))(?::?((?:[0-5][0-9])))))) (?P<fluentd_label>.*?): (?P<fluentd_message>.*)'
             source: output
-        # ################################################################################
-        # # remove all noise
-        # ################################################################################
-        # - drop:
-        #     expression: ".*firewall_source_ip is empty string.*"
-        #     # source: output
-        # - drop:
-        #     expression: ".* ath0: track: .*"
-        #     # source: output
-        # - drop:
-        #     expression: ".* failed to decrypt the message.*"
-        #     # source: output
+        ################################################################################
+        # remove all noise
+        ################################################################################
         - labels:
             stream:
             container_name:
