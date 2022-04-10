@@ -46,9 +46,13 @@ scrape_configs:
     - timestamp:
         format: RFC3339Nano
         source: time
+    - labels:
+        stream:
+        container_name:
     - output:
         source: output
 
+    # EXAMPLE: https://github.com/nautible/nautible-infra/blob/34914fb370aacbdd46150cea7ed72c677ca60044/ArgoCD/ecosystems/base/observation/promtail/application.yaml
     - match: # unifi logs
         # unifi iptable logs
         # selector: '{container_name="bossjones/fluentd-elasticsearch:v4.0.0"} |~ ".*unifi.syslog.*"'
