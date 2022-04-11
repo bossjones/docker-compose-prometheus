@@ -430,6 +430,10 @@ services:
     - "traefik.http.routers.loki.entrypoints=web"
     - "traefik.http.services.loki.loadbalancer.server.port=3100"
     command: -config.file=/loki/loki-config.yaml
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
   # https://github.com/grafana/loki/blob/34a4b242bf1de7eae3f8f6594253adccf8de05cd/production/docker/docker-compose-ha-memberlist.yaml
   # # Since the Loki containers are running as user 10001 and the mounted data volume is owned by root,
