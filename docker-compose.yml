@@ -80,9 +80,9 @@ services:
     container_name: influxdb
     labels:
     - "traefik.enable=true"
-    - "traefik.http.routers.prometheus.rule=Host(`influxdb.scarlettlab.home`)"
-    - "traefik.http.routers.prometheus.entrypoints=web"
-    - "traefik.http.services.prometheus.loadbalancer.server.port=8086"
+    - "traefik.http.routers.influxdb.rule=Host(`influxdb.scarlettlab.home`)"
+    - "traefik.http.routers.influxdb.entrypoints=web"
+    - "traefik.http.services.influxdb.loadbalancer.server.port=8086"
     ports:
       - '8086:8086'
     volumes:
@@ -106,9 +106,9 @@ services:
     container_name: chronograf
     labels:
     - "traefik.enable=true"
-    - "traefik.http.routers.prometheus.rule=Host(`chronograf.scarlettlab.home`)"
-    - "traefik.http.routers.prometheus.entrypoints=web"
-    - "traefik.http.services.prometheus.loadbalancer.server.port=8888"
+    - "traefik.http.routers.chronograf.rule=Host(`chronograf.scarlettlab.home`)"
+    - "traefik.http.routers.chronograf.entrypoints=web"
+    - "traefik.http.services.chronograf.loadbalancer.server.port=8888"
     ports:
       - '8888:8888'
     volumes:
@@ -426,9 +426,9 @@ services:
     - ./loki/etc/loki:/loki
     labels:
     - "traefik.enable=true"
-    - "traefik.http.routers.prometheus.rule=Host(`loki.scarlettlab.home`)"
-    - "traefik.http.routers.prometheus.entrypoints=web"
-    - "traefik.http.services.prometheus.loadbalancer.server.port=3100"
+    - "traefik.http.routers.loki.rule=Host(`loki.scarlettlab.home`)"
+    - "traefik.http.routers.loki.entrypoints=web"
+    - "traefik.http.services.loki.loadbalancer.server.port=3100"
     command: -config.file=/loki/loki-config.yaml
 
   # https://github.com/grafana/loki/blob/34a4b242bf1de7eae3f8f6594253adccf8de05cd/production/docker/docker-compose-ha-memberlist.yaml
@@ -462,9 +462,9 @@ services:
       - ./env
     labels:
     - "traefik.enable=true"
-    - "traefik.http.routers.prometheus.rule=Host(`unifi-poller.scarlettlab.home`)"
-    - "traefik.http.routers.prometheus.entrypoints=web"
-    - "traefik.http.services.prometheus.loadbalancer.server.port=37288"
+    - "traefik.http.routers.unifipoller.rule=Host(`unifi-poller.scarlettlab.home`)"
+    - "traefik.http.routers.unifipoller.entrypoints=web"
+    - "traefik.http.services.unifipoller.loadbalancer.server.port=37288"
     depends_on:
       - influxdb
       - grafana
