@@ -2,3 +2,12 @@
 .vscode
 .env
 env
+docker-heimdall/config/keys/
+docker-heimdall/config/log/
+docker-heimdall/config/php/
+docker-heimdall/config/www/
+heimdall/keys/
+heimdall/log/
+heimdall/nginx/
+heimdall/php/
+heimdall/www/
