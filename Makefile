@@ -105,3 +105,6 @@ loki-dashboards:
 	wget https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-retention.json -P dashboards/
 	wget https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-writes-resources.json -P dashboards/
 	wget https://raw.githubusercontent.com/monitoring-mixins/website/master/assets/loki/dashboards/loki-writes.json -P dashboards/
+
+dashboards:
+	@echo "go to https://github.com/bossjones/monitoring-mixins-website"
