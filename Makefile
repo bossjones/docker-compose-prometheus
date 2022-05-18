@@ -77,6 +77,16 @@ up:
 down:
 	docker-compose -f docker-compose.yml down
 
+.PHONY: logs
+logs:
+	docker-compose -f docker-compose.yml logs -f
+
+.PHONY: restart
+restart: down up
+
+.PHONY: restart-logs
+restart-logs: down up logs
+
 .PHONY: viz
 viz:
 	docker run --rm -it --name dcv -v $(PWD):/input pmsipilot/docker-compose-viz render -m image docker-compose.yml

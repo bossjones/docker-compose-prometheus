@@ -4,7 +4,7 @@ version: '3.7'
 x-logging:
   &default-logging
   driver: "journald"
-  options: 
+  options:
     # tag: "{{.Name}}"
     tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
@@ -33,7 +33,7 @@ services:
     image: "traefik:latest"
     container_name: "traefik"
     command:
-      - "--log.level=DEBUG"
+      # - "--log.level=DEBUG"
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
@@ -80,9 +80,9 @@ services:
     container_name: influxdb
     labels:
     - "traefik.enable=true"
-    - "traefik.http.routers.prometheus.rule=Host(`influxdb.scarlettlab.home`)"
-    - "traefik.http.routers.prometheus.entrypoints=web"
-    - "traefik.http.services.prometheus.loadbalancer.server.port=8086"
+    - "traefik.http.routers.influxdb.rule=Host(`influxdb.scarlettlab.home`)"
+    - "traefik.http.routers.influxdb.entrypoints=web"
+    - "traefik.http.services.influxdb.loadbalancer.server.port=8086"
     ports:
       - '8086:8086'
     volumes:
@@ -106,9 +106,9 @@ services:
     container_name: chronograf
     labels:
     - "traefik.enable=true"
-    - "traefik.http.routers.prometheus.rule=Host(`chronograf.scarlettlab.home`)"
-    - "traefik.http.routers.prometheus.entrypoints=web"
-    - "traefik.http.services.prometheus.loadbalancer.server.port=8888"
+    - "traefik.http.routers.chronograf.rule=Host(`chronograf.scarlettlab.home`)"
+    - "traefik.http.routers.chronograf.entrypoints=web"
+    - "traefik.http.services.chronograf.loadbalancer.server.port=8888"
     ports:
       - '8888:8888'
     volumes:
@@ -149,7 +149,7 @@ services:
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
       - '--web.listen-address=0.0.0.0:9090'
-      - '--log.level=debug'
+      - '--log.level=info'
     ports:
       - 9090:9090
     links:
@@ -172,6 +172,11 @@ services:
     # - "host.docker.internal:host-gateway"
     # SEE: https://stackoverflow.com/questions/31324981/how-to-access-host-port-from-docker-container/43541732#43541732
     # https://stackoverflow.com/questions/56909896/prometheus-in-docker-container-cannot-scrape-target-on-host/56910057
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+
 
   node-exporter:
     image: prom/node-exporter
@@ -299,18 +304,20 @@ services:
     restart: always
     entrypoint:
       - /usr/bin/cadvisor
-      - --v=6
+      # - --v=6
       - '--listen_ip=0.0.0.0'
       - '--port=8081'
-      - --logtostderr 
+      - --logtostderr
       - --disable_metrics=referenced_memory,cpu_topology,resctrl,udp,advtcp,sched,hugetlb,memory_numa,tcp,process,accelerator,disk
-    # command:
-    #   - 
+    env_file:
+      - ./env
+    environment:
+    - TZ=UTC
     logging:
       driver: json-file
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
-  
+
   blackbox:
     image: prom/blackbox-exporter
     privileged: true
@@ -350,7 +357,7 @@ services:
       driver: json-file
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
-  
+
   heimdall:
     image: linuxserver/heimdall
     build: ./docker-heimdall
@@ -381,16 +388,16 @@ services:
       driver: json-file
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
-    
+
   # nfs-server:
   #   # SOURCE: # SOURCE: https://github.com/rafaribe/home-ops/blob/d9e283fd3ddc42a9891c8a12fe82fa128657798a/provision/ansible/backup-server/roles/syncthing/templates/agent.yml
   #   image: heywoodlh/docker-nfs-server
   #   container_name: nfs-server
   #   hostname: nfs-server
-  #   environment: 
+  #   environment:
   #     - NFS_EXPORT_0=/data/
   #   volumes:
-  #     - *data-services-volume 
+  #     - *data-services-volume
   #     - /lib/modules:/lib/modules:ro
   #   cap_add:
   #     - SYS_ADMIN
@@ -421,11 +428,15 @@ services:
     - ./loki/etc/loki:/loki
     labels:
     - "traefik.enable=true"
-    - "traefik.http.routers.prometheus.rule=Host(`loki.scarlettlab.home`)"
-    - "traefik.http.routers.prometheus.entrypoints=web"
-    - "traefik.http.services.prometheus.loadbalancer.server.port=3100"
+    - "traefik.http.routers.loki.rule=Host(`loki.scarlettlab.home`)"
+    - "traefik.http.routers.loki.entrypoints=web"
+    - "traefik.http.services.loki.loadbalancer.server.port=3100"
     command: -config.file=/loki/loki-config.yaml
-  
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+
   # https://github.com/grafana/loki/blob/34a4b242bf1de7eae3f8f6594253adccf8de05cd/production/docker/docker-compose-ha-memberlist.yaml
   # # Since the Loki containers are running as user 10001 and the mounted data volume is owned by root,
   # # Loki would not have permissions to create the directories.
@@ -457,9 +468,9 @@ services:
       - ./env
     labels:
     - "traefik.enable=true"
-    - "traefik.http.routers.prometheus.rule=Host(`unifi-poller.scarlettlab.home`)"
-    - "traefik.http.routers.prometheus.entrypoints=web"
-    - "traefik.http.services.prometheus.loadbalancer.server.port=37288"
+    - "traefik.http.routers.unifipoller.rule=Host(`unifi-poller.scarlettlab.home`)"
+    - "traefik.http.routers.unifipoller.entrypoints=web"
+    - "traefik.http.services.unifipoller.loadbalancer.server.port=37288"
     depends_on:
       - influxdb
       - grafana
@@ -480,6 +491,8 @@ services:
       driver: loki
       options:
         loki-url: http://192.168.1.98:3100/loki/api/v1/push
+        loki-external-labels: "container_name={{.Name}},image_name={{.ImageName}}"
+        # tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
         # loki-url: "http://host.docker.internal:3100/loki/api/v1/push"
     # extra_hosts:
     # # See https://stackoverflow.com/questions/48546124/what-is-linux-equivalent-of-host-docker-internal/67158212#67158212
@@ -540,168 +553,60 @@ services:
   #   security_opt:
   #     - apparmor:unconfined
 
-  # SOURCE docker run --rm -v /var/run/docker.sock:/var/run/docker.sock leoverto/docker-network-graph
-  networkgraph:
-    image: leoverto/docker-network-graph
-    container_name: networkgraph
-    cap_add:
-      - ALL
-    security_opt:
-      - apparmor:unconfined
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./networkgraph:/networkgraph
-    depends_on:
-      - prometheus
-    # networks:
-    #   - back-tier
-    #   - front-tier
-    tty: true
-    stdin_open: true
-    command:
-    - '-f'
-    - '/dev/null'
-    entrypoint: "tail"
-    environment:
-    - TZ=UTC
-  zsh:
-    image: ubuntu:focal
-    container_name: zsh
-    # hostname: example.com # set to fqdn of host
-    # ports:
-    #   - 19999:19999
-    restart: always
-    cap_add:
-      - ALL
-    security_opt:
-      - apparmor:unconfined
-    volumes:
-      - /etc/passwd:/host/etc/passwd:ro
-      - /etc/group:/host/etc/group:ro
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /etc/os-release:/host/etc/os-release:ro
-    depends_on:
-      - prometheus
-    # networks:
-    #   - back-tier
-    #   - front-tier
-    tty: true
-    stdin_open: true
-    command:
-    - '-f'
-    - '/dev/null'
-    entrypoint: "tail"
-    environment:
-    - TZ=UTC
-  #  apt-get update;
-  #  apt-get install bash-completion zsh git net-tools curl wget dnsutils sudo vim build-essential -y;
-  #  wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh
-  #  chmod +x install.sh
-  #  ./install.sh
-  #  mkdir -p /usr/local/src;
-  #  git clone https://github.com/bossjones/debug-tools /usr/local/src/debug-tools;
-  #  curl -L 'https://raw.githubusercontent.com/bossjones/debug-tools/master/install-config-sample-ubuntu' > /usr/local/bin/install-config
-  #  sed -i 's,10.3.0,16.11.1,g' /usr/local/bin/install-config
-  #  cat /usr/local/bin/install-config
-  #  cd /usr/local/src/debug-tools;
-  #  ./update-bossjones-debug-tools
-  #  export TZ=UTC
-  #  ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
-    # apt-get install -y \
-    # apache2-utils \
-    # bash \
-    # bind-tools \
-    # bird \
-    # bridge-utils \
-    # busybox-extras \
-    # calicoctl \
-    # conntrack-tools \
-    # ctop \
-    # curl \
-    # dhcping \
-    # drill \
-    # ethtool \
-    # file \
-    # fping \
-    # httpie \
-    # iftop \
-    # iperf \
-    # iproute2 \
-    # ipset \
-    # iptables \
-    # iptraf-ng \
-    # iputils \
-    # ipvsadm \
-    # jq \
-    # libc6-compat \
-    # liboping \
-    # mtr \
-    # net-snmp-tools \
-    # netcat-openbsd \
-    # netgen \
-    # nftables \
-    # ngrep \
-    # nmap \
-    # nmap-nping \
-    # openssl \
-    # py-crypto \
-    # py2-virtualenv \
-    # python2 \
-    # scapy \
-    # socat \
-    # strace \
-    # tcpdump \
-    # tcptraceroute \
-    # termshark \
-    # tshark \
-    # util-linux \
-    # vim \
-    # websocat \
-    # nethogs
-
-    # export PYENV_VERSIONS_TO_INSTALL="3.9.0\n"
-    # export PYENV_ROOT=/.pyenv
-    # export PATH="${PYENV_ROOT}/bin:${PYENV_ROOT}/shims:$PATH"
-    # export RBENV_ROOT=~/.rbenv
-    # export RBENV_VERSION=2.7.2
-    # export NODE_VERSION_TO_INSTALL=16.11.1
-    # export PATH="$HOME/.fnm:${RBENV_ROOT}/shims:${RBENV_ROOT}/bin:$PATH"
-
-
-#  pushgateway:
-#    image: prom/pushgateway
-#    restart: always
-#    expose:
-#      - 9091
-#    ports:
-#      - "9091:9091"
-#    networks:
-#      - back-tier
-
-  # netdata:
-  #   image: netdata/netdata
-  #   container_name: netdata
-  #   hostname: example.com # set to fqdn of host
-  #   ports:
-  #     - 19999:19999
-  #   restart: always
+  # # SOURCE docker run --rm -v /var/run/docker.sock:/var/run/docker.sock leoverto/docker-network-graph
+  # networkgraph:
+  #   image: leoverto/docker-network-graph
+  #   container_name: networkgraph
   #   cap_add:
-  #     - SYS_PTRACE
+  #     - ALL
   #   security_opt:
   #     - apparmor:unconfined
   #   volumes:
-  #     - netdataconfig:/etc/netdata
-  #     - netdatalib:/var/lib/netdata
-  #     - netdatacache:/var/cache/netdata
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - ./networkgraph:/networkgraph
+  #   depends_on:
+  #     - prometheus
+  #   # networks:
+  #   #   - back-tier
+  #   #   - front-tier
+  #   tty: true
+  #   stdin_open: true
+  #   command:
+  #   - '-f'
+  #   - '/dev/null'
+  #   entrypoint: "tail"
+  #   environment:
+  #   - TZ=UTC
+  # zsh:
+  #   image: ubuntu:focal
+  #   container_name: zsh
+  #   # hostname: example.com # set to fqdn of host
+  #   # ports:
+  #   #   - 19999:19999
+  #   restart: always
+  #   cap_add:
+  #     - ALL
+  #   security_opt:
+  #     - apparmor:unconfined
+  #   volumes:
   #     - /etc/passwd:/host/etc/passwd:ro
   #     - /etc/group:/host/etc/group:ro
   #     - /proc:/host/proc:ro
   #     - /sys:/host/sys:ro
   #     - /etc/os-release:/host/etc/os-release:ro
   #   depends_on:
-  #   - grafana
+  #     - prometheus
+  #   # networks:
+  #   #   - back-tier
+  #   #   - front-tier
+  #   tty: true
+  #   stdin_open: true
+  #   command:
+  #   - '-f'
+  #   - '/dev/null'
+  #   entrypoint: "tail"
+  #   environment:
+  #   - TZ=UTC
 
   promtail:
     # SOURCE: https://github.com/gilmrt/docker-compose/blob/5d8d7b3746fba48ba5f559f9913e56ae3d881eee/metrics/docker-compose.yml
@@ -711,6 +616,7 @@ services:
     volumes:
       - /var/log:/var/log:ro
       - ./promtail/promtail-gateway.yaml:/etc/promtail/promtail-gateway.yaml:ro
+      - ./promtail/promtail-debug.yaml:/etc/promtail/promtail-debug.yaml:rw
       - /var/log/journal/:/var/log/journal/:ro
       - /run/log/journal/:/run/log/journal/:ro
       - /etc/machine-id:/etc/machine-id:ro

@@ -69,7 +69,16 @@ scrape_configs:
 
     static_configs:
         - targets: ['192.168.1.98:9090']
-  
+
+  - job_name: 'node-exporter'
+    metrics_path: /metrics
+
+    # Override the global default and scrape targets from this job every 5 seconds.
+    scrape_interval: 5s
+
+    static_configs:
+        - targets: ['192.168.1.98:9100']
+
   - job_name: 'loki'
     metrics_path: /metrics
 
@@ -78,7 +87,7 @@ scrape_configs:
 
     static_configs:
         - targets: ['192.168.1.98:3100']
-  
+
   - job_name: 'promtail'
     metrics_path: /metrics
 
@@ -88,61 +97,25 @@ scrape_configs:
     static_configs:
         - targets: ['192.168.1.98:9080']
 
-
-  # - job_name: 'cadvisor'
-
-  #   # Override the global default and scrape targets from this job every 5 seconds.
-  #   scrape_interval: 5s
-
-  #   dns_sd_configs:
-  #   - names:
-  #     - 'tasks.cadvisor'
-  #     type: 'A'
-  #     port: 8080
-      
-  - job_name: cadvisor # Local container metrics
-    # https://github.com/google/cadvisor/blob/master/docs/storage/prometheus.md
-    static_configs:
-      - targets:
-          - cadvisor:8081 # Can use the service name of a container to connect to it if containers are on the same network
-        labels:
-          host: 192.168.1.98 # Add hostname label to make it easier to differentiate machines
-    metric_relabel_configs:
-      # Change the name from swarmstack_container.1.xxxx to swarmstack_container
-      - source_labels: [container_label_com_docker_swarm_service_name]
-        target_label: name
-        # Only keep data that is used in graphs to reduce size
-      - source_labels: [__name__]
-        regex: container_last_seen|container_memory_usage_bytes|container_network_receive_bytes_total|container_network_transmit_bytes_total|container_fs_reads_bytes_total|container_fs_writes_bytes_total|container_cpu_usage_seconds_total|container_start_time_seconds
-        action: keep
-        # Only keep necessary labels to keep things neat and reduce size
-      - regex: Time|__name__|container_label_com_docker_stack_namespace|instance|job|name|interface|device|Value.*|host
-        action: labelkeep
-
-#     static_configs:
-#          - targets: ['cadvisor:8080']
-
-  - job_name: 'node-exporter'
-
-    # Override the global default and scrape targets from this job every 5 seconds.
-    scrape_interval: 5s
-
-    dns_sd_configs:
-    - names:
-      - 'tasks.node-exporter'
-      type: 'A'
-      port: 9100
-
-#  - job_name: 'pushgateway'
-#    scrape_interval: 10s
-#    dns_sd_configs:
-#    - names:
-#      - 'tasks.pushgateway'
-#      type: 'A'
-#      port: 9091
-
-#     static_configs:
-#          - targets: ['node-exporter:9100']
+  # # DISABLED IN FAVOR OF NETDATA
+  # - job_name: cadvisor # Local container metrics
+  #   # https://github.com/google/cadvisor/blob/master/docs/storage/prometheus.md
+  #   static_configs:
+  #     - targets:
+  #         - cadvisor:8081 # Can use the service name of a container to connect to it if containers are on the same network
+  #       labels:
+  #         host: 192.168.1.98 # Add hostname label to make it easier to differentiate machines
+  #   metric_relabel_configs:
+  #     # Change the name from swarmstack_container.1.xxxx to swarmstack_container
+  #     - source_labels: [container_label_com_docker_swarm_service_name]
+  #       target_label: name
+  #       # Only keep data that is used in graphs to reduce size
+  #     - source_labels: [__name__]
+  #       regex: container_last_seen|container_memory_usage_bytes|container_network_receive_bytes_total|container_network_transmit_bytes_total|container_fs_reads_bytes_total|container_fs_writes_bytes_total|container_cpu_usage_seconds_total|container_start_time_seconds
+  #       action: keep
+  #       # Only keep necessary labels to keep things neat and reduce size
+  #     - regex: Time|__name__|container_label_com_docker_stack_namespace|instance|job|name|interface|device|Value.*|host
+  #       action: labelkeep
 
   - job_name: traefik # Network metrics for internet facing services
     # https://doc.traefik.io/traefik/observability/metrics/overview/
@@ -156,6 +129,15 @@ scrape_configs:
       - source_labels: [__name__]
         regex: traefik_service_requests_total|traefik_service_request_duration_seconds_sum|traefik_service_request_duration_seconds_count
         action: keep
+
+  - job_name: 'netdata'
+
+    metrics_path: /api/v1/allmetrics
+    params:
+      format: [ prometheus ]
+
+    static_configs:
+      - targets: ['192.168.1.98:19999']
 
   - job_name: 'blackbox'
     metrics_path: /probe
