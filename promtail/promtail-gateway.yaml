@@ -6,6 +6,19 @@ server:
     grpc_listen_port: 0
     log_level: "info"
 
+    # THIS IS WHY WE ARE NOT GETTING LOKI LOGS CURRENTLY
+    #FIXME: https://github.com/grafana/loki/issues/3335
+    #FIXME: https://github.com/grafana/loki/issues/3335
+    #FIXME: https://github.com/grafana/loki/issues/3335
+    #FIXME: https://github.com/grafana/loki/issues/3335
+    #FIXME: https://github.com/grafana/loki/issues/3335
+    #FIXME: https://github.com/grafana/loki/issues/3335
+    #FIXME: https://github.com/grafana/loki/issues/3335
+    #FIXME: https://github.com/grafana/loki/issues/3335
+    #FIXME: https://github.com/grafana/loki/issues/3335
+    #FIXME: https://github.com/grafana/loki/issues/3335
+    #FIXME: https://github.com/grafana/loki/issues/3335
+
     # # Disable the HTTP and GRPC server.
     # [disable: <boolean> | default = false]
 
@@ -307,314 +320,314 @@ scrape_configs:
     #     #     firewall_rule_action:
 
 
-  - job_name: remotebootlog
-    static_configs:
-    - targets:
-        - localhost
-      labels:
-        miner: boss-monitor
-        job: remotebootlog
-        __path__: /log/client_logs/*/boot.log
-
-  # - job_name: remotemessages
-  #   static_configs:
-  #   - targets:
-  #       - localhost
-  #     labels:
-  #       miner: boss-monitor
-  #       job: remotemessages
-  #       __path__: /log/client_logs/*/messages.log
-
-  - job_name: remotecron
-    static_configs:
-    - targets:
-        - localhost
-      labels:
-        miner: boss-monitor
-        job: remotecron
-        __path__: /log/client_logs/*/cron.log
-
-  - job_name: remotesecure
-    static_configs:
-    - targets:
-        - localhost
-      labels:
-        miner: boss-monitor
-        job: remotesecure
-        __path__: /log/client_logs/*/secure.log
-
-  - job_name: remoteuncategorized
-    static_configs:
-    - targets:
-        - localhost
-      labels:
-        miner: boss-monitor
-        job: remoteuncategorized
-        __path__: /log/client_logs/*/uncategorized.log
-
-
-  - job_name: journal
-    journal:
-      json: true
-      max_age: 12h
-      path: /var/log/journal
-      labels:
-        job: systemd-journal
-    relabel_configs:
-      - source_labels: ['__journal__systemd_unit']
-        target_label: 'unit'
-      - source_labels: ['__journal_container_name']
-        target_label: 'container'
-      # - source_labels: ['__journal_syslog_identifier']
-      #   target_label: 'syslog_identifier'
-      # - source_labels: ['__journal__hostname']
-      #   target_label: 'hostname'
-      - source_labels: ['__journal__comm']
-        target_label: 'comm'
-      - source_labels: ['__journal__uid']
-        target_label: 'uid'
-
-      # SOURCE: https://github.com/open-io/ansible-role-openio-promtail/blob/b0d4ee9d50a41f03395db4dfead60d26fad62f0c/templates/config.yml.j2
-      # Extract hostname
-      - action: replace
-        source_labels: ['__journal__hostname']
-        target_label: 'host'
-
-      # extract and convert priority to log_leve
-      - action: replace
-        source_labels: ['__journal_priority']
-        target_label: 'level'
-        regex: '^0$'
-        replacement: 'EMERG'
-
-      - action: replace
-        source_labels: ['__journal_priority']
-        target_label: 'level'
-        regex: '^1$'
-        replacement: 'ALERT'
-
-      - action: replace
-        source_labels: ['__journal_priority']
-        target_label: 'level'
-        regex: '^2$'
-        replacement: 'CRIT'
-
-      - action: replace
-        source_labels: ['__journal_priority']
-        target_label: 'level'
-        regex: '^3$'
-        replacement: 'ERROR'
-
-      - action: replace
-        source_labels: ['__journal_priority']
-        target_label: 'level'
-        regex: '^4$'
-        replacement: 'WARNING'
-
-      - action: replace
-        source_labels: ['__journal_priority']
-        target_label: 'level'
-        regex: '^5$'
-        replacement: 'NOTICE'
-
-      - action: replace
-        source_labels: ['__journal_priority']
-        target_label: 'level'
-        regex: '^6$'
-        replacement: 'INFO'
-
-      - action: replace
-        source_labels: ['__journal_priority']
-        target_label: 'level'
-        regex: '^7$'
-        replacement: 'DEBUG'
-
-      # extract and convert syslog_facility
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^0$'
-        replacement: 'KERN'
-
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^1$'
-        replacement: 'USER'
-
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^2$'
-        replacement: 'MAIL'
-
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^3$'
-        replacement: 'DAEMON'
-
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^4$'
-        replacement: 'AUTH'
-
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^5$'
-        replacement: 'SYSLOG'
-
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^6$'
-        replacement: LPR''
-
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^7$'
-        replacement: 'NEWS'
-
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^8$'
-        replacement: 'UUCP'
-
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^9$'
-        replacement: 'CRON'
-
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^10$'
-        replacement: 'AUTHPRIV'
-
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^11$'
-        replacement: 'FTP'
-
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^16$'
-        replacement: 'LOCAL0'
-
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^17$'
-        replacement: 'LOCAL1'
-
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^18$'
-        replacement: 'LOCAL2'
-
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^19$'
-        replacement: 'LOCAL3'
-
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^20$'
-        replacement: 'LOCAL4'
-
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^21$'
-        replacement: 'LOCAL5'
-
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^22$'
-        replacement: 'LOCAL6'
-
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^23$'
-        replacement: 'LOCAL7'
-
-      # only keep lines with specific OIO syslog identifier
-      - action: keep
-        regex: 'OIO,\w+,\w+,\d+'
-        source_labels: ['__journal_syslog_identifier']
-
-      # extract namespace from syslog identifier
-      - action: replace
-        source_labels: ['__journal_syslog_identifier']
-        target_label: namespace
-        regex: 'OIO,(\w+),\w+,\d+'
-        replacement: '${1}'
-
-      # extract service_type from syslog identifier
-      - action: replace
-        source_labels: ['__journal_syslog_identifier']
-        target_label: service_type
-        regex: 'OIO,\w+,(\w+),\d+'
-        replacement: '${1}'
-
-      # extract service from syslog identifier
-      - action: replace
-        source_labels: ['__journal_syslog_identifier']
-        target_label: service
-        regex: 'OIO,\w+,(\w+),(\d+)'
-        replacement: '${1}-${2}'
-
-      # drop line related to log services
-      - action: drop
-        regex: '^(loki|promtail|elasticsearch|kibana|filebeat)$'
-        source_labels: ['service_type']
-
-
-  - job_name: syslog
-    syslog:
-      listen_address: 0.0.0.0:9514
-      idle_timeout: 60s
-      label_structured_data: yes
-      labels:
-        job: "syslog"
-    relabel_configs:
-      # - source_labels: ['__syslog_message_hostname']
-      #   target_label: 'hostname'
-      - source_labels: ['__syslog_connection_ip_address']
-        target_label: 'ip_address'
-      - source_labels: ['__syslog_message_severity']
-        target_label: 'severity'
-      - source_labels: ['__syslog_message_facility']
-        target_label: 'facility'
-      - source_labels: ['__syslog_message_app_name']
-        target_label: 'app'
-      - source_labels: ['__syslog_message_hostname']
-        target_label: 'host'
-      - action: labelmap
-        regex: __syslog_message_(.+)
-
-
-  # # SOURCE: https://github.com/rafaribe/home-ops/blob/d9e283fd3ddc42a9891c8a12fe82fa128657798a/provision/ansible/backup-server/roles/syncthing/templates/agent.yml
-  # - job_name: system
-  #   static_configs:
-  #   - targets:
-  #       - localhost
-  #     labels:
-  #       miner: boss-monitor
-  #       job: varlogs
-  #       __path__: //var/log/*log
+# DISABLED: LABELS ERROR #  - job_name: remotebootlog
+# DISABLED: LABELS ERROR #    static_configs:
+# DISABLED: LABELS ERROR #    - targets:
+# DISABLED: LABELS ERROR #        - localhost
+# DISABLED: LABELS ERROR #      labels:
+# DISABLED: LABELS ERROR #        miner: boss-monitor
+# DISABLED: LABELS ERROR #        job: remotebootlog
+# DISABLED: LABELS ERROR #        __path__: /log/client_logs/*/boot.log
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #  # - job_name: remotemessages
+# DISABLED: LABELS ERROR #  #   static_configs:
+# DISABLED: LABELS ERROR #  #   - targets:
+# DISABLED: LABELS ERROR #  #       - localhost
+# DISABLED: LABELS ERROR #  #     labels:
+# DISABLED: LABELS ERROR #  #       miner: boss-monitor
+# DISABLED: LABELS ERROR #  #       job: remotemessages
+# DISABLED: LABELS ERROR #  #       __path__: /log/client_logs/*/messages.log
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #  - job_name: remotecron
+# DISABLED: LABELS ERROR #    static_configs:
+# DISABLED: LABELS ERROR #    - targets:
+# DISABLED: LABELS ERROR #        - localhost
+# DISABLED: LABELS ERROR #      labels:
+# DISABLED: LABELS ERROR #        miner: boss-monitor
+# DISABLED: LABELS ERROR #        job: remotecron
+# DISABLED: LABELS ERROR #        __path__: /log/client_logs/*/cron.log
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #  - job_name: remotesecure
+# DISABLED: LABELS ERROR #    static_configs:
+# DISABLED: LABELS ERROR #    - targets:
+# DISABLED: LABELS ERROR #        - localhost
+# DISABLED: LABELS ERROR #      labels:
+# DISABLED: LABELS ERROR #        miner: boss-monitor
+# DISABLED: LABELS ERROR #        job: remotesecure
+# DISABLED: LABELS ERROR #        __path__: /log/client_logs/*/secure.log
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #  - job_name: remoteuncategorized
+# DISABLED: LABELS ERROR #    static_configs:
+# DISABLED: LABELS ERROR #    - targets:
+# DISABLED: LABELS ERROR #        - localhost
+# DISABLED: LABELS ERROR #      labels:
+# DISABLED: LABELS ERROR #        miner: boss-monitor
+# DISABLED: LABELS ERROR #        job: remoteuncategorized
+# DISABLED: LABELS ERROR #        __path__: /log/client_logs/*/uncategorized.log
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #  - job_name: journal
+# DISABLED: LABELS ERROR #    journal:
+# DISABLED: LABELS ERROR #      json: true
+# DISABLED: LABELS ERROR #      max_age: 12h
+# DISABLED: LABELS ERROR #      path: /var/log/journal
+# DISABLED: LABELS ERROR #      labels:
+# DISABLED: LABELS ERROR #        job: systemd-journal
+# DISABLED: LABELS ERROR #    relabel_configs:
+# DISABLED: LABELS ERROR #      - source_labels: ['__journal__systemd_unit']
+# DISABLED: LABELS ERROR #        target_label: 'unit'
+# DISABLED: LABELS ERROR #      - source_labels: ['__journal_container_name']
+# DISABLED: LABELS ERROR #        target_label: 'container'
+# DISABLED: LABELS ERROR #      # - source_labels: ['__journal_syslog_identifier']
+# DISABLED: LABELS ERROR #      #   target_label: 'syslog_identifier'
+# DISABLED: LABELS ERROR #      # - source_labels: ['__journal__hostname']
+# DISABLED: LABELS ERROR #      #   target_label: 'hostname'
+# DISABLED: LABELS ERROR #      - source_labels: ['__journal__comm']
+# DISABLED: LABELS ERROR #        target_label: 'comm'
+# DISABLED: LABELS ERROR #      - source_labels: ['__journal__uid']
+# DISABLED: LABELS ERROR #        target_label: 'uid'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      # SOURCE: https://github.com/open-io/ansible-role-openio-promtail/blob/b0d4ee9d50a41f03395db4dfead60d26fad62f0c/templates/config.yml.j2
+# DISABLED: LABELS ERROR #      # Extract hostname
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal__hostname']
+# DISABLED: LABELS ERROR #        target_label: 'host'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      # extract and convert priority to log_leve
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_priority']
+# DISABLED: LABELS ERROR #        target_label: 'level'
+# DISABLED: LABELS ERROR #        regex: '^0$'
+# DISABLED: LABELS ERROR #        replacement: 'EMERG'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_priority']
+# DISABLED: LABELS ERROR #        target_label: 'level'
+# DISABLED: LABELS ERROR #        regex: '^1$'
+# DISABLED: LABELS ERROR #        replacement: 'ALERT'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_priority']
+# DISABLED: LABELS ERROR #        target_label: 'level'
+# DISABLED: LABELS ERROR #        regex: '^2$'
+# DISABLED: LABELS ERROR #        replacement: 'CRIT'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_priority']
+# DISABLED: LABELS ERROR #        target_label: 'level'
+# DISABLED: LABELS ERROR #        regex: '^3$'
+# DISABLED: LABELS ERROR #        replacement: 'ERROR'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_priority']
+# DISABLED: LABELS ERROR #        target_label: 'level'
+# DISABLED: LABELS ERROR #        regex: '^4$'
+# DISABLED: LABELS ERROR #        replacement: 'WARNING'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_priority']
+# DISABLED: LABELS ERROR #        target_label: 'level'
+# DISABLED: LABELS ERROR #        regex: '^5$'
+# DISABLED: LABELS ERROR #        replacement: 'NOTICE'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_priority']
+# DISABLED: LABELS ERROR #        target_label: 'level'
+# DISABLED: LABELS ERROR #        regex: '^6$'
+# DISABLED: LABELS ERROR #        replacement: 'INFO'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_priority']
+# DISABLED: LABELS ERROR #        target_label: 'level'
+# DISABLED: LABELS ERROR #        regex: '^7$'
+# DISABLED: LABELS ERROR #        replacement: 'DEBUG'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      # extract and convert syslog_facility
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_syslog_facility']
+# DISABLED: LABELS ERROR #        target_label: 'facility'
+# DISABLED: LABELS ERROR #        regex: '^0$'
+# DISABLED: LABELS ERROR #        replacement: 'KERN'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_syslog_facility']
+# DISABLED: LABELS ERROR #        target_label: 'facility'
+# DISABLED: LABELS ERROR #        regex: '^1$'
+# DISABLED: LABELS ERROR #        replacement: 'USER'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_syslog_facility']
+# DISABLED: LABELS ERROR #        target_label: 'facility'
+# DISABLED: LABELS ERROR #        regex: '^2$'
+# DISABLED: LABELS ERROR #        replacement: 'MAIL'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_syslog_facility']
+# DISABLED: LABELS ERROR #        target_label: 'facility'
+# DISABLED: LABELS ERROR #        regex: '^3$'
+# DISABLED: LABELS ERROR #        replacement: 'DAEMON'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_syslog_facility']
+# DISABLED: LABELS ERROR #        target_label: 'facility'
+# DISABLED: LABELS ERROR #        regex: '^4$'
+# DISABLED: LABELS ERROR #        replacement: 'AUTH'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_syslog_facility']
+# DISABLED: LABELS ERROR #        target_label: 'facility'
+# DISABLED: LABELS ERROR #        regex: '^5$'
+# DISABLED: LABELS ERROR #        replacement: 'SYSLOG'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_syslog_facility']
+# DISABLED: LABELS ERROR #        target_label: 'facility'
+# DISABLED: LABELS ERROR #        regex: '^6$'
+# DISABLED: LABELS ERROR #        replacement: LPR''
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_syslog_facility']
+# DISABLED: LABELS ERROR #        target_label: 'facility'
+# DISABLED: LABELS ERROR #        regex: '^7$'
+# DISABLED: LABELS ERROR #        replacement: 'NEWS'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_syslog_facility']
+# DISABLED: LABELS ERROR #        target_label: 'facility'
+# DISABLED: LABELS ERROR #        regex: '^8$'
+# DISABLED: LABELS ERROR #        replacement: 'UUCP'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_syslog_facility']
+# DISABLED: LABELS ERROR #        target_label: 'facility'
+# DISABLED: LABELS ERROR #        regex: '^9$'
+# DISABLED: LABELS ERROR #        replacement: 'CRON'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_syslog_facility']
+# DISABLED: LABELS ERROR #        target_label: 'facility'
+# DISABLED: LABELS ERROR #        regex: '^10$'
+# DISABLED: LABELS ERROR #        replacement: 'AUTHPRIV'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_syslog_facility']
+# DISABLED: LABELS ERROR #        target_label: 'facility'
+# DISABLED: LABELS ERROR #        regex: '^11$'
+# DISABLED: LABELS ERROR #        replacement: 'FTP'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_syslog_facility']
+# DISABLED: LABELS ERROR #        target_label: 'facility'
+# DISABLED: LABELS ERROR #        regex: '^16$'
+# DISABLED: LABELS ERROR #        replacement: 'LOCAL0'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_syslog_facility']
+# DISABLED: LABELS ERROR #        target_label: 'facility'
+# DISABLED: LABELS ERROR #        regex: '^17$'
+# DISABLED: LABELS ERROR #        replacement: 'LOCAL1'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_syslog_facility']
+# DISABLED: LABELS ERROR #        target_label: 'facility'
+# DISABLED: LABELS ERROR #        regex: '^18$'
+# DISABLED: LABELS ERROR #        replacement: 'LOCAL2'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_syslog_facility']
+# DISABLED: LABELS ERROR #        target_label: 'facility'
+# DISABLED: LABELS ERROR #        regex: '^19$'
+# DISABLED: LABELS ERROR #        replacement: 'LOCAL3'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_syslog_facility']
+# DISABLED: LABELS ERROR #        target_label: 'facility'
+# DISABLED: LABELS ERROR #        regex: '^20$'
+# DISABLED: LABELS ERROR #        replacement: 'LOCAL4'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_syslog_facility']
+# DISABLED: LABELS ERROR #        target_label: 'facility'
+# DISABLED: LABELS ERROR #        regex: '^21$'
+# DISABLED: LABELS ERROR #        replacement: 'LOCAL5'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_syslog_facility']
+# DISABLED: LABELS ERROR #        target_label: 'facility'
+# DISABLED: LABELS ERROR #        regex: '^22$'
+# DISABLED: LABELS ERROR #        replacement: 'LOCAL6'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_syslog_facility']
+# DISABLED: LABELS ERROR #        target_label: 'facility'
+# DISABLED: LABELS ERROR #        regex: '^23$'
+# DISABLED: LABELS ERROR #        replacement: 'LOCAL7'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      # only keep lines with specific OIO syslog identifier
+# DISABLED: LABELS ERROR #      - action: keep
+# DISABLED: LABELS ERROR #        regex: 'OIO,\w+,\w+,\d+'
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_syslog_identifier']
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      # extract namespace from syslog identifier
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_syslog_identifier']
+# DISABLED: LABELS ERROR #        target_label: namespace
+# DISABLED: LABELS ERROR #        regex: 'OIO,(\w+),\w+,\d+'
+# DISABLED: LABELS ERROR #        replacement: '${1}'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      # extract service_type from syslog identifier
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_syslog_identifier']
+# DISABLED: LABELS ERROR #        target_label: service_type
+# DISABLED: LABELS ERROR #        regex: 'OIO,\w+,(\w+),\d+'
+# DISABLED: LABELS ERROR #        replacement: '${1}'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      # extract service from syslog identifier
+# DISABLED: LABELS ERROR #      - action: replace
+# DISABLED: LABELS ERROR #        source_labels: ['__journal_syslog_identifier']
+# DISABLED: LABELS ERROR #        target_label: service
+# DISABLED: LABELS ERROR #        regex: 'OIO,\w+,(\w+),(\d+)'
+# DISABLED: LABELS ERROR #        replacement: '${1}-${2}'
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #      # drop line related to log services
+# DISABLED: LABELS ERROR #      - action: drop
+# DISABLED: LABELS ERROR #        regex: '^(loki|promtail|elasticsearch|kibana|filebeat)$'
+# DISABLED: LABELS ERROR #        source_labels: ['service_type']
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #  - job_name: syslog
+# DISABLED: LABELS ERROR #    syslog:
+# DISABLED: LABELS ERROR #      listen_address: 0.0.0.0:9514
+# DISABLED: LABELS ERROR #      idle_timeout: 60s
+# DISABLED: LABELS ERROR #      label_structured_data: yes
+# DISABLED: LABELS ERROR #      labels:
+# DISABLED: LABELS ERROR #        job: "syslog"
+# DISABLED: LABELS ERROR #    relabel_configs:
+# DISABLED: LABELS ERROR #      # - source_labels: ['__syslog_message_hostname']
+# DISABLED: LABELS ERROR #      #   target_label: 'hostname'
+# DISABLED: LABELS ERROR #      - source_labels: ['__syslog_connection_ip_address']
+# DISABLED: LABELS ERROR #        target_label: 'ip_address'
+# DISABLED: LABELS ERROR #      - source_labels: ['__syslog_message_severity']
+# DISABLED: LABELS ERROR #        target_label: 'severity'
+# DISABLED: LABELS ERROR #      - source_labels: ['__syslog_message_facility']
+# DISABLED: LABELS ERROR #        target_label: 'facility'
+# DISABLED: LABELS ERROR #      - source_labels: ['__syslog_message_app_name']
+# DISABLED: LABELS ERROR #        target_label: 'app'
+# DISABLED: LABELS ERROR #      - source_labels: ['__syslog_message_hostname']
+# DISABLED: LABELS ERROR #        target_label: 'host'
+# DISABLED: LABELS ERROR #      - action: labelmap
+# DISABLED: LABELS ERROR #        regex: __syslog_message_(.+)
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #
+# DISABLED: LABELS ERROR #  # # SOURCE: https://github.com/rafaribe/home-ops/blob/d9e283fd3ddc42a9891c8a12fe82fa128657798a/provision/ansible/backup-server/roles/syncthing/templates/agent.yml
+# DISABLED: LABELS ERROR #  # - job_name: system
+# DISABLED: LABELS ERROR #  #   static_configs:
+# DISABLED: LABELS ERROR #  #   - targets:
+# DISABLED: LABELS ERROR #  #       - localhost
+# DISABLED: LABELS ERROR #  #     labels:
+# DISABLED: LABELS ERROR #  #       miner: boss-monitor
+# DISABLED: LABELS ERROR #  #       job: varlogs
+# DISABLED: LABELS ERROR #  #       __path__: //var/log/*log
 
   - job_name: containers
     static_configs:

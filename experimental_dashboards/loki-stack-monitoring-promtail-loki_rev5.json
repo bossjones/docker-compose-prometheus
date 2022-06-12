@@ -1302,7 +1302,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "100 * max by(pod,container) (container_memory_working_set_bytes{container!=\"\",container!=\"POD\",container_label_com_docker_compose_service=~\"loki.*\"})\n/\non (pod,container) group_left  container_spec_memory_limit_bytes{container_label_com_docker_compose_service=~\"loki.*\"}",
+          "expr": "100 * max by(container_label_com_docker_compose_service,container) (container_memory_working_set_bytes{container!=\"\",container!=\"POD\",container_label_com_docker_compose_service=~\"loki.*\"})\n/\non (container_label_com_docker_compose_service,container) group_left  container_spec_memory_limit_bytes{container_label_com_docker_compose_service=~\"loki.*\"}",
           "hide": false,
           "interval": "",
           "legendFormat": "Usage (job={{job}}, container={{container}}, name={{name}})",
@@ -1597,7 +1597,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "100* max by(pod,container) (container_memory_working_set_bytes{container!=\"\",container!=\"POD\",container_label_com_docker_compose_service=~\"promtail.*\"})\n/\non (pod,container) (container_spec_memory_limit_bytes{container_label_com_docker_compose_service=~\"promtail.*\"})",
+          "expr": "100* max by(container_label_com_docker_compose_service,container) (container_memory_working_set_bytes{container!=\"\",container!=\"POD\",container_label_com_docker_compose_service=~\"promtail.*\"})\n/\non (container_label_com_docker_compose_service,container) (container_spec_memory_limit_bytes{container_label_com_docker_compose_service=~\"promtail.*\"})",
           "hide": false,
           "interval": "",
           "legendFormat": "",
@@ -1905,7 +1905,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "100* rate(container_cpu_usage_seconds_total{container!=\"POD\",container!=\"\",container_label_com_docker_compose_service=~\"loki.*\"}[1m])\n/\non (pod,container) kube_pod_container_resource_limits_cpu_cores{container=\"loki\"}",
+          "expr": "100* rate(container_cpu_usage_seconds_total{container!=\"POD\",container!=\"\",container_label_com_docker_compose_service=~\"loki.*\"}[1m])\n/\non (container_label_com_docker_compose_service,container) kube_pod_container_resource_limits_cpu_cores{container=\"loki\"}",
           "interval": "10s",
           "intervalFactor": 1,
           "legendFormat": "",
@@ -2204,7 +2204,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "100 * rate(container_cpu_usage_seconds_total{container!=\"\",container!=\"POD\",container_label_com_docker_compose_service=~\"promtail.*\"}[1m])\n/\non (pod,container) kube_pod_container_resource_limits_cpu_cores{container_label_com_docker_compose_service=~\"promtail.*\"}",
+          "expr": "100 * rate(container_cpu_usage_seconds_total{container!=\"\",container!=\"POD\",container_label_com_docker_compose_service=~\"promtail.*\"}[1m])\n/\non (container_label_com_docker_compose_service,container) kube_pod_container_resource_limits_cpu_cores{container_label_com_docker_compose_service=~\"promtail.*\"}",
           "interval": "10s",
           "intervalFactor": 1,
           "legendFormat": "",
