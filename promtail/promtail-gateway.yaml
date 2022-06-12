@@ -365,234 +365,238 @@ scrape_configs:
         job: remoteuncategorized
         __path__: /log/client_logs/*/uncategorized.log
 
+  # FIXME: https://github.com/grafana/loki/issues/3335
+  # FIXME: https://github.com/grafana/loki/issues/3335
+  # FIXME: https://github.com/grafana/loki/issues/3335
+  # FIXME: https://github.com/grafana/loki/issues/3335
+  # FIXME: https://github.com/grafana/loki/issues/3335
+  # - job_name: journal
+  #   journal:
+  #     json: true
+  #     max_age: 12h
+  #     path: /var/log/journal
+  #     labels:
+  #       job: systemd-journal
+  #   relabel_configs:
+  #     - source_labels: ['__journal__systemd_unit']
+  #       target_label: 'unit'
+  #     - source_labels: ['__journal_container_name']
+  #       target_label: 'container'
+  #     # - source_labels: ['__journal_syslog_identifier']
+  #     #   target_label: 'syslog_identifier'
+  #     # - source_labels: ['__journal__hostname']
+  #     #   target_label: 'hostname'
+  #     - source_labels: ['__journal__comm']
+  #       target_label: 'comm'
+  #     - source_labels: ['__journal__uid']
+  #       target_label: 'uid'
 
-  - job_name: journal
-    journal:
-      json: true
-      max_age: 12h
-      path: /var/log/journal
-      labels:
-        job: systemd-journal
-    relabel_configs:
-      - source_labels: ['__journal__systemd_unit']
-        target_label: 'unit'
-      - source_labels: ['__journal_container_name']
-        target_label: 'container'
-      # - source_labels: ['__journal_syslog_identifier']
-      #   target_label: 'syslog_identifier'
-      # - source_labels: ['__journal__hostname']
-      #   target_label: 'hostname'
-      - source_labels: ['__journal__comm']
-        target_label: 'comm'
-      - source_labels: ['__journal__uid']
-        target_label: 'uid'
+  #     # SOURCE: https://github.com/open-io/ansible-role-openio-promtail/blob/b0d4ee9d50a41f03395db4dfead60d26fad62f0c/templates/config.yml.j2
+  #     # Extract hostname
+  #     - action: replace
+  #       source_labels: ['__journal__hostname']
+  #       target_label: 'host'
 
-      # SOURCE: https://github.com/open-io/ansible-role-openio-promtail/blob/b0d4ee9d50a41f03395db4dfead60d26fad62f0c/templates/config.yml.j2
-      # Extract hostname
-      - action: replace
-        source_labels: ['__journal__hostname']
-        target_label: 'host'
+  #     # extract and convert priority to log_leve
+  #     - action: replace
+  #       source_labels: ['__journal_priority']
+  #       target_label: 'level'
+  #       regex: '^0$'
+  #       replacement: 'EMERG'
 
-      # extract and convert priority to log_leve
-      - action: replace
-        source_labels: ['__journal_priority']
-        target_label: 'level'
-        regex: '^0$'
-        replacement: 'EMERG'
+  #     - action: replace
+  #       source_labels: ['__journal_priority']
+  #       target_label: 'level'
+  #       regex: '^1$'
+  #       replacement: 'ALERT'
 
-      - action: replace
-        source_labels: ['__journal_priority']
-        target_label: 'level'
-        regex: '^1$'
-        replacement: 'ALERT'
+  #     - action: replace
+  #       source_labels: ['__journal_priority']
+  #       target_label: 'level'
+  #       regex: '^2$'
+  #       replacement: 'CRIT'
 
-      - action: replace
-        source_labels: ['__journal_priority']
-        target_label: 'level'
-        regex: '^2$'
-        replacement: 'CRIT'
+  #     - action: replace
+  #       source_labels: ['__journal_priority']
+  #       target_label: 'level'
+  #       regex: '^3$'
+  #       replacement: 'ERROR'
 
-      - action: replace
-        source_labels: ['__journal_priority']
-        target_label: 'level'
-        regex: '^3$'
-        replacement: 'ERROR'
+  #     - action: replace
+  #       source_labels: ['__journal_priority']
+  #       target_label: 'level'
+  #       regex: '^4$'
+  #       replacement: 'WARNING'
 
-      - action: replace
-        source_labels: ['__journal_priority']
-        target_label: 'level'
-        regex: '^4$'
-        replacement: 'WARNING'
+  #     - action: replace
+  #       source_labels: ['__journal_priority']
+  #       target_label: 'level'
+  #       regex: '^5$'
+  #       replacement: 'NOTICE'
 
-      - action: replace
-        source_labels: ['__journal_priority']
-        target_label: 'level'
-        regex: '^5$'
-        replacement: 'NOTICE'
+  #     - action: replace
+  #       source_labels: ['__journal_priority']
+  #       target_label: 'level'
+  #       regex: '^6$'
+  #       replacement: 'INFO'
 
-      - action: replace
-        source_labels: ['__journal_priority']
-        target_label: 'level'
-        regex: '^6$'
-        replacement: 'INFO'
+  #     - action: replace
+  #       source_labels: ['__journal_priority']
+  #       target_label: 'level'
+  #       regex: '^7$'
+  #       replacement: 'DEBUG'
 
-      - action: replace
-        source_labels: ['__journal_priority']
-        target_label: 'level'
-        regex: '^7$'
-        replacement: 'DEBUG'
+  #     # extract and convert syslog_facility
+  #     - action: replace
+  #       source_labels: ['__journal_syslog_facility']
+  #       target_label: 'facility'
+  #       regex: '^0$'
+  #       replacement: 'KERN'
 
-      # extract and convert syslog_facility
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^0$'
-        replacement: 'KERN'
+  #     - action: replace
+  #       source_labels: ['__journal_syslog_facility']
+  #       target_label: 'facility'
+  #       regex: '^1$'
+  #       replacement: 'USER'
 
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^1$'
-        replacement: 'USER'
+  #     - action: replace
+  #       source_labels: ['__journal_syslog_facility']
+  #       target_label: 'facility'
+  #       regex: '^2$'
+  #       replacement: 'MAIL'
 
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^2$'
-        replacement: 'MAIL'
+  #     - action: replace
+  #       source_labels: ['__journal_syslog_facility']
+  #       target_label: 'facility'
+  #       regex: '^3$'
+  #       replacement: 'DAEMON'
 
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^3$'
-        replacement: 'DAEMON'
+  #     - action: replace
+  #       source_labels: ['__journal_syslog_facility']
+  #       target_label: 'facility'
+  #       regex: '^4$'
+  #       replacement: 'AUTH'
 
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^4$'
-        replacement: 'AUTH'
+  #     - action: replace
+  #       source_labels: ['__journal_syslog_facility']
+  #       target_label: 'facility'
+  #       regex: '^5$'
+  #       replacement: 'SYSLOG'
 
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^5$'
-        replacement: 'SYSLOG'
+  #     - action: replace
+  #       source_labels: ['__journal_syslog_facility']
+  #       target_label: 'facility'
+  #       regex: '^6$'
+  #       replacement: LPR''
 
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^6$'
-        replacement: LPR''
+  #     - action: replace
+  #       source_labels: ['__journal_syslog_facility']
+  #       target_label: 'facility'
+  #       regex: '^7$'
+  #       replacement: 'NEWS'
 
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^7$'
-        replacement: 'NEWS'
+  #     - action: replace
+  #       source_labels: ['__journal_syslog_facility']
+  #       target_label: 'facility'
+  #       regex: '^8$'
+  #       replacement: 'UUCP'
 
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^8$'
-        replacement: 'UUCP'
+  #     - action: replace
+  #       source_labels: ['__journal_syslog_facility']
+  #       target_label: 'facility'
+  #       regex: '^9$'
+  #       replacement: 'CRON'
 
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^9$'
-        replacement: 'CRON'
+  #     - action: replace
+  #       source_labels: ['__journal_syslog_facility']
+  #       target_label: 'facility'
+  #       regex: '^10$'
+  #       replacement: 'AUTHPRIV'
 
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^10$'
-        replacement: 'AUTHPRIV'
+  #     - action: replace
+  #       source_labels: ['__journal_syslog_facility']
+  #       target_label: 'facility'
+  #       regex: '^11$'
+  #       replacement: 'FTP'
 
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^11$'
-        replacement: 'FTP'
+  #     - action: replace
+  #       source_labels: ['__journal_syslog_facility']
+  #       target_label: 'facility'
+  #       regex: '^16$'
+  #       replacement: 'LOCAL0'
 
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^16$'
-        replacement: 'LOCAL0'
+  #     - action: replace
+  #       source_labels: ['__journal_syslog_facility']
+  #       target_label: 'facility'
+  #       regex: '^17$'
+  #       replacement: 'LOCAL1'
 
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^17$'
-        replacement: 'LOCAL1'
+  #     - action: replace
+  #       source_labels: ['__journal_syslog_facility']
+  #       target_label: 'facility'
+  #       regex: '^18$'
+  #       replacement: 'LOCAL2'
 
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^18$'
-        replacement: 'LOCAL2'
+  #     - action: replace
+  #       source_labels: ['__journal_syslog_facility']
+  #       target_label: 'facility'
+  #       regex: '^19$'
+  #       replacement: 'LOCAL3'
 
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^19$'
-        replacement: 'LOCAL3'
+  #     - action: replace
+  #       source_labels: ['__journal_syslog_facility']
+  #       target_label: 'facility'
+  #       regex: '^20$'
+  #       replacement: 'LOCAL4'
 
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^20$'
-        replacement: 'LOCAL4'
+  #     - action: replace
+  #       source_labels: ['__journal_syslog_facility']
+  #       target_label: 'facility'
+  #       regex: '^21$'
+  #       replacement: 'LOCAL5'
 
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^21$'
-        replacement: 'LOCAL5'
+  #     - action: replace
+  #       source_labels: ['__journal_syslog_facility']
+  #       target_label: 'facility'
+  #       regex: '^22$'
+  #       replacement: 'LOCAL6'
 
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^22$'
-        replacement: 'LOCAL6'
+  #     - action: replace
+  #       source_labels: ['__journal_syslog_facility']
+  #       target_label: 'facility'
+  #       regex: '^23$'
+  #       replacement: 'LOCAL7'
 
-      - action: replace
-        source_labels: ['__journal_syslog_facility']
-        target_label: 'facility'
-        regex: '^23$'
-        replacement: 'LOCAL7'
+  #     # only keep lines with specific OIO syslog identifier
+  #     - action: keep
+  #       regex: 'OIO,\w+,\w+,\d+'
+  #       source_labels: ['__journal_syslog_identifier']
 
-      # only keep lines with specific OIO syslog identifier
-      - action: keep
-        regex: 'OIO,\w+,\w+,\d+'
-        source_labels: ['__journal_syslog_identifier']
+  #     # extract namespace from syslog identifier
+  #     - action: replace
+  #       source_labels: ['__journal_syslog_identifier']
+  #       target_label: namespace
+  #       regex: 'OIO,(\w+),\w+,\d+'
+  #       replacement: '${1}'
 
-      # extract namespace from syslog identifier
-      - action: replace
-        source_labels: ['__journal_syslog_identifier']
-        target_label: namespace
-        regex: 'OIO,(\w+),\w+,\d+'
-        replacement: '${1}'
+  #     # extract service_type from syslog identifier
+  #     - action: replace
+  #       source_labels: ['__journal_syslog_identifier']
+  #       target_label: service_type
+  #       regex: 'OIO,\w+,(\w+),\d+'
+  #       replacement: '${1}'
 
-      # extract service_type from syslog identifier
-      - action: replace
-        source_labels: ['__journal_syslog_identifier']
-        target_label: service_type
-        regex: 'OIO,\w+,(\w+),\d+'
-        replacement: '${1}'
+  #     # extract service from syslog identifier
+  #     - action: replace
+  #       source_labels: ['__journal_syslog_identifier']
+  #       target_label: service
+  #       regex: 'OIO,\w+,(\w+),(\d+)'
+  #       replacement: '${1}-${2}'
 
-      # extract service from syslog identifier
-      - action: replace
-        source_labels: ['__journal_syslog_identifier']
-        target_label: service
-        regex: 'OIO,\w+,(\w+),(\d+)'
-        replacement: '${1}-${2}'
-
-      # drop line related to log services
-      - action: drop
-        regex: '^(loki|promtail|elasticsearch|kibana|filebeat)$'
-        source_labels: ['service_type']
+  #     # drop line related to log services
+  #     - action: drop
+  #       regex: '^(loki|promtail|elasticsearch|kibana|filebeat)$'
+  #       source_labels: ['service_type']
 
 
   - job_name: syslog
@@ -674,7 +678,7 @@ scrape_configs:
         format: RFC3339Nano
         source: time
     - labels:
-        stream:
+        # stream:
         container_name:
     - drop:
         expression: ".*firewall_source_ip is empty string.*"
