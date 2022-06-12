@@ -748,7 +748,7 @@
           "expr": "rate(promtail_dropped_entries_total[1m])*60",
           "instant": false,
           "interval": "",
-          "legendFormat": "pod={{kubernetes_pod_name}}, instance={{instance}}",
+          "legendFormat": "pod={{config}}, instance={{instance}}",
           "refId": "A"
         }
       ],
@@ -1305,7 +1305,7 @@
           "expr": "100 * max by(pod,container) (container_memory_working_set_bytes{container!=\"\",container!=\"POD\",pod=~\"loki.*\"})\n/\non (pod,container) group_left  kube_pod_container_resource_limits_memory_bytes{pod=~\"loki.*\"}",
           "hide": false,
           "interval": "",
-          "legendFormat": "Usage (pod={{pod}}, container={{container}}, name={{name}})",
+          "legendFormat": "Usage (job={{job}}, container={{container}}, name={{name}})",
           "refId": "A"
         }
       ],
@@ -1439,7 +1439,7 @@
           "expr": "container_memory_working_set_bytes{container!=\"\",container!=\"POD\",pod=~\"loki.*\"}",
           "interval": "10s",
           "intervalFactor": 1,
-          "legendFormat": "Usage (pod={{pod}}, container={{container}})",
+          "legendFormat": "Usage (job={{job}}, container={{container}})",
           "metric": "container_memory_usage:sort_desc",
           "refId": "A",
           "step": 10
@@ -1733,7 +1733,7 @@
           "expr": "container_memory_working_set_bytes{container!=\"\",container!=\"POD\",pod=~\"promtail.*\"}",
           "interval": "10s",
           "intervalFactor": 1,
-          "legendFormat": "Usage (pod={{pod}}, container={{container}})",
+          "legendFormat": "Usage (job={{job}}, container={{container}})",
           "metric": "container_memory_usage:sort_desc",
           "refId": "A",
           "step": 10
@@ -2045,7 +2045,7 @@
           "expr": "rate(container_cpu_usage_seconds_total{container!=\"\",container!=\"POD\",pod=~\"loki.*\"}[1m])",
           "interval": "10s",
           "intervalFactor": 1,
-          "legendFormat": "CPU Usage (pod={{pod}}, container={{container}})",
+          "legendFormat": "CPU Usage (job={{job}}, container={{container}})",
           "metric": "container_cpu",
           "refId": "A",
           "step": 10
@@ -2343,7 +2343,7 @@
           "expr": "rate(container_cpu_usage_seconds_total{container!=\"\",container!=\"POD\",pod=~\"promtail.*\"}[1m])",
           "interval": "10s",
           "intervalFactor": 1,
-          "legendFormat": "CPU Usage (pod={{pod}}, container={{container}})",
+          "legendFormat": "CPU Usage (job={{job}}, container={{container}})",
           "metric": "container_cpu",
           "refId": "A",
           "step": 10

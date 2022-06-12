@@ -308,7 +308,7 @@ services:
       - '--listen_ip=0.0.0.0'
       - '--port=8081'
       - --logtostderr
-      - --disable_metrics=referenced_memory,cpu_topology,resctrl,udp,advtcp,sched,hugetlb,memory_numa,tcp,process,accelerator,disk
+      # - --disable_metrics=referenced_memory,cpu_topology,resctrl,udp,advtcp,sched,hugetlb,memory_numa,tcp,process,accelerator,disk
     env_file:
       - ./env
     environment:
