@@ -529,7 +529,7 @@ services:
     - TZ=UTC
     # - GF_SECURITY_ADMIN_USER=${GRAFANA_USERNAME}
     # - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
-    - GF_INSTALL_PLUGINS=grafana-clock-panel,natel-discrete-panel,grafana-piechart-panel
+    - GF_INSTALL_PLUGINS=grafana-clock-panel,natel-discrete-panel,grafana-piechart-panel,grafana-worldmap-panel
     # username - admin
     # password - foobar (Password is stored in the `/grafana/config.monitoring` env file)
 
