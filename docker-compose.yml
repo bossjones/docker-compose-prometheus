@@ -413,29 +413,29 @@ services:
   #     options:
   #       tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
-  loki:
-    restart: always
-    image: grafana/loki:2.4.1
-    ports:
-      - "3100:3100/tcp"
-      - "9096:9096"
-    container_name: loki
-    tty: true
-    stdin_open: true
-    env_file:
-      - ./env
-    volumes:
-    - ./loki/etc/loki:/loki
-    labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.loki.rule=Host(`loki.scarlettlab.home`)"
-    - "traefik.http.routers.loki.entrypoints=web"
-    - "traefik.http.services.loki.loadbalancer.server.port=3100"
-    command: -config.file=/loki/loki-config.yaml
-    logging:
-      driver: json-file
-      options:
-        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+  # loki:
+  #   restart: always
+  #   image: grafana/loki:2.4.1
+  #   ports:
+  #     - "3100:3100/tcp"
+  #     - "9096:9096"
+  #   container_name: loki
+  #   tty: true
+  #   stdin_open: true
+  #   env_file:
+  #     - ./env
+  #   volumes:
+  #   - ./loki/etc/loki:/loki
+  #   labels:
+  #   - "traefik.enable=true"
+  #   - "traefik.http.routers.loki.rule=Host(`loki.scarlettlab.home`)"
+  #   - "traefik.http.routers.loki.entrypoints=web"
+  #   - "traefik.http.services.loki.loadbalancer.server.port=3100"
+  #   command: -config.file=/loki/loki-config.yaml
+  #   logging:
+  #     driver: json-file
+  #     options:
+  #       tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
   # https://github.com/grafana/loki/blob/34a4b242bf1de7eae3f8f6594253adccf8de05cd/production/docker/docker-compose-ha-memberlist.yaml
   # # Since the Loki containers are running as user 10001 and the mounted data volume is owned by root,
@@ -474,7 +474,7 @@ services:
     depends_on:
       - influxdb
       - grafana
-      - loki
+      # - loki
     environment:
     - UP_WEBSERVER_ENABLE=true
     # - TZ=UTC
@@ -487,11 +487,11 @@ services:
     #   - UP_UNIFI_DEFAULT_URL=${UNIFI_URL}
     #   - UP_POLLER_DEBUG=${POLLER_DEBUG}
     #   - UP_UNIFI_DEFAULT_SAVE_DPI=${POLLER_SAVE_DPI}
-    logging:
-      driver: loki
-      options:
-        loki-url: http://192.168.1.98:3100/loki/api/v1/push
-        loki-external-labels: "container_name={{.Name}},image_name={{.ImageName}}"
+    # logging:
+    #   driver: loki
+    #   options:
+    #     loki-url: http://192.168.1.98:3100/loki/api/v1/push
+    #     loki-external-labels: "container_name={{.Name}},image_name={{.ImageName}}"
         # tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
         # loki-url: "http://host.docker.internal:3100/loki/api/v1/push"
     # extra_hosts:
@@ -608,38 +608,38 @@ services:
   #   environment:
   #   - TZ=UTC
 
-  promtail:
-    # SOURCE: https://github.com/gilmrt/docker-compose/blob/5d8d7b3746fba48ba5f559f9913e56ae3d881eee/metrics/docker-compose.yml
-    container_name: promtail
-    image: grafana/promtail:2.4.2
-    restart: always
-    volumes:
-      - /var/log:/var/log:ro
-      - ./promtail/promtail-gateway.yaml:/etc/promtail/promtail-gateway.yaml:ro
-      - ./promtail/promtail-debug.yaml:/etc/promtail/promtail-debug.yaml:rw
-      - /var/log/journal/:/var/log/journal/:ro
-      - /run/log/journal/:/run/log/journal/:ro
-      - /etc/machine-id:/etc/machine-id:ro
-      - ./promtail/var/run/promtail:/var/run/promtail
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /home/pi/dev/bossjones/elk-docker/rsyslog-conf/log:/log
-      # - ${DATADIR}/promtail/config/promtail-config.yaml:/etc/promtail/promtail-config.ya
-    ports:
-      - "9080:9080"
-    expose:
-    - 9080
-    # command: -config.file=/etc/promtail/promtail-config.yaml
-    command: -config.file=/etc/promtail/promtail-gateway.yaml
-    environment:
-    - TZ=UTC
-    tty: true
-    stdin_open: true
-    env_file:
-      - ./env
-    labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.promtail.rule=Host(`promtail.scarlettlab.home`)"
-    - "traefik.http.routers.promtail.entrypoints=web"
-    - "traefik.http.services.promtail.loadbalancer.server.port=9080"
-    depends_on:
-      - loki
+  # promtail:
+  #   # SOURCE: https://github.com/gilmrt/docker-compose/blob/5d8d7b3746fba48ba5f559f9913e56ae3d881eee/metrics/docker-compose.yml
+  #   container_name: promtail
+  #   image: grafana/promtail:2.4.2
+  #   restart: always
+  #   volumes:
+  #     - /var/log:/var/log:ro
+  #     - ./promtail/promtail-gateway.yaml:/etc/promtail/promtail-gateway.yaml:ro
+  #     - ./promtail/promtail-debug.yaml:/etc/promtail/promtail-debug.yaml:rw
+  #     - /var/log/journal/:/var/log/journal/:ro
+  #     - /run/log/journal/:/run/log/journal/:ro
+  #     - /etc/machine-id:/etc/machine-id:ro
+  #     - ./promtail/var/run/promtail:/var/run/promtail
+  #     - /var/lib/docker/containers:/var/lib/docker/containers:ro
+  #     - /home/pi/dev/bossjones/elk-docker/rsyslog-conf/log:/log
+  #     # - ${DATADIR}/promtail/config/promtail-config.yaml:/etc/promtail/promtail-config.ya
+  #   ports:
+  #     - "9080:9080"
+  #   expose:
+  #   - 9080
+  #   # command: -config.file=/etc/promtail/promtail-config.yaml
+  #   command: -config.file=/etc/promtail/promtail-gateway.yaml
+  #   environment:
+  #   - TZ=UTC
+  #   tty: true
+  #   stdin_open: true
+  #   env_file:
+  #     - ./env
+  #   labels:
+  #   - "traefik.enable=true"
+  #   - "traefik.http.routers.promtail.rule=Host(`promtail.scarlettlab.home`)"
+  #   - "traefik.http.routers.promtail.entrypoints=web"
+  #   - "traefik.http.services.promtail.loadbalancer.server.port=9080"
+  #   # depends_on:
+  #   #   - loki
