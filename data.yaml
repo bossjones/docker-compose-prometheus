@@ -1,6 +1,6 @@
 fqdn: 'scarlettlab.home'
 prometheus_server_ip: '192.168.3.16'
-usg_ip: '192.168.1.150'
+usg_ip: '192.168.3.150'
 nfs_ip: '192.168.1.111'
 
 prometheus_pinghosts_targets:
@@ -8,3 +8,4 @@ prometheus_pinghosts_targets:
 - http://github.com;github.com;external;internetbox
 # - http://192.168.1.91:18000/metrics;cerebrobot;external;internetbox
 
+cadvisor_feature_flag: true

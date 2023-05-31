@@ -13,3 +13,4 @@ heimdall/php/
 heimdall/www/
 venv
 .envrc
+outputs/docker-heimdall/

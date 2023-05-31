@@ -12,3 +12,17 @@ Just needed this to test out a couple things w/ a python asyncio app
 
 - [ ] https://grafana.com/blog/2020/12/08/how-to-create-fast-queries-with-lokis-logql-to-filter-terabytes-of-logs-in-seconds/
 - [ ] https://grafana.com/blog/2021/08/09/new-in-loki-2.3-logql-pattern-parser-makes-it-easier-to-extract-data-from-unstructured-logs/
+
+
+## How to setup
+
+1. cp -a .envrc.sample .envrc
+2. direnv allow .
+3. python3 -m venv venv
+4. . ./venv/bin/activate
+5. pip install -r requirements.txt
+6. modify data.yaml
+7. make render
+8. cd ./outputs
+9. docker-compose --env-file env ps
+10. docker-compose --env-file env up

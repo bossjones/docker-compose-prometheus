@@ -152,10 +152,15 @@ services:
     ports:
       - 9090:9090
     links:
+{% if cadvisor_feature_flag %}
       - cadvisor:cadvisor
+{% endif %}
       - alertmanager:alertmanager
     depends_on:
+{% if cadvisor_feature_flag %}
       - cadvisor
+{% endif %}
+      - alertmanager
     restart: always
 
     environment:
@@ -231,6 +236,7 @@ services:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
 
+{% if cadvisor_feature_flag %}
   cadvisor:
     # SOURCE: https://github.com/rafaribe/home-ops/blob/d9e283fd3ddc42a9891c8a12fe82fa128657798a/provision/ansible/backup-server/roles/syncthing/templates/agent.yml
     image: gcr.io/cadvisor/cadvisor:latest
@@ -272,6 +278,7 @@ services:
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
+{% endif %}
 
   blackbox:
     image: prom/blackbox-exporter
