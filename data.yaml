@@ -8,4 +8,4 @@ prometheus_pinghosts_targets:
 - http://github.com;github.com;external;internetbox
 # - http://192.168.1.91:18000/metrics;cerebrobot;external;internetbox
 
-cadvisor_feature_flag: true
+cadvisor_feature_flag: false
