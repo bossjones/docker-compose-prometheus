@@ -348,7 +348,7 @@ services:
 
   unifi-poller:
     restart: always
-    image: golift/unifi-poller:${POLLER_TAG}
+    image: ghcr.io/unpoller/unpoller:${POLLER_TAG}
     ports:
       - "9130:9130/tcp"
       - "9130:9130/udp"
