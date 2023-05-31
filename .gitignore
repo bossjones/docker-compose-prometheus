@@ -11,3 +11,5 @@ heimdall/log/
 heimdall/nginx/
 heimdall/php/
 heimdall/www/
+venv
+.envrc

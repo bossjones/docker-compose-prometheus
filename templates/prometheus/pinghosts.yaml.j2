@@ -1,0 +1,4 @@
+- targets:  # url;humanname;routing;switch
+{% for t in prometheus_pinghosts_targets %}
+    - {{ t }}
+{% endfor %}

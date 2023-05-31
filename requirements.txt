@@ -1,0 +1,4 @@
+# https://github.com/Avielyo10/jinja2-tools
+jinja2-tools
+better_exceptions
+bpython

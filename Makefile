@@ -108,3 +108,6 @@ loki-dashboards:
 
 dashboards:
 	@echo "go to https://github.com/bossjones/monitoring-mixins-website"
+
+render:
+	bash ./render.sh
