@@ -18,3 +18,5 @@ for j in $(fd . -H -t f -e j2 -d 5 './templates'); do
     echo "jinja render -d ./data.yaml -t \"./${old_path}\" -o \"./${new_path}\""
     jinja render -d ./data.yaml -t "./${old_path}" -o "./${new_path}"
 done
+
+cp -a docker-compose.yml outputs/docker-compose.yml
