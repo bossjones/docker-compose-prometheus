@@ -20,3 +20,4 @@ for j in $(fd . -H -t f -e j2 -d 5 './templates'); do
 done
 
 # cp -a docker-compose.yml outputs/docker-compose.yml
+cp -av unifi_poller_dashboards/*.json  outputs/grafana/provisioning/dashboards/
