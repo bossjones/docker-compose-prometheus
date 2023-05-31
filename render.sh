@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# source .envrc
+
 # pre created directory structure
 for i in $(fd . -t d -d 5 './templates'); do
     new_path=$(python3 -c "import os;p=os.path.join('outputs', os.path.relpath('${i}',start='./templates'));print(p)")

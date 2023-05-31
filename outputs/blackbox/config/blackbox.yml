@@ -1,4 +1,4 @@
-{% raw %}
+
 modules:
   http_2xx:
     prober: http
@@ -34,4 +34,3 @@ modules:
       - expect: "^:[^ ]+ 001"
   icmp:
     prober: icmp
-{% endraw %}

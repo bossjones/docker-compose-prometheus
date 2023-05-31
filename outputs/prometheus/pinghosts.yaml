@@ -1,0 +1,3 @@
+- targets:  # url;humanname;routing;switch
+    - http://google.com;google.com;external;internetbox
+    - http://github.com;github.com;external;internetbox

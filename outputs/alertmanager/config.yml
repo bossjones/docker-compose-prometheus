@@ -1,7 +1,6 @@
-{% raw %}
+
 route:
   receiver: 'slack'
 
 receivers:
   - name: 'slack'
-{% endraw %}

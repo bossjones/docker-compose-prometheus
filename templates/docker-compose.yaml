@@ -1,6 +1,7 @@
 version: '3.7'
 # Since only root has access to /var/lib/docker and I'm running the Grafana agent under its own user on the host itself, changing the permissions to that directory seemed like a bad idea to me. After a bit of research I figured out how to make this work using the journald driver, which works nicely.
 # SOURCE: https://gist.github.com/ruanbekker/c6fa9bc6882e6f324b4319c5e3622460?permalink_comment_id=4009155#gistcomment-4009155
+{% raw %}
 x-logging:
   &default-logging
   driver: "journald"
@@ -18,7 +19,9 @@ volumes:
     influxdb-storage:
     chronograf-storage:
     grafana-storage:
+{% endraw %}
 
+{% raw %}
 services:
   # SOURCE: https://doc.traefik.io/traefik/user-guides/docker-compose/basic-example/
   # SOURCE: https://doc.traefik.io/traefik/user-guides/docker-compose/basic-example/
@@ -41,6 +44,7 @@ services:
       driver: json-file
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
 
   whoami:
     image: "traefik/whoami:v1.8.0"
@@ -58,10 +62,12 @@ services:
     - WHOAMI_NAME=whoami
     ports:
     - 10080:10080
+{% raw %}
     logging:
       driver: json-file
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
 
   influxdb:
     restart: always
@@ -84,10 +90,12 @@ services:
       - TZ=UTC
     env_file:
       - ./env
+{% raw %}
     logging:
       driver: json-file
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
 
   chronograf:
     restart: always
@@ -111,10 +119,12 @@ services:
       - TZ=UTC
     env_file:
       - ./env
+{% raw %}
     logging:
       driver: json-file
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
 
   # docker pull prom/prometheus:v2.31.1
   prometheus:
@@ -152,11 +162,12 @@ services:
     - TZ=UTC
     # SEE: https://stackoverflow.com/questions/31324981/how-to-access-host-port-from-docker-container/43541732#43541732
     # https://stackoverflow.com/questions/56909896/prometheus-in-docker-container-cannot-scrape-target-on-host/56910057
+{% raw %}
     logging:
       driver: json-file
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
-
+{% endraw %}
 
   node-exporter:
     image: prom/node-exporter
@@ -184,10 +195,12 @@ services:
       mode: global
     environment:
     - TZ=UTC
+{% raw %}
     logging:
       driver: json-file
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
 
   alertmanager:
     image: prom/alertmanager
@@ -211,11 +224,12 @@ services:
       - '--storage.path=/alertmanager'
     environment:
     - TZ=UTC
-
+{% raw %}
     logging:
       driver: json-file
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
 
   cadvisor:
     # SOURCE: https://github.com/rafaribe/home-ops/blob/d9e283fd3ddc42a9891c8a12fe82fa128657798a/provision/ansible/backup-server/roles/syncthing/templates/agent.yml
@@ -252,10 +266,12 @@ services:
       - ./env
     environment:
     - TZ=UTC
+{% raw %}
     logging:
       driver: json-file
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
 
   blackbox:
     image: prom/blackbox-exporter
@@ -284,10 +300,12 @@ services:
       mode: global
     environment:
     - TZ=UTC
+{% raw %}
     logging:
       driver: json-file
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
 
   heimdall:
     image: linuxserver/heimdall
@@ -313,11 +331,12 @@ services:
     expose:
     - 4040
     - 4443
+{% raw %}
     logging:
       driver: json-file
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
-
+{% endraw %}
 
 
   unifi-poller:
