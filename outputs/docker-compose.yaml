@@ -50,20 +50,20 @@ services:
 #       driver: json-file
 #       options:
 #         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
-loki-gateway:
-  image: nginx:1.19
-  container_name: "loki-gateway"
-  volumes:
-    - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-  ports:
-    - "8080:80"
-    - "3100"
-  networks:
-    - loki
-  logging:
-    driver: json-file
-    options:
-      tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+  loki-gateway:
+    image: nginx:1.19
+    container_name: "loki-gateway"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "8080:80"
+      - "3100"
+    networks:
+      - loki
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
   # Since the Loki containers are running as user 10001 and the mounted data volume is owned by root,
   # Loki would not have permissions to create the directories.
@@ -417,10 +417,10 @@ loki-gateway:
       - "7946"
       # uncomment to use interactive debugging
       - "40000-40002:40000" # # makes the replicas available on ports 40000, 40001, 40002
-      cap_add:
-        - SYS_PTRACE
-      security_opt:
-        - apparmor=unconfined
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - apparmor=unconfined
     command: "-config.file=/etc/loki/loki.yaml -target=read"
     env_file:
       - ./env
@@ -446,10 +446,10 @@ loki-gateway:
       - "7946"
       # uncomment to use interactive debugging
       - "50000-50002:40000" # makes the replicas available on ports 50000, 50001, 50002
-      cap_add:
-        - SYS_PTRACE
-      security_opt:
-        - apparmor=unconfined
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - apparmor=unconfined
     command: "-config.file=/etc/loki/loki.yaml -target=write"
     env_file:
       - ./env
