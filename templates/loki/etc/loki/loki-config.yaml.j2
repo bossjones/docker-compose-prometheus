@@ -27,11 +27,23 @@ ingester:
   max_transfer_retries: 0     # Chunk transfers disabled
 # SOURCE: https://github.com/grafana/loki/issues/4613#issuecomment-1018367471
 
+# loki v2.4.1 config
+# schema_config:
+#   configs:
+#     # SOURCE: https://github.com/grafana/loki/issues/4613#issuecomment-1018367471
+#     - from: 2020-11-01
+#     # SOURCE: https://github.com/grafana/loki/issues/4613#issuecomment-1018367471
+#       store: boltdb-shipper
+#       object_store: filesystem
+#       schema: v11
+#       index:
+#         prefix: index_
+#         period: 24h
+
+# v2.8.0 config
 schema_config:
   configs:
-    # SOURCE: https://github.com/grafana/loki/issues/4613#issuecomment-1018367471
-    - from: 2020-11-01
-    # SOURCE: https://github.com/grafana/loki/issues/4613#issuecomment-1018367471
+    - from: 2020-10-24
       store: boltdb-shipper
       object_store: filesystem
       schema: v11
@@ -154,6 +166,11 @@ query_range:
   # If i'm not mistaken then this splits the data fetching between the queriers if the query loads more data then can fit into 1 interval.
   split_queries_by_interval: 0 # 720h # 30d
 # SOURCE: https://github.com/grafana/loki/issues/4613#issuecomment-1018367471
+  results_cache:
+    cache:
+      embedded_cache:
+        enabled: true
+        max_size_mb: 100
 
 ruler:
   storage:
@@ -168,14 +185,14 @@ ruler:
 # If a more specific config is given in other sections, the related config under this section
 # will be ignored.
 common:
+  instance_addr: 127.0.0.1
   path_prefix: /tmp/loki
-  # storage:
-  #   filesystem:
-  #     chunks_directory: /tmp/loki/chunks
-  #     rules_directory: /tmp/loki/rules
+  storage:
+    filesystem:
+      chunks_directory: /tmp/loki/chunks
+      rules_directory: /tmp/loki/rules
   replication_factor: 1
   ring:
-    instance_addr: 127.0.0.1
     kvstore:
       store: inmemory
 

@@ -1,4 +1,8 @@
 version: '3.7'
+
+networks:
+  loki:
+
 # Since only root has access to /var/lib/docker and I'm running the Grafana agent under its own user on the host itself, changing the permissions to that directory seemed like a bad idea to me. After a bit of research I figured out how to make this work using the journald driver, which works nicely.
 # SOURCE: https://gist.github.com/ruanbekker/c6fa9bc6882e6f324b4319c5e3622460?permalink_comment_id=4009155#gistcomment-4009155
 {% raw %}
@@ -40,6 +44,8 @@ services:
       - "8080:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+    - loki
     logging:
       driver: json-file
       options:
@@ -62,6 +68,8 @@ services:
     - WHOAMI_NAME=whoami
     ports:
     - 10080:10080
+    networks:
+    - loki
 {% raw %}
     logging:
       driver: json-file
@@ -90,6 +98,8 @@ services:
       - TZ=UTC
     env_file:
       - ./env
+    networks:
+    - loki
 {% raw %}
     logging:
       driver: json-file
@@ -119,6 +129,8 @@ services:
       - TZ=UTC
     env_file:
       - ./env
+    networks:
+    - loki
 {% raw %}
     logging:
       driver: json-file
@@ -167,6 +179,8 @@ services:
     - TZ=UTC
     # SEE: https://stackoverflow.com/questions/31324981/how-to-access-host-port-from-docker-container/43541732#43541732
     # https://stackoverflow.com/questions/56909896/prometheus-in-docker-container-cannot-scrape-target-on-host/56910057
+    networks:
+    - loki
 {% raw %}
     logging:
       driver: json-file
@@ -200,6 +214,8 @@ services:
       mode: global
     environment:
     - TZ=UTC
+    networks:
+    - loki
 {% raw %}
     logging:
       driver: json-file
@@ -229,6 +245,8 @@ services:
       - '--storage.path=/alertmanager'
     environment:
     - TZ=UTC
+    networks:
+    - loki
 {% raw %}
     logging:
       driver: json-file
@@ -272,6 +290,8 @@ services:
       - ./env
     environment:
     - TZ=UTC
+    networks:
+    - loki
 {% raw %}
     logging:
       driver: json-file
@@ -307,6 +327,8 @@ services:
       mode: global
     environment:
     - TZ=UTC
+    networks:
+    - loki
 {% raw %}
     logging:
       driver: json-file
@@ -338,6 +360,8 @@ services:
     expose:
     - 4040
     - 4443
+    networks:
+    - loki
 {% raw %}
     logging:
       driver: json-file
@@ -369,10 +393,12 @@ services:
       - grafana
     environment:
     - UP_WEBSERVER_ENABLE=true
+    networks:
+    - loki
 
   loki:
     restart: always
-    image: grafana/loki:2.4.1
+    image: grafana/loki:2.8.2
     ports:
       - "3100:3100/tcp"
       - "9096:9096"
@@ -389,6 +415,8 @@ services:
     - "traefik.http.routers.loki.entrypoints=web"
     - "traefik.http.services.loki.loadbalancer.server.port=3100"
     command: -config.file=/loki/loki-config.yaml
+    networks:
+    - loki
 {% raw %}
     logging:
       driver: json-file
@@ -401,7 +429,7 @@ services:
   promtail:
     # SOURCE: https://github.com/gilmrt/docker-compose/blob/5d8d7b3746fba48ba5f559f9913e56ae3d881eee/metrics/docker-compose.yml
     container_name: promtail
-    image: grafana/promtail:2.4.2
+    image: grafana/promtail:2.8.2
     restart: always
     volumes:
       # - /var/log:/var/log:ro
@@ -432,6 +460,8 @@ services:
     - "traefik.http.routers.promtail.entrypoints=web"
     - "traefik.http.services.promtail.loadbalancer.server.port=9080"
     depends_on:
+    - loki
+    networks:
     - loki
 
   grafana:
@@ -479,3 +509,5 @@ services:
     - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
     - GF_AUTH_ANONYMOUS_ENABLED=true
     - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    networks:
+    - loki
