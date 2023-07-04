@@ -440,7 +440,8 @@ services:
   loki-write:
     image: grafana/loki:2.8.2
     volumes:
-      - ./config:/etc/loki/
+      # - ./config:/etc/loki/
+      - ./loki/etc/loki:/loki
     ports:
       - "3100"
       - "7946"
@@ -526,8 +527,8 @@ services:
     - "traefik.http.routers.promtail.rule=Host(`promtail.scarlettlab.home`)"
     - "traefik.http.routers.promtail.entrypoints=web"
     - "traefik.http.services.promtail.loadbalancer.server.port=9080"
-    depends_on:
-    - loki
+    # depends_on:
+    # - loki
     networks:
     - loki
 

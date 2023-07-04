@@ -14,3 +14,5 @@ heimdall/www/
 venv
 .envrc
 outputs/docker-heimdall/
+outputs/.data/
+outputs/loki/generated-logs.txt
