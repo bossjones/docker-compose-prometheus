@@ -396,6 +396,44 @@ services:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
 
+
+
+  promtail:
+    # SOURCE: https://github.com/gilmrt/docker-compose/blob/5d8d7b3746fba48ba5f559f9913e56ae3d881eee/metrics/docker-compose.yml
+    container_name: promtail
+    image: grafana/promtail:2.4.2
+    restart: always
+    volumes:
+      # - /var/log:/var/log:ro
+      - ./promtail/promtail-gateway.yaml:/etc/promtail/promtail-gateway.yaml:ro
+      # - ./promtail/promtail-debug.yaml:/etc/promtail/promtail-debug.yaml:rw
+      # - /var/log/journal/:/var/log/journal/:ro
+      # - /run/log/journal/:/run/log/journal/:ro
+      - /etc/machine-id:/etc/machine-id:ro
+      - ./promtail/var/run/promtail:/var/run/promtail
+      # - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      # - /home/pi/dev/bossjones/elk-docker/rsyslog-conf/log:/log
+      # - ${DATADIR}/promtail/config/promtail-config.yaml:/etc/promtail/promtail-config.ya
+    ports:
+      - "9080:9080"
+    expose:
+    - 9080
+    # command: -config.file=/etc/promtail/promtail-config.yaml
+    command: -config.file=/etc/promtail/promtail-gateway.yaml
+    environment:
+    - TZ=UTC
+    tty: true
+    stdin_open: true
+    env_file:
+      - ./env
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.promtail.rule=Host(`promtail.{{ fqdn }}`)"
+    - "traefik.http.routers.promtail.entrypoints=web"
+    - "traefik.http.services.promtail.loadbalancer.server.port=9080"
+    depends_on:
+    - loki
+
   grafana:
     image: grafana/grafana
     container_name: grafana
