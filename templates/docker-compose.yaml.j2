@@ -471,7 +471,8 @@ services:
     image: grafana/loki:2.8.2
     volumes:
       # - ./config:/etc/loki/
-      - ./loki/etc/loki:/etc/loki/
+      # - ./loki/etc/loki:/etc/loki/
+      - ./loki/etc/loki:/loki
       - ./rules:/loki/rules:ro
     ports:
       - "3100"
@@ -482,7 +483,7 @@ services:
       - SYS_PTRACE
     security_opt:
       - apparmor=unconfined
-    command: "-config.file=/etc/loki/loki.yaml -target=read"
+    command: "-config.file=/loki/loki-config.yaml -target=read"
     env_file:
       - ./env
     networks:
@@ -513,7 +514,7 @@ services:
       - SYS_PTRACE
     security_opt:
       - apparmor=unconfined
-    command: "-config.file=/etc/loki/loki.yaml -target=write"
+    command: "-config.file=/loki/loki-config.yaml -target=write"
     env_file:
       - ./env
     networks:
