@@ -23,32 +23,98 @@ volumes:
     influxdb-storage:
     chronograf-storage:
     grafana-storage:
+    alertmanager-data:
 
 
 services:
-  # SOURCE: https://doc.traefik.io/traefik/user-guides/docker-compose/basic-example/
-  # SOURCE: https://doc.traefik.io/traefik/user-guides/docker-compose/basic-example/
-  traefik:
-    image: "traefik:latest"
-    container_name: "traefik"
-    command:
-      # - "--log.level=DEBUG"
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--metrics.prometheus=true"
-    ports:
-      - "80:80"
-      - "8080:8080"
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-    networks:
+#   # SOURCE: https://doc.traefik.io/traefik/user-guides/docker-compose/basic-example/
+#   # SOURCE: https://doc.traefik.io/traefik/user-guides/docker-compose/basic-example/
+#   traefik:
+#     image: "traefik:latest"
+#     container_name: "traefik"
+#     command:
+#       # - "--log.level=DEBUG"
+#       - "--api.insecure=true"
+#       - "--providers.docker=true"
+#       - "--providers.docker.exposedbydefault=false"
+#       - "--entrypoints.web.address=:80"
+#       - "--metrics.prometheus=true"
+#     ports:
+#       - "80:80"
+#       - "8080:8080"
+#     volumes:
+#       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+#     networks:
+#     - loki
+#     logging:
+#       driver: json-file
+#       options:
+#         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+loki-gateway:
+  image: nginx:1.19
+  container_name: "loki-gateway"
+  volumes:
+    - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+  ports:
+    - "8080:80"
+    - "3100"
+  networks:
     - loki
-    logging:
-      driver: json-file
-      options:
-        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+  logging:
+    driver: json-file
+    options:
+      tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+
+  # Since the Loki containers are running as user 10001 and the mounted data volume is owned by root,
+  # Loki would not have permissions to create the directories.
+  # Therefore the init container changes permissions of the mounted directory.
+  init:
+    image: grafana/loki:2.8.2
+    user: root
+    entrypoint:
+      - "chown"
+      - "10001:10001"
+      - "/loki"
+    volumes:
+      - ./loki:/loki
+    networks:
+      - loki
+
+  minio:
+    image: minio/minio
+    entrypoint:
+      - sh
+      - -euc
+      - |
+        mkdir -p /data/loki-data && \
+        mkdir -p /data/loki-ruler &&
+        minio server /data
+    environment:
+      - MINIO_ROOT_USER=loki
+      - MINIO_ROOT_PASSWORD=supersecret
+      - MINIO_PROMETHEUS_AUTH_TYPE=public
+      - MINIO_UPDATE=off
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./.data/minio:/data
+    networks:
+      - loki
+
+
+  # for testing purposes only, disable in production
+  log-generator:
+    image: mingrammer/flog
+    command:
+      - --loop
+      - --format=json
+      - --number=10 # number of log lines to generate per second
+      - --delay=100ms # delay between log lines
+      - --output=/var/log/generated-logs.txt
+      - --overwrite
+      - --type=log
+    volumes:
+      - ./loki/:/var/log/
 
   whoami:
     image: "traefik/whoami:v1.8.0"
@@ -155,7 +221,9 @@ services:
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
       - '--web.listen-address=0.0.0.0:9090'
-      - '--log.level=info'
+      - '--log.level=debug'
+      - '--enable-feature=remote-write-receiver'
+      - '--query.lookback-delta=30s'
     ports:
       - 9090:9090
     links:
@@ -226,10 +294,12 @@ services:
       - 9093:9093
     volumes:
       - ./alertmanager/:/etc/alertmanager/
+      - alertmanager-data:/data
     restart: always
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
+      - '--log.level=debug'
     environment:
     - TZ=UTC
     networks:
@@ -335,33 +405,92 @@ services:
     networks:
     - loki
 
-  loki:
-    restart: always
+
+  loki-read:
     image: grafana/loki:2.8.2
+    volumes:
+      # - ./config:/etc/loki/
+      - ./loki/etc/loki:/etc/loki/
+      - ./rules:/loki/rules:ro
     ports:
-      - "3100:3100/tcp"
-      - "9096:9096"
-    container_name: loki
-    tty: true
-    stdin_open: true
+      - "3100"
+      - "7946"
+      # uncomment to use interactive debugging
+      - "40000-40002:40000" # # makes the replicas available on ports 40000, 40001, 40002
+      cap_add:
+        - SYS_PTRACE
+      security_opt:
+        - apparmor=unconfined
+    command: "-config.file=/etc/loki/loki.yaml -target=read"
     env_file:
       - ./env
-    volumes:
-    - ./loki/etc/loki:/loki
-    labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.loki.rule=Host(`loki.scarlettlab.home`)"
-    - "traefik.http.routers.loki.entrypoints=web"
-    - "traefik.http.services.loki.loadbalancer.server.port=3100"
-    command: -config.file=/loki/loki-config.yaml
     networks:
-    - loki
+      - loki
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 3
+    # only needed for interactive debugging with dlv
 
     logging:
       driver: json-file
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
+  loki-write:
+    image: grafana/loki:2.8.2
+    volumes:
+      - ./config:/etc/loki/
+    ports:
+      - "3100"
+      - "7946"
+      # uncomment to use interactive debugging
+      - "50000-50002:40000" # makes the replicas available on ports 50000, 50001, 50002
+      cap_add:
+        - SYS_PTRACE
+      security_opt:
+        - apparmor=unconfined
+    command: "-config.file=/etc/loki/loki.yaml -target=write"
+    env_file:
+      - ./env
+    networks:
+      - loki
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 3
+
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+
+#   loki:
+#     restart: always
+#     image: grafana/loki:2.8.2
+#     ports:
+#       - "3100:3100/tcp"
+#       - "9096:9096"
+#     container_name: loki
+#     tty: true
+#     stdin_open: true
+#     env_file:
+#       - ./env
+#     volumes:
+#     - ./loki/etc/loki:/loki
+#     labels:
+#     - "traefik.enable=true"
+#     - "traefik.http.routers.loki.rule=Host(`loki.scarlettlab.home`)"
+#     - "traefik.http.routers.loki.entrypoints=web"
+#     - "traefik.http.services.loki.loadbalancer.server.port=3100"
+#     command: -config.file=/loki/loki-config.yaml
+#     networks:
+#     - loki
+
+#     logging:
+#       driver: json-file
+#       options:
+#         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
 
   promtail:

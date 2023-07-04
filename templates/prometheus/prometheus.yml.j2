@@ -1,8 +1,8 @@
 #TODO: Uses some of this https://zeigren.com/posts/monitoring_prometheus_loki/
 # my global config
 global:
-  scrape_interval:     15s # By default, scrape targets every 15 seconds.
-  evaluation_interval: 15s # By default, scrape targets every 15 seconds.
+  scrape_interval:     5s # By default, scrape targets every 15 seconds.
+  # evaluation_interval: 15s # By default, scrape targets every 15 seconds.
   # evaluation_interval: 5s # By default, scrape targets every 15 seconds.
   # scrape_timeout:     1m
   # scrape_timeout is set to the global default (10s).
@@ -60,6 +60,7 @@ scrape_configs:
       replacement: {{ prometheus_server_ip }}:9130
   # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
 
+
   - job_name: 'prometheus'
 
     # Override the global default and scrape targets from this job every 5 seconds.
@@ -77,23 +78,23 @@ scrape_configs:
     static_configs:
         - targets: ['{{ prometheus_server_ip }}:9100']
 
-  - job_name: 'loki'
-    metrics_path: /metrics
+  # - job_name: 'loki'
+  #   metrics_path: /metrics
 
-    # Override the global default and scrape targets from this job every 5 seconds.
-    scrape_interval: 5s
+  #   # Override the global default and scrape targets from this job every 5 seconds.
+  #   scrape_interval: 5s
 
-    static_configs:
-        - targets: ['{{ prometheus_server_ip }}:3100']
+  #   static_configs:
+  #       - targets: ['{{ prometheus_server_ip }}:3100']
 
-  - job_name: 'promtail'
-    metrics_path: /metrics
+  # - job_name: 'promtail'
+  #   metrics_path: /metrics
 
-    # Override the global default and scrape targets from this job every 5 seconds.
-    scrape_interval: 5s
+  #   # Override the global default and scrape targets from this job every 5 seconds.
+  #   scrape_interval: 5s
 
-    static_configs:
-        - targets: ['{{ prometheus_server_ip }}:9080']
+  #   static_configs:
+  #       - targets: ['{{ prometheus_server_ip }}:9080']
 
   - job_name: 'docker'
     metrics_path: /metrics
@@ -208,3 +209,18 @@ scrape_configs:
       - target_label: __address__
         # replacement: 192.168.1.102:9115  # The blackbox exporter's real hostname:port.
         replacement: {{ prometheus_server_ip }}:9115  # The blackbox exporter's real hostname:port.
+
+  - job_name: 'loki'
+    dns_sd_configs:
+      - names:
+          - loki-read
+          - loki-write
+        type: A
+        port: 3100
+
+  - job_name: 'promtail'
+    dns_sd_configs:
+      - names:
+          - promtail
+        type: A
+        port: 9080
