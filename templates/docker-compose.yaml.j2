@@ -483,7 +483,8 @@ services:
       # - 3101:3100
       # - 7946
       - 9095
-      - "3101:3100"
+      #- "3101:3100"
+      - "3100"
       - "7946"
       # uncomment to use interactive debugging
       - "40000-40002:40000" # # makes the replicas available on ports 40000, 40001, 40002
@@ -517,7 +518,8 @@ services:
       - ./loki/etc/loki:/loki
     ports:
       - "9095"
-      - "3102:3100"
+      #- "3102:3100"
+      - "3100"
       - "7946"
       # uncomment to use interactive debugging
       # - "50000-50002:40000" # makes the replicas available on ports 50000, 50001, 50002
