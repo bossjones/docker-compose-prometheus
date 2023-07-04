@@ -370,6 +370,32 @@ services:
     environment:
     - UP_WEBSERVER_ENABLE=true
 
+  loki:
+    restart: always
+    image: grafana/loki:2.4.1
+    ports:
+      - "3100:3100/tcp"
+      - "9096:9096"
+    container_name: loki
+    tty: true
+    stdin_open: true
+    env_file:
+      - ./env
+    volumes:
+    - ./loki/etc/loki:/loki
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.loki.rule=Host(`loki.{{ fqdn }}`)"
+    - "traefik.http.routers.loki.entrypoints=web"
+    - "traefik.http.services.loki.loadbalancer.server.port=3100"
+    command: -config.file=/loki/loki-config.yaml
+{% raw %}
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
+
   grafana:
     image: grafana/grafana
     container_name: grafana
