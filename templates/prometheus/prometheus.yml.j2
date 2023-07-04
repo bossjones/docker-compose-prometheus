@@ -134,18 +134,18 @@ scrape_configs:
 #     static_configs:
 #     - targets: ['192.168.1.111:9100']
 
-  - job_name: traefik # Network metrics for internet facing services
-    # https://doc.traefik.io/traefik/observability/metrics/overview/
-    static_configs:
-      - targets:
-          - traefik:8080
-        labels:
-          host: {{ prometheus_server_ip }}
-    metric_relabel_configs:
-      # Only keep data that is used in graphs to reduce size
-      - source_labels: [__name__]
-        regex: traefik_service_requests_total|traefik_service_request_duration_seconds_sum|traefik_service_request_duration_seconds_count
-        action: keep
+  # - job_name: traefik # Network metrics for internet facing services
+  #   # https://doc.traefik.io/traefik/observability/metrics/overview/
+  #   static_configs:
+  #     - targets:
+  #         - traefik:8080
+  #       labels:
+  #         host: {{ prometheus_server_ip }}
+  #   metric_relabel_configs:
+  #     # Only keep data that is used in graphs to reduce size
+  #     - source_labels: [__name__]
+  #       regex: traefik_service_requests_total|traefik_service_request_duration_seconds_sum|traefik_service_request_duration_seconds_count
+  #       action: keep
 
   - job_name: 'netdata'
 

@@ -414,14 +414,17 @@ services:
       - ./loki/etc/loki:/loki
       - ./rules:/loki/rules:ro
     ports:
+      # - 3101:3100
+      # - 7946
+      - 9095
       - "3100"
       - "7946"
       # uncomment to use interactive debugging
       - "40000-40002:40000" # # makes the replicas available on ports 40000, 40001, 40002
-    cap_add:
-      - SYS_PTRACE
-    security_opt:
-      - apparmor=unconfined
+    #cap_add:
+    #  - SYS_PTRACE
+    #security_opt:
+    #  - apparmor=unconfined
     command: "-config.file=/loki/loki-config.yaml -target=read"
     env_file:
       - ./env
@@ -444,14 +447,15 @@ services:
       # - ./config:/etc/loki/
       - ./loki/etc/loki:/loki
     ports:
+      - "9095"
       - "3100"
       - "7946"
       # uncomment to use interactive debugging
-      - "50000-50002:40000" # makes the replicas available on ports 50000, 50001, 50002
-    cap_add:
-      - SYS_PTRACE
-    security_opt:
-      - apparmor=unconfined
+      # - "50000-50002:40000" # makes the replicas available on ports 50000, 50001, 50002
+    #cap_add:
+    #  - SYS_PTRACE
+    #security_opt:
+    #  - apparmor=unconfined
     command: "-config.file=/loki/loki-config.yaml -target=write"
     env_file:
       - ./env
