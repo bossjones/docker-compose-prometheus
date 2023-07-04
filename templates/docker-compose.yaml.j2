@@ -1,4 +1,8 @@
 version: '3.7'
+
+networks:
+  loki:
+
 # Since only root has access to /var/lib/docker and I'm running the Grafana agent under its own user on the host itself, changing the permissions to that directory seemed like a bad idea to me. After a bit of research I figured out how to make this work using the journald driver, which works nicely.
 # SOURCE: https://gist.github.com/ruanbekker/c6fa9bc6882e6f324b4319c5e3622460?permalink_comment_id=4009155#gistcomment-4009155
 {% raw %}
@@ -40,6 +44,8 @@ services:
       - "8080:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+    - loki
     logging:
       driver: json-file
       options:
@@ -62,6 +68,8 @@ services:
     - WHOAMI_NAME=whoami
     ports:
     - 10080:10080
+    networks:
+    - loki
 {% raw %}
     logging:
       driver: json-file
@@ -90,6 +98,8 @@ services:
       - TZ=UTC
     env_file:
       - ./env
+    networks:
+    - loki
 {% raw %}
     logging:
       driver: json-file
@@ -119,6 +129,8 @@ services:
       - TZ=UTC
     env_file:
       - ./env
+    networks:
+    - loki
 {% raw %}
     logging:
       driver: json-file
@@ -167,6 +179,8 @@ services:
     - TZ=UTC
     # SEE: https://stackoverflow.com/questions/31324981/how-to-access-host-port-from-docker-container/43541732#43541732
     # https://stackoverflow.com/questions/56909896/prometheus-in-docker-container-cannot-scrape-target-on-host/56910057
+    networks:
+    - loki
 {% raw %}
     logging:
       driver: json-file
@@ -200,6 +214,8 @@ services:
       mode: global
     environment:
     - TZ=UTC
+    networks:
+    - loki
 {% raw %}
     logging:
       driver: json-file
@@ -229,6 +245,8 @@ services:
       - '--storage.path=/alertmanager'
     environment:
     - TZ=UTC
+    networks:
+    - loki
 {% raw %}
     logging:
       driver: json-file
@@ -272,6 +290,8 @@ services:
       - ./env
     environment:
     - TZ=UTC
+    networks:
+    - loki
 {% raw %}
     logging:
       driver: json-file
@@ -307,6 +327,8 @@ services:
       mode: global
     environment:
     - TZ=UTC
+    networks:
+    - loki
 {% raw %}
     logging:
       driver: json-file
@@ -338,6 +360,8 @@ services:
     expose:
     - 4040
     - 4443
+    networks:
+    - loki
 {% raw %}
     logging:
       driver: json-file
@@ -348,6 +372,7 @@ services:
 
   unifi-poller:
     restart: always
+    # 2023: Use -> ghcr.io/unpoller/unpoller:${POLLER_TAG}
     image: golift/unifi-poller:${POLLER_TAG}
     ports:
       - "9130:9130/tcp"
@@ -368,6 +393,76 @@ services:
       - grafana
     environment:
     - UP_WEBSERVER_ENABLE=true
+    networks:
+    - loki
+
+  loki:
+    restart: always
+    image: grafana/loki:2.8.2
+    ports:
+      - "3100:3100/tcp"
+      - "9096:9096"
+    container_name: loki
+    tty: true
+    stdin_open: true
+    env_file:
+      - ./env
+    volumes:
+    - ./loki/etc/loki:/loki
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.loki.rule=Host(`loki.{{ fqdn }}`)"
+    - "traefik.http.routers.loki.entrypoints=web"
+    - "traefik.http.services.loki.loadbalancer.server.port=3100"
+    command: -config.file=/loki/loki-config.yaml
+    networks:
+    - loki
+{% raw %}
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
+
+
+
+  promtail:
+    # SOURCE: https://github.com/gilmrt/docker-compose/blob/5d8d7b3746fba48ba5f559f9913e56ae3d881eee/metrics/docker-compose.yml
+    container_name: promtail
+    image: grafana/promtail:2.8.2
+    restart: always
+    volumes:
+      # - /var/log:/var/log:ro
+      - ./promtail/promtail-gateway.yaml:/etc/promtail/promtail-gateway.yaml:ro
+      # - ./promtail/promtail-debug.yaml:/etc/promtail/promtail-debug.yaml:rw
+      # - /var/log/journal/:/var/log/journal/:ro
+      # - /run/log/journal/:/run/log/journal/:ro
+      - /etc/machine-id:/etc/machine-id:ro
+      - ./promtail/var/run/promtail:/var/run/promtail
+      # - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      # - /home/pi/dev/bossjones/elk-docker/rsyslog-conf/log:/log
+      # - ${DATADIR}/promtail/config/promtail-config.yaml:/etc/promtail/promtail-config.ya
+    ports:
+      - "9080:9080"
+    expose:
+    - 9080
+    # command: -config.file=/etc/promtail/promtail-config.yaml
+    command: -config.file=/etc/promtail/promtail-gateway.yaml
+    environment:
+    - TZ=UTC
+    tty: true
+    stdin_open: true
+    env_file:
+      - ./env
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.promtail.rule=Host(`promtail.{{ fqdn }}`)"
+    - "traefik.http.routers.promtail.entrypoints=web"
+    - "traefik.http.services.promtail.loadbalancer.server.port=9080"
+    depends_on:
+    - loki
+    networks:
+    - loki
 
   grafana:
     image: grafana/grafana
@@ -389,6 +484,30 @@ services:
     env_file:
       - ./env
     restart: always
+    # entrypoint:
+    #   - sh
+    #   - -euc
+    #   - |
+    #     mkdir -p /etc/grafana/provisioning/datasources
+    #     cat <<EOF > /etc/grafana/provisioning/datasources/ds.yaml
+    #     apiVersion: 1
+    #     datasources:
+    #     - name: Loki
+    #       type: loki
+    #       access: proxy
+    #       orgId: 1
+    #       url: http://loki:3100
+    #       basicAuth: false
+    #       isDefault: true
+    #       version: 1
+    #       editable: false
+    #     EOF
+    #     /run.sh
     environment:
     - TZ=UTC
     - GF_INSTALL_PLUGINS=grafana-clock-panel,natel-discrete-panel,grafana-piechart-panel
+    - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+    - GF_AUTH_ANONYMOUS_ENABLED=true
+    - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    networks:
+    - loki

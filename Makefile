@@ -71,15 +71,20 @@ help: ## ** Show this help message
 
 .PHONY: up
 up:
-	docker-compose -f docker-compose.yml up -d
+# docker-compose -f docker-compose.yml up -d
+	docker-compose --env-file env up
 
 .PHONY: down
 down:
-	docker-compose -f docker-compose.yml down
+	docker-compose -f docker-compose.yml --env-file env down
 
 .PHONY: logs
 logs:
-	docker-compose -f docker-compose.yml logs -f
+	docker-compose -f docker-compose.yml --env-file env logs -f
+
+.PHONY: rm
+rm:
+	docker-compose -f docker-compose.yml --env-file env rm
 
 .PHONY: restart
 restart: down up
