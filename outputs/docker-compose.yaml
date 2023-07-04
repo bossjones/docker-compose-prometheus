@@ -130,7 +130,7 @@ services:
     expose:
       - 10080
     environment:
-    - TZ=UTC
+    #- TZ=UTC
     - WHOAMI_PORT_NUMBER=10080
     - WHOAMI_NAME=whoami
     ports:
@@ -161,7 +161,7 @@ services:
       - INFLUXDB_HTTP_AUTH_ENABLED=${INFLUXDB_HTTP_AUTH_ENABLED}
       - INFLUXDB_ADMIN_USER=${INFLUXDB_ADMIN_USER}
       - INFLUXDB_ADMIN_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
-      - TZ=UTC
+      #- TZ=UTC
     env_file:
       - ./env
     networks:
@@ -191,7 +191,7 @@ services:
       - INFLUXDB_URL=${INFLUXDB_URL}
       - INFLUXDB_USERNAME=${INFLUXDB_ADMIN_USER}
       - INFLUXDB_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
-      - TZ=UTC
+      #- TZ=UTC
     env_file:
       - ./env
     networks:
@@ -235,8 +235,8 @@ services:
       - alertmanager
     restart: always
 
-    environment:
-    - TZ=UTC
+    # environment:
+    #- TZ=UTC
     # SEE: https://stackoverflow.com/questions/31324981/how-to-access-host-port-from-docker-container/43541732#43541732
     # https://stackoverflow.com/questions/56909896/prometheus-in-docker-container-cannot-scrape-target-on-host/56910057
     networks:
@@ -273,8 +273,8 @@ services:
     restart: always
     deploy:
       mode: global
-    environment:
-    - TZ=UTC
+    # environment:
+    #- TZ=UTC
     networks:
     - loki
 
@@ -305,8 +305,8 @@ services:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
       - '--log.level=debug'
-    environment:
-    - TZ=UTC
+    # environment:
+    #- TZ=UTC
     networks:
     - loki
 
@@ -341,8 +341,8 @@ services:
     restart: always
     deploy:
       mode: global
-    environment:
-    - TZ=UTC
+    #environment:
+    #- TZ=UTC
     networks:
     - loki
 
@@ -359,7 +359,7 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=UTC
+      #- TZ=UTC
     volumes:
       - ./docker-heimdall/config:/config
     ports:
@@ -422,7 +422,8 @@ services:
       # - 3101:3100
       # - 7946
       - 9095
-      - "3101:3100"
+      #- "3101:3100"
+      - "3100"
       - "7946"
       # uncomment to use interactive debugging
       - "40000-40002:40000" # # makes the replicas available on ports 40000, 40001, 40002
@@ -455,7 +456,8 @@ services:
       - ./loki/etc/loki:/loki
     ports:
       - "9095"
-      - "3102:3100"
+      #- "3102:3100"
+      - "3100"
       - "7946"
       # uncomment to use interactive debugging
       # - "50000-50002:40000" # makes the replicas available on ports 50000, 50001, 50002
@@ -532,8 +534,8 @@ services:
     - 9080
     # command: -config.file=/etc/promtail/promtail-config.yaml
     command: -config.file=/etc/promtail/promtail-gateway.yaml
-    environment:
-    - TZ=UTC
+    # environment:
+    #- TZ=UTC
     tty: true
     stdin_open: true
     env_file:
@@ -589,7 +591,7 @@ services:
     #     EOF
     #     /run.sh
     environment:
-    - TZ=UTC
+    #- TZ=UTC
     - GF_INSTALL_PLUGINS=grafana-clock-panel,natel-discrete-panel,grafana-piechart-panel
     - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
     - GF_AUTH_ANONYMOUS_ENABLED=true
