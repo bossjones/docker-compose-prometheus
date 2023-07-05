@@ -184,10 +184,8 @@ services:
     depends_on:
       - influxdb
     environment:
-      # - INFLUXDB_URL=${INFLUXDB_URL}
-      # - INFLUXDB_USERNAME=${INFLUXDB_ADMIN_USER}
-      # - INFLUXDB_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
       - INFLUXDB_URL=http://influxdb:8086
+      # - INFLUXDB_URL=${INFLUXDB_URL}
       - INFLUXDB_USERNAME=${INFLUXDB_ADMIN_USER}
       - INFLUXDB_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
       #- TZ=UTC
@@ -223,7 +221,7 @@ services:
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
       - '--web.listen-address=0.0.0.0:9090'
-      - '--log.level=debug'
+      - '--log.level=info'
       - '--enable-feature=remote-write-receiver'
       - '--query.lookback-delta=30s'
     ports:
@@ -303,7 +301,7 @@ services:
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
-      - '--log.level=debug'
+      - '--log.level=info'
     # environment:
     #- TZ=UTC
     networks:
