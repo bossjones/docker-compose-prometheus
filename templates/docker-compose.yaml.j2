@@ -240,7 +240,7 @@ services:
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
       - '--web.listen-address=0.0.0.0:9090'
-      - '--log.level=debug'
+      - '--log.level={{ prometheus_log_level }}'
       - '--enable-feature=remote-write-receiver'
       - '--query.lookback-delta=30s'
     ports:
@@ -328,7 +328,7 @@ services:
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
-      - '--log.level=debug'
+      - '--log.level={{ alertmanager_log_level }}'
     # environment:
     #- TZ=UTC
     networks:
@@ -503,7 +503,7 @@ services:
     #  - SYS_PTRACE
     #security_opt:
     #  - apparmor=unconfined
-    command: "-config.file=/loki/loki-config.yaml -log.level=debug -target=read"
+    command: "-config.file=/loki/loki-config.yaml -log.level={{ loki_log_level }} -target=read"
     env_file:
       - ./env
     networks:
@@ -538,7 +538,7 @@ services:
     #  - SYS_PTRACE
     #security_opt:
     #  - apparmor=unconfined
-    command: "-config.file=/loki/loki-config.yaml -log.level=debug -target=write -frontend.downstream-url=http://loki-gateway:3100 -querier.frontend-address=http://loki-write:9095"
+    command: "-config.file=/loki/loki-config.yaml -log.level={{ loki_log_level }} -target=write -frontend.downstream-url=http://loki-gateway:3100 -querier.frontend-address=http://loki-write:9095"
     env_file:
       - ./env
     networks:
