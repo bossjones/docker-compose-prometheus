@@ -109,20 +109,6 @@ services:
       - loki
 
 
-  # for testing purposes only, disable in production
-  log-generator:
-    image: mingrammer/flog
-    command:
-      - --loop
-      - --format=json
-      - --number=10 # number of log lines to generate per second
-      - --delay=100ms # delay between log lines
-      - --output=/var/log/generated-logs.txt
-      - --overwrite
-      - --type=log
-    volumes:
-      - ./loki/:/var/log/
-
   whoami:
     image: "traefik/whoami:v1.8.0"
     container_name: "whoami"
@@ -361,37 +347,37 @@ services:
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
-  heimdall:
-    image: linuxserver/heimdall
-    build: ./docker-heimdall
-    container_name: heimdall
-    restart: always
-    environment:
-      - PUID=1000
-      - PGID=1000
-      #- TZ=UTC
-    volumes:
-      - ./docker-heimdall/config:/config
-    ports:
-      - 4040:4040
-      - 4443:4443
-    labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.heimdall.rule=Host(`heimdall.scarlettlab.home`)"
-    - "traefik.http.routers.heimdall.entrypoints=web"
-    - "traefik.http.services.heimdall.loadbalancer.server.port=4040"
-    tty: true
-    stdin_open: true
-    expose:
-    - 4040
-    - 4443
-    networks:
-    - loki
+#   heimdall:
+#     image: linuxserver/heimdall
+#     build: ./docker-heimdall
+#     container_name: heimdall
+#     restart: always
+#     environment:
+#       - PUID=1000
+#       - PGID=1000
+#       #- TZ=UTC
+#     volumes:
+#       - ./docker-heimdall/config:/config
+#     ports:
+#       - 4040:4040
+#       - 4443:4443
+#     labels:
+#     - "traefik.enable=true"
+#     - "traefik.http.routers.heimdall.rule=Host(`heimdall.scarlettlab.home`)"
+#     - "traefik.http.routers.heimdall.entrypoints=web"
+#     - "traefik.http.services.heimdall.loadbalancer.server.port=4040"
+#     tty: true
+#     stdin_open: true
+#     expose:
+#     - 4040
+#     - 4443
+#     networks:
+#     - loki
 
-    logging:
-      driver: json-file
-      options:
-        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+#     logging:
+#       driver: json-file
+#       options:
+#         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
 
   unifi-poller:
