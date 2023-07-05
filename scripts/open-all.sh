@@ -11,3 +11,6 @@ for port in "${myArray[@]}"; do
     "${_DIR}"/open-browser.py http://localhost:${port}
     set +x
 done
+
+# prometheus metrics endpoint
+"${_DIR}"/open-browser.py http://localhost:9090/api/v1/label/__name__/values

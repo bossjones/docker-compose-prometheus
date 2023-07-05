@@ -11,6 +11,6 @@ prometheus_pinghosts_targets:
 cadvisor_feature_flag: false
 log_generator_feature_flag: false
 loki_log_level: 'debug'
-prometheus_log_level: 'debug'
-alertmanager_log_level: 'debug'
-promtail_log_level: 'debug'
+prometheus_log_level: 'info'
+alertmanager_log_level: 'info'
+promtail_log_level: 'info'

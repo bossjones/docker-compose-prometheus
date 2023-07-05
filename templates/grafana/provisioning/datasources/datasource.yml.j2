@@ -49,13 +49,29 @@ datasources:
   # <bool> allow users to edit datasources from the UI.
   editable: true
 
+# - name: InfluxDB
+#   type: influxdb
+#   access: proxy
+#   database: unifi
+#   user: unifi-poller
+#   password: changeme
+#   url: http://influxdb:8086
+
 - name: InfluxDB
   type: influxdb
   access: proxy
-  database: unifi
+  # database: unifi
   user: unifi-poller
-  password: changeme
+  jsonData:
+      dbName: unifi
+      httpMode: GET
+  secureJsonData:
+    password: changeme
   url: http://influxdb:8086
+  editable: true
+  uid: influxdb
+  version: 1
+  basicAuth: true
 
 # - name: Loki
 #   type: loki
