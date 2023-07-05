@@ -93,14 +93,17 @@ services:
       - |
         mkdir -p /data/loki-data && \
         mkdir -p /data/loki-ruler &&
-        minio server /data
+        minio server --console-address :9001 /data
     environment:
       - MINIO_ROOT_USER=loki
       - MINIO_ROOT_PASSWORD=supersecret
       - MINIO_PROMETHEUS_AUTH_TYPE=public
       - MINIO_UPDATE=off
+      # - MINIO_ACCESS_KEY=admin
+      # - MINIO_SECRET_KEY=password
     ports:
       - "9000:9000"
+      - "9001:9001"
     volumes:
       - ./.data/minio:/data
     networks:
@@ -482,12 +485,12 @@ services:
     ports:
       # - 3101:3100
       # - 7946
-      - 9095
+      - "9095"
       #- "3101:3100"
       - "3100"
       - "7946"
       # uncomment to use interactive debugging
-      - "40000-40002:40000" # # makes the replicas available on ports 40000, 40001, 40002
+      # - "40000-40002:40000" # # makes the replicas available on ports 40000, 40001, 40002
     #cap_add:
     #  - SYS_PTRACE
     #security_opt:
@@ -591,12 +594,12 @@ services:
       - ./promtail/var/run/promtail:/var/run/promtail
       # - /var/lib/docker/containers:/var/lib/docker/containers:ro
       # - /home/pi/dev/bossjones/elk-docker/rsyslog-conf/log:/log
-      # - ${DATADIR}/promtail/config/promtail-config.yaml:/etc/promtail/promtail-config.ya
+      # so we can get generated logs
+      - ./loki/:/var/log/:ro
     ports:
       - "9080:9080"
     expose:
     - 9080
-    # command: -config.file=/etc/promtail/promtail-config.yaml
     command: -config.file=/etc/promtail/promtail-gateway.yaml -print-config-stderr -log-config-reverse-order
     # environment:
     #- TZ=UTC
