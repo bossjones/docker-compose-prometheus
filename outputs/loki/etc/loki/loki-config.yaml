@@ -280,7 +280,17 @@ server:
   grpc_listen_address: 0.0.0.0
   http_listen_port: 3100
   grpc_listen_port: 9095
+  # SOURCE: https://medium.com/lonto-digital-services-integrator/grafana-loki-configuration-nuances-2e9b94da4ac1
+  grpc_server_max_recv_msg_size: 104857600  # 100 Mb
+  grpc_server_max_send_msg_size: 104857600  # 100 Mb
+  http_server_write_timeout: 310s
+  http_server_read_timeout: 310s
   log_level: debug
+
+ingester_client:
+  grpc_client_config:
+    max_recv_msg_size: 104857600  # 100 Mb
+    max_send_msg_size: 104857600  # 100 Mb
 
 common:
   storage:
@@ -294,7 +304,8 @@ common:
   compactor_address: http://loki-write:3100
 
 memberlist:
-  join_members: ["loki-read", "loki-write"]
+  # join_members: ["loki-read", "loki-write"]
+  join_members: ["loki-write"]
   dead_node_reclaim_time: 30s
   gossip_to_dead_nodes_time: 15s
   left_ingesters_timeout: 30s
@@ -311,14 +322,17 @@ ingester:
       kvstore:
         store: memberlist
     final_sleep: 0s
-  chunk_idle_period: 1m
+  # chunk_idle_period: 1m
+  chunk_idle_period: 2h
   wal:
     enabled: true
     dir: /loki/wal
-  max_chunk_age: 1m
+  # max_chunk_age: 1m
+  max_chunk_age: 2h
   chunk_retain_period: 30s
   chunk_encoding: snappy
-  chunk_target_size: 1.572864e+06
+  # chunk_target_size: 1.572864e+06
+  chunk_target_size: 1536000
   chunk_block_size: 262144
   flush_op_timeout: 10s
 
@@ -360,6 +374,8 @@ storage_config:
 
 
 limits_config:
+  max_query_parallelism: 24
+  split_queries_by_interval: 15m
   # increment_duplicate_timestamp: true
   max_cache_freshness_per_query: '10m'
   # Enforce every sample has a metric name.
@@ -367,10 +383,14 @@ limits_config:
   reject_old_samples: true
   # reject_old_samples_max_age: 30m
   reject_old_samples_max_age: 168h
-  ingestion_rate_mb: 10
-  ingestion_burst_size_mb: 20
+  # ingestion_rate_mb: 10
+  # ingestion_burst_size_mb: 20
+  ingestion_rate_mb: 20
+  ingestion_burst_size_mb: 30
   # parallelize queries in 15min intervals
   split_queries_by_interval: 15m
+  per_stream_rate_limit: "3MB"
+  per_stream_rate_limit_burst: "10MB"
 
   # SOURCE: https://git.corp.adobe.com/experience-platform/skyline-ops/blob/868e3cf28a80468cabc970f8bd7ece759656baaf/configsets/loki-logging/loki_common.yaml.mustache
   # max_entries_limit_per_query: 100000
@@ -378,6 +398,10 @@ limits_config:
   # ingestion_burst_size_mb: 50
   # per_stream_rate_limit: 20M
   # per_stream_rate_limit_burst: 50M
+
+
+frontend_worker:
+  match_max_concurrent: true
 
 chunk_store_config:
   max_look_back_period: 336h
@@ -417,7 +441,11 @@ query_scheduler:
   max_outstanding_requests_per_tenant: 1024
 
 querier:
+  max_concurrent: 8
   query_ingesters_within: 2h
+  query_timeout: 300s
+  engine:
+    timeout: 300s
 
 compactor:
   working_directory: /tmp/compactor
