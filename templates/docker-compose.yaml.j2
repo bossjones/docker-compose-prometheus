@@ -421,37 +421,37 @@ services:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
 
-  heimdall:
-    image: linuxserver/heimdall
-    build: ./docker-heimdall
-    container_name: heimdall
-    restart: always
-    environment:
-      - PUID=1000
-      - PGID=1000
-      #- TZ=UTC
-    volumes:
-      - ./docker-heimdall/config:/config
-    ports:
-      - 4040:4040
-      - 4443:4443
-    labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.heimdall.rule=Host(`heimdall.{{ fqdn }}`)"
-    - "traefik.http.routers.heimdall.entrypoints=web"
-    - "traefik.http.services.heimdall.loadbalancer.server.port=4040"
-    tty: true
-    stdin_open: true
-    expose:
-    - 4040
-    - 4443
-    networks:
-    - loki
+#   heimdall:
+#     image: linuxserver/heimdall
+#     build: ./docker-heimdall
+#     container_name: heimdall
+#     restart: always
+#     environment:
+#       - PUID=1000
+#       - PGID=1000
+#       #- TZ=UTC
+#     volumes:
+#       - ./docker-heimdall/config:/config
+#     ports:
+#       - 4040:4040
+#       - 4443:4443
+#     labels:
+#     - "traefik.enable=true"
+#     - "traefik.http.routers.heimdall.rule=Host(`heimdall.{{ fqdn }}`)"
+#     - "traefik.http.routers.heimdall.entrypoints=web"
+#     - "traefik.http.services.heimdall.loadbalancer.server.port=4040"
+#     tty: true
+#     stdin_open: true
+#     expose:
+#     - 4040
+#     - 4443
+#     networks:
+#     - loki
 {% raw %}
-    logging:
-      driver: json-file
-      options:
-        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+#     logging:
+#       driver: json-file
+#       options:
+#         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
 
 
