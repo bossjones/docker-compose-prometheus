@@ -37,6 +37,7 @@ scrape_configs:
         target_label: 'host'
       - action: labelmap
         regex: __syslog_message_(.+)
+
   - job_name: generated-logs
     static_configs:
       - targets:
