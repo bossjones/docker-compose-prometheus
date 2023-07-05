@@ -465,7 +465,7 @@ services:
     #  - SYS_PTRACE
     #security_opt:
     #  - apparmor=unconfined
-    command: "-config.file=/loki/loki-config.yaml -log.level=debug -target=write"
+    command: "-config.file=/loki/loki-config.yaml -log.level=debug -target=write -frontend.downstream-url=http://loki-gateway:3100 -querier.frontend-address=http://loki-write:9095"
     env_file:
       - ./env
     networks:
