@@ -9,3 +9,4 @@ prometheus_pinghosts_targets:
 # - http://192.168.1.91:18000/metrics;cerebrobot;external;internetbox
 
 cadvisor_feature_flag: false
+log_generator_feature_flag: false

@@ -110,7 +110,7 @@ services:
     networks:
       - loki
 
-
+{% if log_generator_feature_flag %}
   # for testing purposes only, disable in production
   log-generator:
     image: mingrammer/flog
@@ -124,6 +124,7 @@ services:
       - --type=log
     volumes:
       - ./loki/:/var/log/
+{% endif %}
 
   whoami:
     image: "traefik/whoami:v1.8.0"
