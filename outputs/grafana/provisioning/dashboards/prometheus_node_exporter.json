@@ -14182,7 +14182,7 @@
         "includeAll": false,
         "label": "datasource",
         "multi": false,
-        "name": "DS_PROMETHEUS",
+        "name": "prometheus",
         "options": [],
         "query": "prometheus",
         "queryValue": "",
