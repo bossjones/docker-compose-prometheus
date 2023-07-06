@@ -91,7 +91,7 @@ datasources:
     httpHeaderValue1: "docker"
   editable: true
   isDefault: true
-  name: loki
+  name: Loki
   type: loki
   uid: loki
   url: http://loki-gateway
