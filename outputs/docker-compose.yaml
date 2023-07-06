@@ -626,7 +626,7 @@ services:
     - loki
 
   grafana:
-    image: grafana/grafana
+    image: grafana/grafana:10.0.1
     container_name: grafana
     labels:
     - "traefik.enable=true"
