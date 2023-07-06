@@ -199,7 +199,7 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "sum(minio_disks_total)",
+          "expr": "sum(minio_cluster_disk_total)",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -497,7 +497,7 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "sum(minio_disks_offline)",
+          "expr": "sum(minio_cluster_disk_offline_total)",
           "format": "time_series",
           "instant": true,
           "interval": "",
@@ -573,7 +573,7 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "count(count by (instances) (minio_version_info))",
+          "expr": "count(count by (instances) (minio_software_version_info))",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -1518,7 +1518,7 @@
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "S3 Bytes Received {{instance}}",
-          "metric": "minio_http_requests_duration_seconds_count",
+          "metric": "minio_s3_requests_total",
           "refId": "A",
           "step": 4
         },
@@ -1633,7 +1633,7 @@
           "interval": "",
           "intervalFactor": 1,
           "legendFormat": "Instance {{instance}} function {{api}}",
-          "metric": "minio_network_sent_bytes_total",
+          "metric": "minio_bucket_traffic_sent_bytes",
           "refId": "A",
           "step": 10
         }
@@ -1784,7 +1784,7 @@
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "Internode Bytes Received {{instance}}",
-          "metric": "minio_http_requests_duration_seconds_count",
+          "metric": "minio_s3_requests_total",
           "refId": "A",
           "step": 4
         },
@@ -1910,7 +1910,7 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "minio_disks_total{instance=~\"$instance\"} - minio_disks_offline{instance=~\"$instance\"}",
+          "expr": "minio_cluster_disk_total{instance=~\"$instance\"} - minio_cluster_disk_offline_total{instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -2064,7 +2064,7 @@
           "value": "$__all"
         },
         "datasource": "Prometheus",
-        "definition": "label_values(minio_version_info,instance)",
+        "definition": "label_values(minio_software_version_info,instance)",
         "description": null,
         "error": null,
         "hide": 0,
@@ -2074,7 +2074,7 @@
         "name": "instance",
         "options": [],
         "query": {
-          "query": "label_values(minio_version_info,instance)",
+          "query": "label_values(minio_software_version_info,instance)",
           "refId": "Prometheus-instance-Variable-Query"
         },
         "refresh": 1,
