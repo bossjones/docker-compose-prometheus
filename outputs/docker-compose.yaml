@@ -348,13 +348,14 @@ services:
     entrypoint:
       - /usr/bin/cadvisor
       # - --v=6
+      - '--max_procs=2'
       - '--listen_ip=0.0.0.0'
       - '--port=8081'
       - '--logtostderr'
-      - '--enable_load_reader=true'
+      # - '--enable_load_reader=true'
       - '--machine_id_file="/etc/machine-id"'
-      - '--enable_metrics=advtcp,app,cpu,cpuLoad,cpu_topology,cpuset,disk,diskIO,hugetlb,memory,memory_numa,network,oom_event,percpu,perf_event,process,resctrl,sched,tcp,udp'
-      - '--disable_metrics=referenced_memory'
+      - '--enable_metrics=advtcp,app,cpu,cpu_topology,cpuset,disk,diskIO,hugetlb,memory,memory_numa,network,oom_event,percpu,perf_event,process,resctrl,sched,tcp,udp'
+      - '--disable_metrics=referenced_memory,cpuLoad'
       # - "--housekeeping_interval=30s"
       # - "--max_housekeeping_interval=35s"
       # - "--event_storage_event_limit=default=0"
