@@ -21,3 +21,5 @@ done
 
 # cp -a docker-compose.yml outputs/docker-compose.yml
 cp -av unifi_poller_dashboards/*.json  outputs/grafana/provisioning/dashboards/
+
+chmod +x outputs/syslog-generator/entrypoint.sh
