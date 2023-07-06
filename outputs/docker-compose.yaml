@@ -229,6 +229,7 @@ services:
       - 9090:9090
     links:
       - alertmanager:alertmanager
+      - loki-gateway:loki-gateway
     depends_on:
       - alertmanager
     restart: always
@@ -561,6 +562,11 @@ services:
     depends_on:
       - prometheus
       - loki-gateway
+    links:
+      - prometheus:prometheus
+      - loki-gateway:loki-gateway
+      - alertmanager:alertmanager
+      - influxdb:influxdb
     expose:
     - 3000
     ports:
