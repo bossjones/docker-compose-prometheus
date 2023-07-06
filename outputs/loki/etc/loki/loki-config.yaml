@@ -271,7 +271,7 @@
 #   enable_api: true
 
 
-auth_enabled: true
+auth_enabled: false
 
 http_prefix:
 
