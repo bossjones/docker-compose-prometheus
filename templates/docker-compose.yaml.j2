@@ -616,7 +616,11 @@ services:
       - "9080:9080"
     expose:
     - 9080
-    command: -config.file=/etc/promtail/promtail-gateway.yaml -print-config-stderr -log-config-reverse-order --inspect
+    command:
+    - '-config.file=/etc/promtail/promtail-gateway.yaml'
+    - '-print-config-stderr'
+    - '-log-config-reverse-order'
+    - '--inspect'
     # environment:
     #- TZ=UTC
     tty: true
