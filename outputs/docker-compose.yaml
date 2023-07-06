@@ -93,12 +93,15 @@ services:
       - |
         mkdir -p /data/loki-data && \
         mkdir -p /data/loki-ruler &&
-        minio server /data --console-address ":9001"
+        minio server /data --address ":9000" --console-address ":9001"
     environment:
       - MINIO_ROOT_USER=loki
       - MINIO_ROOT_PASSWORD=supersecret
       - MINIO_PROMETHEUS_AUTH_TYPE=public
       - MINIO_UPDATE=off
+      - MINIO_PROMETHEUS_URL=http://prometheus:9090
+      - MINIO_PROMETHEUS_JOB_ID=minio-cluster
+      - MINIO_BROWSER=on
       # - MINIO_ACCESS_KEY=admin
       # - MINIO_SECRET_KEY=password
     ports:

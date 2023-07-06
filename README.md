@@ -26,3 +26,5 @@ Just needed this to test out a couple things w/ a python asyncio app
 8. cd ./outputs
 9. docker-compose --env-file env ps
 10. docker-compose --env-file env up
+
+https://github.com/microdevops-com/microdevops-formula/blob/61ac0273f2e7559d73344934164ccc850eff52c0/loki/pillar.example
