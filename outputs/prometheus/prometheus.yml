@@ -225,6 +225,13 @@ scrape_configs:
         type: A
         port: 9080
 
+  - job_name: 'grafana'
+    dns_sd_configs:
+      - names:
+          - grafana
+        type: A
+        port: 3000
+
   - job_name: minio-cluster
     metrics_path: /minio/v2/metrics/cluster
     scheme: http
