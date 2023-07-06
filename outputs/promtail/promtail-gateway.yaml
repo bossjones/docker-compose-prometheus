@@ -7,7 +7,7 @@ positions:
   filename: /tmp/positions.yaml
 
 clients:
-  - url: http://loki-gateway:3100/loki/api/v1/push
+  - url: http://loki-gateway:80/loki/api/v1/push
     tenant_id: docker
     backoff_config:
       min_period: 100ms

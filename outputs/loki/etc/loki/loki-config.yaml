@@ -287,11 +287,6 @@ server:
   http_server_read_timeout: 310s
   log_level: debug
 
-ingester_client:
-  grpc_client_config:
-    max_recv_msg_size: 104857600  # 100 Mb
-    max_send_msg_size: 104857600  # 100 Mb
-
 common:
   storage:
     s3:
@@ -304,8 +299,8 @@ common:
   compactor_address: http://loki-write:3100
 
 memberlist:
-  # join_members: ["loki-read", "loki-write"]
-  join_members: ["loki-write"]
+  join_members: ["loki-read", "loki-write"]
+  # join_members: ["loki-write"]
   dead_node_reclaim_time: 30s
   gossip_to_dead_nodes_time: 15s
   left_ingesters_timeout: 30s
@@ -336,24 +331,24 @@ ingester:
   chunk_block_size: 262144
   flush_op_timeout: 10s
 
-ruler:
-  enable_api: true
-  wal:
-    dir: /tmp/ruler-wal
-  storage:
-    type: local
-    local:
-      directory: /loki/rules
-  rule_path: /tmp/prom-rules
-  remote_write:
-    enabled: true
-    clients:
-      local:
-          url: http://prometheus:9090/api/v1/write
-          queue_config:
-            # send immediately as soon as a sample is generated
-            capacity: 1
-            batch_send_deadline: 0s
+# ruler:
+#   enable_api: true
+#   wal:
+#     dir: /tmp/ruler-wal
+#   storage:
+#     type: local
+#     local:
+#       directory: /loki/rules
+#   rule_path: /tmp/prom-rules
+#   remote_write:
+#     enabled: true
+#     clients:
+#       local:
+#           url: http://prometheus:9090/api/v1/write
+#           queue_config:
+#             # send immediately as soon as a sample is generated
+#             capacity: 1
+#             batch_send_deadline: 0s
 
 schema_config:
   configs:
@@ -414,6 +409,7 @@ query_range:
   align_queries_with_step: true
   max_retries: 5
   parallelise_shardable_queries: true
+  cache_results: true
   # SOURCE: https://git.corp.adobe.com/experience-platform/skyline-ops/blob/868e3cf28a80468cabc970f8bd7ece759656baaf/configsets/loki-logging/loki_common.yaml.mustache
   # parallelize queries in 15min intervals
   # split_queries_by_interval: 15m
@@ -449,3 +445,9 @@ querier:
 compactor:
   working_directory: /tmp/compactor
   shared_store: s3
+
+
+ingester_client:
+  grpc_client_config:
+    max_recv_msg_size: 104857600  # 100 Mb
+    max_send_msg_size: 104857600  # 100 Mb
