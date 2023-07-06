@@ -225,8 +225,14 @@ scrape_configs:
         type: A
         port: 9080
 
-  - job_name: minio
+  - job_name: minio-cluster
     metrics_path: /minio/v2/metrics/cluster
+    scheme: http
+    static_configs:
+    - targets: [minio:9000]
+
+  - job_name: minio-node
+    metrics_path: /minio/v2/metrics/node
     scheme: http
     static_configs:
     - targets: [minio:9000]
