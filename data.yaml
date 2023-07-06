@@ -8,7 +8,7 @@ prometheus_pinghosts_targets:
 - http://github.com;github.com;external;internetbox
 # - http://192.168.1.91:18000/metrics;cerebrobot;external;internetbox
 
-cadvisor_feature_flag: false
+cadvisor_feature_flag: true
 log_generator_feature_flag: false
 loki_log_level: 'info'
 prometheus_log_level: 'info'

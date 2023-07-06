@@ -217,7 +217,7 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "sum by (instance) (log_messages_total)",
+          "expr": "sum by (instance) (loki_internal_log_messages_total)",
           "instant": false,
           "interval": "",
           "legendFormat": "{{instance}}",
@@ -275,7 +275,7 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "sum (log_messages_total)",
+          "expr": "sum (loki_internal_log_messages_total)",
           "instant": false,
           "interval": "",
           "legendFormat": "",
@@ -718,7 +718,7 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "sum(irate(log_messages_total[1m])) by (level)",
+          "expr": "sum(irate(loki_internal_log_messages_total[1m])) by (level)",
           "interval": "",
           "legendFormat": "{{ level }}",
           "refId": "A"

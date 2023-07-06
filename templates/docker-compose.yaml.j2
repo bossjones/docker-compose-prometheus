@@ -349,10 +349,11 @@ services:
 {% if cadvisor_feature_flag %}
   cadvisor:
     # SOURCE: https://github.com/rafaribe/home-ops/blob/d9e283fd3ddc42a9891c8a12fe82fa128657798a/provision/ansible/backup-server/roles/syncthing/templates/agent.yml
-    image: gcr.io/cadvisor/cadvisor:latest
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
     container_name: cadvisor
     privileged: true
     userns_mode: "host"
+    pid: "host"
     labels:
     - "traefik.enable=true"
     - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.{{ fqdn }}`)"
@@ -374,12 +375,18 @@ services:
     restart: always
     entrypoint:
       - /usr/bin/cadvisor
+      - '--enable_metrics'
       # - --v=6
       - '--listen_ip=0.0.0.0'
       - '--port=8081'
       - --logtostderr
+      - --enable_load_reader=true
+      - --machine_id_file="/etc/machine-id"
+      - --enable_metrics=accelerator,advtcp,app,cpu,cpuLoad,cpu_topology,cpuset,disk,diskIO,hugetlb,memory,memory_numa,network,oom_event,percpu,perf_event,process,referenced_memory,resctrl,sched,tcp,udp
     env_file:
       - ./env
+    devices:
+    - /dev/kmsg:/dev/kmsg
     # environment:
     #- TZ=UTC
     networks:
