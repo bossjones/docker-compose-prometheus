@@ -78,7 +78,8 @@ services:
     user: root
     entrypoint:
       - "chown"
-      - "10001:10001"
+      # - "10001:10001"
+      - "1000:1000"
       - "/loki"
     volumes:
       - ./loki:/loki
@@ -485,11 +486,12 @@ services:
 
 
   loki-read:
+    user: "1000"
     image: grafana/loki:2.8.2
     volumes:
       # - ./config:/etc/loki/
       # - ./loki/etc/loki:/etc/loki/
-      - ./loki/etc/loki:/loki
+      - ./loki/etc/loki:/loki:rw
       - ./rules:/loki/rules:ro
     ports:
       # - 3101:3100
@@ -524,10 +526,11 @@ services:
 {% endraw %}
 
   loki-write:
+    user: "1000"
     image: grafana/loki:2.8.2
     volumes:
       # - ./config:/etc/loki/
-      - ./loki/etc/loki:/loki
+      - ./loki/etc/loki:/loki:rw
     ports:
       - "9095"
       #- "3102:3100"
