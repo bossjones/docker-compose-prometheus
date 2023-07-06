@@ -597,5 +597,8 @@ services:
     - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
     - GF_AUTH_ANONYMOUS_ENABLED=true
     - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    - GF_DATAPROXY_TIMEOUT=310
+    - GF_LOG_LEVEL=info
+    - GF_DATAPROXY_LOGGING=true
     networks:
     - loki
