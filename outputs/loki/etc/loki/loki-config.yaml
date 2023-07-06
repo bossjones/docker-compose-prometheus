@@ -369,6 +369,7 @@ storage_config:
 
 
 limits_config:
+  query_timeout: 300s
   max_query_parallelism: 24
   split_queries_by_interval: 15m
   # increment_duplicate_timestamp: true

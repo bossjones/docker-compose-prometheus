@@ -724,11 +724,3 @@ services:
     - ./syslog-ng/syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf:ro
     - ./syslog-ng:/syslog-ng:rw
 
-  syslog-generator:
-    build:
-      context: ./syslog-generator
-    container_name: syslog-generator
-    depends_on:
-    - syslog-ng
-    networks:
-      loki: null
