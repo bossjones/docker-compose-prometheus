@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.8'
 
 networks:
   loki:
@@ -93,7 +93,7 @@ services:
       - |
         mkdir -p /data/loki-data && \
         mkdir -p /data/loki-ruler &&
-        minio server --console-address :9001 /data
+        minio server /data --console-address ":9001"
     environment:
       - MINIO_ROOT_USER=loki
       - MINIO_ROOT_PASSWORD=supersecret
@@ -466,6 +466,7 @@ services:
     #  - SYS_PTRACE
     #security_opt:
     #  - apparmor=unconfined
+    # command: "-config.file=/loki/loki-config.yaml -log.level=debug -target=write -frontend.downstream-url=http://loki-gateway:3100 -querier.frontend-address=http://loki-write:9095"
     command: "-config.file=/loki/loki-config.yaml -log.level=debug -target=write -frontend.downstream-url=http://loki-gateway:3100 -querier.frontend-address=http://loki-write:9095"
     env_file:
       - ./env
@@ -518,6 +519,8 @@ services:
     restart: always
     depends_on:
       - 'loki-gateway'
+      - 'loki-read'
+      - 'loki-write'
     volumes:
       # - /var/log:/var/log:ro
       - ./promtail/promtail-gateway.yaml:/etc/promtail/promtail-gateway.yaml:ro
@@ -606,5 +609,6 @@ services:
     - GF_DATAPROXY_TIMEOUT=310
     - GF_LOG_LEVEL=info
     - GF_DATAPROXY_LOGGING=true
+    - GF_EXPLORE_ENABLED=true
     networks:
     - loki
