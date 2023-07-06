@@ -175,7 +175,7 @@ services:
       - INFLUXDB_HTTP_ENABLED=1
       - INFLUXDB_HTTP_LOG_ENABLED=1
       # - INFLUXDB_HTTP_AUTH_ENABLED=0
-      - INFLUXDB_LOGGING_LEVEL=debug
+      - INFLUXDB_LOGGING_LEVEL={{ influxdb_log_level }}
       #- TZ=UTC
     env_file:
       - ./env
@@ -618,8 +618,8 @@ services:
     - 9080
     command:
     - '-config.file=/etc/promtail/promtail-gateway.yaml'
-    - '-print-config-stderr'
-    - '-log-config-reverse-order'
+    # - '-print-config-stderr'
+    # - '-log-config-reverse-order'
     - '--inspect'
     # environment:
     #- TZ=UTC

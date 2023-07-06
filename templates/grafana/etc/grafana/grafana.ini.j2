@@ -627,7 +627,7 @@ timeout = 310
 ;mode = console file
 
 # Either "debug", "info", "warn", "error", "critical", default is "info"
-;level = info
+level = {{ grafana_log_level }}
 
 # optional settings to set different levels for specific loggers. Ex filters = sqlstore:debug
 ;filters =

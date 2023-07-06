@@ -285,7 +285,7 @@ server:
   grpc_server_max_send_msg_size: 104857600  # 100 Mb
   http_server_write_timeout: 310s
   http_server_read_timeout: 310s
-  log_level: debug
+  log_level: {{loki_log_level}}
 
 common:
   storage:

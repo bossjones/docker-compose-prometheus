@@ -157,7 +157,7 @@ services:
       - INFLUXDB_HTTP_ENABLED=1
       - INFLUXDB_HTTP_LOG_ENABLED=1
       # - INFLUXDB_HTTP_AUTH_ENABLED=0
-      - INFLUXDB_LOGGING_LEVEL=debug
+      - INFLUXDB_LOGGING_LEVEL=
       #- TZ=UTC
     env_file:
       - ./env
@@ -431,7 +431,7 @@ services:
     #  - SYS_PTRACE
     #security_opt:
     #  - apparmor=unconfined
-    command: "-config.file=/loki/loki-config.yaml -log.level=debug -target=read"
+    command: "-config.file=/loki/loki-config.yaml -log.level=info -target=read"
     env_file:
       - ./env
     networks:
@@ -466,8 +466,8 @@ services:
     #  - SYS_PTRACE
     #security_opt:
     #  - apparmor=unconfined
-    # command: "-config.file=/loki/loki-config.yaml -log.level=debug -target=write -frontend.downstream-url=http://loki-gateway:3100 -querier.frontend-address=http://loki-write:9095"
-    command: "-config.file=/loki/loki-config.yaml -log.level=debug -target=write -frontend.downstream-url=http://loki-gateway"
+    # command: "-config.file=/loki/loki-config.yaml -log.level=info -target=write -frontend.downstream-url=http://loki-gateway:3100 -querier.frontend-address=http://loki-write:9095"
+    command: "-config.file=/loki/loki-config.yaml -log.level=info -target=write -frontend.downstream-url=http://loki-gateway"
     env_file:
       - ./env
     networks:
@@ -539,8 +539,8 @@ services:
     - 9080
     command:
     - '-config.file=/etc/promtail/promtail-gateway.yaml'
-    - '-print-config-stderr'
-    - '-log-config-reverse-order'
+    # - '-print-config-stderr'
+    # - '-log-config-reverse-order'
     - '--inspect'
     # environment:
     #- TZ=UTC
