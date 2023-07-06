@@ -375,14 +375,13 @@ services:
     restart: always
     entrypoint:
       - /usr/bin/cadvisor
-      - '--enable_metrics'
       # - --v=6
       - '--listen_ip=0.0.0.0'
       - '--port=8081'
-      - --logtostderr
-      - --enable_load_reader=true
-      - --machine_id_file="/etc/machine-id"
-      - --enable_metrics=accelerator,advtcp,app,cpu,cpuLoad,cpu_topology,cpuset,disk,diskIO,hugetlb,memory,memory_numa,network,oom_event,percpu,perf_event,process,referenced_memory,resctrl,sched,tcp,udp
+      - '--logtostderr'
+      - '--enable_load_reader=true'
+      - '--machine_id_file="/etc/machine-id"'
+      - '--enable_metrics=accelerator,advtcp,app,cpu,cpuLoad,cpu_topology,cpuset,disk,diskIO,hugetlb,memory,memory_numa,network,oom_event,percpu,perf_event,process,referenced_memory,resctrl,sched,tcp,udp'
     env_file:
       - ./env
     devices:
