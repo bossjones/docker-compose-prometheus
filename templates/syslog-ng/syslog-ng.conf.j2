@@ -24,11 +24,11 @@ options {
 @include "scl.conf"
 
 source udp {
-    syslog(ip(0.0.0.0) port(1514) transport("udp"));
+    syslog(ip(0.0.0.0) port(514) transport("udp"));
 };
 
 source tcp {
-    syslog(ip(0.0.0.0) port(1514) transport("tcp"));
+    syslog(ip(0.0.0.0) port(514) transport("tcp"));
 };
 
 # All messages generated internally by syslog-ng use this special source. To collect warnings, errors and notices from syslog-ng itself, include this source in one of your source statements.

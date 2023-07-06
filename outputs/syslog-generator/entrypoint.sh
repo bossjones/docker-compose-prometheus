@@ -27,13 +27,13 @@ random_host=${arr[$rand]}
    I=$(shuf -i 1-4 -n 1)
    D=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
    case "$I" in
-      "1") echo "$D ${random_host} ERROR An error is usually an exception that has been caught and not handled." | nc -u -w1 ${endpoint} 1514
+      "1") echo "$D ${random_host} ERROR An error is usually an exception that has been caught and not handled." | nc -u -w1 ${endpoint} 514
       ;;
-      "2") echo "$D ${random_host} INFO An info is often used to provide context in the current task." | nc -u -w1 ${endpoint} 1514
+      "2") echo "$D ${random_host} INFO An info is often used to provide context in the current task." | nc -u -w1 ${endpoint} 514
       ;;
-      "3") echo "$D ${random_host} WARN A warning that should be ignored is usually at this level and should be actionable." | nc -u -w1 ${endpoint} 1514
+      "3") echo "$D ${random_host} WARN A warning that should be ignored is usually at this level and should be actionable." | nc -u -w1 ${endpoint} 514
       ;;
-      "4") echo "$D ${random_host} DEBUG This is a debug log that shows a log that can be ignored." | nc -u -w1 ${endpoint} 1514
+      "4") echo "$D ${random_host} DEBUG This is a debug log that shows a log that can be ignored." | nc -u -w1 ${endpoint} 514
       ;;
    esac
    c=$(( c+1 ))
