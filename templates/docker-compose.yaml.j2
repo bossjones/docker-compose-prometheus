@@ -295,7 +295,7 @@ services:
       # - --collector.filesystem.ignored-mount-points
       # - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
       -  '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
-      - '--collector.thermal_zone=false'
+      - '--collector.thermal_zone-exclude'
     expose:
     - 9100
     ports:
