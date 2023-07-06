@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+cat <<EOF > /tmp/influxdb_setup.yaml
+CREATE DATABASE unifi
+USE unifi
+CREATE USER unifipoller WITH PASSWORD 'changeme' WITH ALL PRIVILEGES
+GRANT ALL ON unifi TO unifipoller
+exit
+EOF
+
+docker exec -it influxdb influx
