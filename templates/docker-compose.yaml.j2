@@ -381,7 +381,8 @@ services:
       - '--logtostderr'
       - '--enable_load_reader=true'
       - '--machine_id_file="/etc/machine-id"'
-      - '--enable_metrics=accelerator,advtcp,app,cpu,cpuLoad,cpu_topology,cpuset,disk,diskIO,hugetlb,memory,memory_numa,network,oom_event,percpu,perf_event,process,referenced_memory,resctrl,sched,tcp,udp'
+      - '--enable_metrics=advtcp,app,cpu,cpuLoad,cpu_topology,cpuset,disk,diskIO,hugetlb,memory,memory_numa,network,oom_event,percpu,perf_event,process,resctrl,sched,tcp,udp'
+      - '--disable_metrics=referenced_memory'
       # - "--housekeeping_interval=30s"
       # - "--max_housekeeping_interval=35s"
       # - "--event_storage_event_limit=default=0"
