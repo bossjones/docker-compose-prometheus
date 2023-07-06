@@ -714,7 +714,7 @@ services:
 
   syslog-generator:
     build:
-      context: ./generator
+      context: ./syslog-generator
     container_name: syslog-generator
     depends_on:
     - syslog-ng
