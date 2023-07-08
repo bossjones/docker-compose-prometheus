@@ -724,3 +724,24 @@ services:
     - ./syslog-ng/syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf:ro
     - ./syslog-ng:/syslog-ng:rw
 
+  syslog_ng_exporter:
+    build:
+      context: ./syslog_ng_exporter
+    container_name: syslog_ng_exporter
+    command:
+    - '--telemetry.address=":9577"'
+    - '--telemetry.endpoint="/metrics"'
+    - '--socket.path="/syslog-ng/syslog-ng.ctl"'
+    - '--log.level="info"'
+    depends_on:
+    - syslog-ng
+    networks:
+      loki: null
+    ports:
+    - protocol: tcp
+      published: 9577
+      target: 9577
+    restart: always
+    volumes:
+    - ./syslog-ng:/syslog-ng:rw
+
