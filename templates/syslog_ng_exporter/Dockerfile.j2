@@ -1,4 +1,4 @@
-FROM golang:alpine AS builder
+FROM golang:1.15.3-alpine AS builder
 RUN apk --no-cache upgrade
 RUN apk --no-cache add alpine-sdk
 COPY ./ /go/src/github.com/brandond/syslog_ng_exporter/
