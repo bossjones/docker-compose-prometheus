@@ -769,7 +769,7 @@ services:
     - '--telemetry.address=":9577"'
     - '--telemetry.endpoint="/metrics"'
     - '--socket.path="/syslog-ng/syslog-ng.ctl"'
-    - '--log.level="info"'
+    # - '--log.level="info"'
     depends_on:
     - syslog-ng
     networks:
