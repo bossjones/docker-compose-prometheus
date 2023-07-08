@@ -766,10 +766,10 @@ services:
     image: brandond/syslog_ng_exporter:latest
     container_name: syslog_ng_exporter
     command:
-    - '--telemetry.address=":9577"'
-    - '--telemetry.endpoint="/metrics"'
-    - '--socket.path="/syslog-ng/syslog-ng.ctl"'
-    # - '--log.level="info"'
+    - '--telemetry.address=:9577'
+    - '--telemetry.endpoint=/metrics'
+    - '--socket.path=/syslog-ng/syslog-ng.ctl'
+    # - '--log.level=info'
     depends_on:
     - syslog-ng
     networks:
