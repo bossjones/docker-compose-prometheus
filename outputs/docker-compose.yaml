@@ -725,8 +725,9 @@ services:
     - ./syslog-ng:/syslog-ng:rw
 
   syslog_ng_exporter:
-    build:
-      context: ./syslog_ng_exporter
+    # build:
+    #   context: ./syslog_ng_exporter
+    image: brandond/syslog_ng_exporter:latest
     container_name: syslog_ng_exporter
     command:
     - '--telemetry.address=":9577"'

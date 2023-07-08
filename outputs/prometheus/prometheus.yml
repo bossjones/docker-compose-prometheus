@@ -230,6 +230,11 @@ scrape_configs:
     static_configs:
     - targets: [grafana:3000]
 
+  - job_name: syslog_ng_exporter
+    scheme: http
+    static_configs:
+    - targets: [syslog_ng_exporter:9577]
+
   - job_name: minio-cluster
     metrics_path: /minio/v2/metrics/cluster
     scheme: http
