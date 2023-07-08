@@ -1139,7 +1139,7 @@
           "pluginVersion": "7.3.1",
           "targets": [
             {
-              "expr": "cortex_prometheus_rule_evaluations_total",
+              "expr": "cortex_ruler_sync_rules_total",
               "format": "time_series",
               "instant": true,
               "interval": "",
@@ -1518,7 +1518,7 @@
           "pluginVersion": "8.1.2",
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(cortex_cache_value_size_bytes_bucket[5m])) by (le,name,method))",
+              "expr": "histogram_quantile(0.95, sum(rate(loki_cache_value_size_bytes_bucket[5m])) by (le,name,method))",
               "interval": "",
               "legendFormat": "{{name}} / {{method}}",
               "refId": "A"
@@ -1605,7 +1605,7 @@
           "pluginVersion": "8.1.2",
           "targets": [
             {
-              "expr": "rate(cortex_cache_hits[5m])",
+              "expr": "rate(loki_cache_hits[5m])",
               "interval": "",
               "legendFormat": "{{name}}",
               "refId": "A"
@@ -1692,7 +1692,7 @@
           "pluginVersion": "8.1.2",
           "targets": [
             {
-              "expr": "cortex_cache_background_queue_length",
+              "expr": "cortex_ingester_flush_queue_length",
               "interval": "",
               "legendFormat": "{{name}}",
               "refId": "A"
@@ -1779,7 +1779,7 @@
           "pluginVersion": "8.1.2",
           "targets": [
             {
-              "expr": "cortex_cache_fetched_keys",
+              "expr": "loki_cache_fetched_keys",
               "interval": "",
               "legendFormat": "{{name}}",
               "refId": "A"
@@ -1882,7 +1882,7 @@
           "pluginVersion": "8.1.2",
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(cortex_cassandra_request_duration_seconds_bucket[5m])) by (le,operation))",
+              "expr": "histogram_quantile(0.95, sum(rate(cortex_kv_request_duration_seconds_bucket[5m])) by (le,operation))",
               "interval": "",
               "legendFormat": "{{operation}}",
               "refId": "A"
@@ -2059,7 +2059,7 @@
           "pluginVersion": "8.1.2",
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(cortex_table_manager_sync_duration_seconds_bucket[5m])) by (le))",
+              "expr": "histogram_quantile(0.95, sum(rate(loki_boltdb_shipper_tables_sync_operation_total[5m])) by (le))",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
@@ -2161,7 +2161,7 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "sum by (tenant) (rate(loki_distributor_lines_received_total[5m]))",
+          "expr": "sum by (tenant) (rate(loki_logql_querystats_ingester_sent_lines_total[5m]))",
           "interval": "",
           "legendFormat": "distributor / {{ tenant}}",
           "refId": "A"
