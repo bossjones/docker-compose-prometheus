@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.8'
 
 networks:
   loki:
@@ -23,34 +23,112 @@ volumes:
     influxdb-storage:
     chronograf-storage:
     grafana-storage:
+    alertmanager-data:
 {% endraw %}
 
 {% raw %}
 services:
-  # SOURCE: https://doc.traefik.io/traefik/user-guides/docker-compose/basic-example/
-  # SOURCE: https://doc.traefik.io/traefik/user-guides/docker-compose/basic-example/
-  traefik:
-    image: "traefik:latest"
-    container_name: "traefik"
-    command:
-      # - "--log.level=DEBUG"
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--metrics.prometheus=true"
-    ports:
-      - "80:80"
-      - "8080:8080"
+#   # SOURCE: https://doc.traefik.io/traefik/user-guides/docker-compose/basic-example/
+#   # SOURCE: https://doc.traefik.io/traefik/user-guides/docker-compose/basic-example/
+#   traefik:
+#     image: "traefik:latest"
+#     container_name: "traefik"
+#     command:
+#       # - "--log.level=DEBUG"
+#       - "--api.insecure=true"
+#       - "--providers.docker=true"
+#       - "--providers.docker.exposedbydefault=false"
+#       - "--entrypoints.web.address=:80"
+#       - "--metrics.prometheus=true"
+#     ports:
+#       - "80:80"
+#       - "8080:8080"
+#     volumes:
+#       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+#     networks:
+#     - loki
+#     logging:
+#       driver: json-file
+#       options:
+#         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+  loki-gateway:
+    image: nginx:1.19
+    container_name: "loki-gateway"
+    depends_on:
+      - 'loki-read'
+      - 'loki-write'
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "8080:80"
+      - "3100:3100"
     networks:
-    - loki
+      - loki
     logging:
       driver: json-file
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
+
+  # Since the Loki containers are running as user 10001 and the mounted data volume is owned by root,
+  # Loki would not have permissions to create the directories.
+  # Therefore the init container changes permissions of the mounted directory.
+  init:
+    image: grafana/loki:2.8.0
+    user: root
+    entrypoint:
+      - "chown"
+      # - "10001:10001"
+      - "1000:1000"
+      - "/loki"
+    volumes:
+      - ./loki:/loki
+    networks:
+      - loki
+
+  minio:
+    image: minio/minio:RELEASE.2023-06-29T05-12-28Z
+    container_name: minio
+    entrypoint:
+      - sh
+      - -euc
+      - |
+        mkdir -p /data/loki-data && \
+        mkdir -p /data/loki-ruler &&
+        minio server /data --address ":9000" --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=loki
+      - MINIO_ROOT_PASSWORD=supersecret
+      - MINIO_PROMETHEUS_AUTH_TYPE=public
+      - MINIO_UPDATE=off
+      - MINIO_PROMETHEUS_URL=http://prometheus:9090
+      - MINIO_PROMETHEUS_JOB_ID=minio-cluster
+      - MINIO_BROWSER=on
+      # - MINIO_ACCESS_KEY=admin
+      # - MINIO_SECRET_KEY=password
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - ./.data/minio:/data
+    networks:
+      - loki
+
+{% if log_generator_feature_flag %}
+  # for testing purposes only, disable in production
+  log-generator:
+    image: mingrammer/flog
+    command:
+      - --loop
+      - --format=json
+      - --number=10 # number of log lines to generate per second
+      - --delay=100ms # delay between log lines
+      - --output=/var/log/generated-logs.txt
+      - --overwrite
+      - --type=log
+    volumes:
+      - ./loki/:/var/log/
+{% endif %}
 
   whoami:
     image: "traefik/whoami:v1.8.0"
@@ -63,7 +141,7 @@ services:
     expose:
       - 10080
     environment:
-    - TZ=UTC
+    #- TZ=UTC
     - WHOAMI_PORT_NUMBER=10080
     - WHOAMI_NAME=whoami
     ports:
@@ -95,7 +173,31 @@ services:
       - INFLUXDB_HTTP_AUTH_ENABLED=${INFLUXDB_HTTP_AUTH_ENABLED}
       - INFLUXDB_ADMIN_USER=${INFLUXDB_ADMIN_USER}
       - INFLUXDB_ADMIN_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
-      - TZ=UTC
+      # SOURCE: https://docs.influxdata.com/influxdb/v1.8/administration/config/
+      - INFLUXDB_META_LOGGING_ENABLED=1
+      - INFLUXDB_HTTP_ENABLED=1
+      - INFLUXDB_HTTP_LOG_ENABLED=1
+      # - INFLUXDB_HTTP_AUTH_ENABLED=0
+      - INFLUXDB_LOGGING_LEVEL={{ influxdb_log_level }}
+      # CREATE DATABASE unifi
+      # USE unifi
+      # CREATE USER unifipoller WITH PASSWORD 'unifipoller' WITH ALL PRIVILEGES
+      # GRANT ALL ON unifi TO unifipoller
+      # exit
+      # DOCKER_INFLUXDB_INIT_USERNAME: The username to set for the system's initial super-user (Required).
+      # DOCKER_INFLUXDB_INIT_PASSWORD: The password to set for the system's inital super-user (Required).
+      # DOCKER_INFLUXDB_INIT_ORG: The name to set for the system's initial organization (Required).
+      # DOCKER_INFLUXDB_INIT_BUCKET: The name to set for the system's initial bucket (Required).
+      # DOCKER_INFLUXDB_INIT_RETENTION: The duration the system's initial bucket should retain data. If not set, the initial bucket will retain data forever.
+      # DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: The authentication token to associate with the system's initial super-user. If not set, a token will be auto-generated by the system.
+      # - DOCKER_INFLUXDB_INIT_MODE=setup
+      # - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUXDB_ADMIN_USER}
+      # - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
+      # - DOCKER_INFLUXDB_INIT_ORG=unpoller
+      # - DOCKER_INFLUXDB_INIT_BUCKET=unpoller
+      # - DOCKER_INFLUXDB_INIT_RETENTION=1w
+      # - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=unpollersecret
+      #- TZ=UTC
     env_file:
       - ./env
     networks:
@@ -123,10 +225,11 @@ services:
     depends_on:
       - influxdb
     environment:
-      - INFLUXDB_URL=${INFLUXDB_URL}
+      - INFLUXDB_URL=http://influxdb:8086
+      # - INFLUXDB_URL=${INFLUXDB_URL}
       - INFLUXDB_USERNAME=${INFLUXDB_ADMIN_USER}
       - INFLUXDB_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
-      - TZ=UTC
+      #- TZ=UTC
     env_file:
       - ./env
     networks:
@@ -160,7 +263,9 @@ services:
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
       - '--web.listen-address=0.0.0.0:9090'
-      - '--log.level=info'
+      - '--log.level={{ prometheus_log_level }}'
+      - '--enable-feature=remote-write-receiver'
+      - '--query.lookback-delta=30s'
     ports:
       - 9090:9090
     links:
@@ -168,6 +273,7 @@ services:
       - cadvisor:cadvisor
 {% endif %}
       - alertmanager:alertmanager
+      - loki-gateway:loki-gateway
     depends_on:
 {% if cadvisor_feature_flag %}
       - cadvisor
@@ -175,8 +281,8 @@ services:
       - alertmanager
     restart: always
 
-    environment:
-    - TZ=UTC
+    # environment:
+    #- TZ=UTC
     # SEE: https://stackoverflow.com/questions/31324981/how-to-access-host-port-from-docker-container/43541732#43541732
     # https://stackoverflow.com/questions/56909896/prometheus-in-docker-container-cannot-scrape-target-on-host/56910057
     networks:
@@ -189,7 +295,7 @@ services:
 {% endraw %}
 
   node-exporter:
-    image: prom/node-exporter
+    image: prom/node-exporter:latest
     container_name: node-exporter
     labels:
     - "traefik.enable=true"
@@ -202,9 +308,12 @@ services:
       - /:/rootfs:ro
     command:
       - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
       - '--path.sysfs=/host/sys'
-      - --collector.filesystem.ignored-mount-points
-      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+      # - --collector.filesystem.ignored-mount-points
+      # - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+      -  '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+      # - '--collector.thermal_zone-exclude'
     expose:
     - 9100
     ports:
@@ -212,8 +321,8 @@ services:
     restart: always
     deploy:
       mode: global
-    environment:
-    - TZ=UTC
+    # environment:
+    #- TZ=UTC
     networks:
     - loki
 {% raw %}
@@ -239,12 +348,14 @@ services:
       - 9093:9093
     volumes:
       - ./alertmanager/:/etc/alertmanager/
+      - alertmanager-data:/data
     restart: always
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
-    environment:
-    - TZ=UTC
+      - '--log.level={{ alertmanager_log_level }}'
+    # environment:
+    #- TZ=UTC
     networks:
     - loki
 {% raw %}
@@ -257,10 +368,11 @@ services:
 {% if cadvisor_feature_flag %}
   cadvisor:
     # SOURCE: https://github.com/rafaribe/home-ops/blob/d9e283fd3ddc42a9891c8a12fe82fa128657798a/provision/ansible/backup-server/roles/syncthing/templates/agent.yml
-    image: gcr.io/cadvisor/cadvisor:latest
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
     container_name: cadvisor
     privileged: true
     userns_mode: "host"
+    pid: "host"
     labels:
     - "traefik.enable=true"
     - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.{{ fqdn }}`)"
@@ -283,13 +395,32 @@ services:
     entrypoint:
       - /usr/bin/cadvisor
       # - --v=6
+      - '--max_procs=2'
       - '--listen_ip=0.0.0.0'
       - '--port=8081'
-      - --logtostderr
+      - '--logtostderr'
+      # - '--enable_load_reader=true'
+      - '--machine_id_file="/etc/machine-id"'
+      - '--enable_metrics=advtcp,app,cpu,cpu_topology,cpuset,disk,diskIO,hugetlb,memory,memory_numa,network,oom_event,percpu,perf_event,process,resctrl,sched,tcp,udp'
+      - '--disable_metrics=referenced_memory,cpuLoad'
+      # - "--housekeeping_interval=30s"
+      # - "--max_housekeeping_interval=35s"
+      # - "--event_storage_event_limit=default=0"
+      # - "--event_storage_age_limit=default=0"
+      # - "--store_container_labels=false"
+      # - "--whitelisted_container_labels=io.kubernetes.container.name,io.kubernetes.pod.name,io.kubernetes.pod.namespace,io.kubernetes.pod.uid"
+      # - "--global_housekeeping_interval=30s"
+      # - "--event_storage_event_limit=default=0"
+      # - "--event_storage_age_limit=default=0"
+      # - "--disable_metrics=percpu,process,sched,tcp,udp,diskIO,disk,network"
+      # - "--allow_dynamic_housekeeping=true"
+      # - "--storage_duration=1m0s"
     env_file:
       - ./env
-    environment:
-    - TZ=UTC
+    devices:
+    - /dev/kmsg:/dev/kmsg
+    # environment:
+    #- TZ=UTC
     networks:
     - loki
 {% raw %}
@@ -325,8 +456,8 @@ services:
     restart: always
     deploy:
       mode: global
-    environment:
-    - TZ=UTC
+    #environment:
+    #- TZ=UTC
     networks:
     - loki
 {% raw %}
@@ -336,37 +467,37 @@ services:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
 
-  heimdall:
-    image: linuxserver/heimdall
-    build: ./docker-heimdall
-    container_name: heimdall
-    restart: always
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=UTC
-    volumes:
-      - ./docker-heimdall/config:/config
-    ports:
-      - 4040:4040
-      - 4443:4443
-    labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.heimdall.rule=Host(`heimdall.{{ fqdn }}`)"
-    - "traefik.http.routers.heimdall.entrypoints=web"
-    - "traefik.http.services.heimdall.loadbalancer.server.port=4040"
-    tty: true
-    stdin_open: true
-    expose:
-    - 4040
-    - 4443
-    networks:
-    - loki
+#   heimdall:
+#     image: linuxserver/heimdall
+#     build: ./docker-heimdall
+#     container_name: heimdall
+#     restart: always
+#     environment:
+#       - PUID=1000
+#       - PGID=1000
+#       #- TZ=UTC
+#     volumes:
+#       - ./docker-heimdall/config:/config
+#     ports:
+#       - 4040:4040
+#       - 4443:4443
+#     labels:
+#     - "traefik.enable=true"
+#     - "traefik.http.routers.heimdall.rule=Host(`heimdall.{{ fqdn }}`)"
+#     - "traefik.http.routers.heimdall.entrypoints=web"
+#     - "traefik.http.services.heimdall.loadbalancer.server.port=4040"
+#     tty: true
+#     stdin_open: true
+#     expose:
+#     - 4040
+#     - 4443
+#     networks:
+#     - loki
 {% raw %}
-    logging:
-      driver: json-file
-      options:
-        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+#     logging:
+#       driver: json-file
+#       options:
+#         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
 
 
@@ -396,27 +527,40 @@ services:
     networks:
     - loki
 
-  loki:
-    restart: always
-    image: grafana/loki:2.8.2
+
+  loki-read:
+    user: "1000"
+    image: grafana/loki:2.8.0
+    volumes:
+      # - ./config:/etc/loki/
+      # - ./loki/etc/loki:/etc/loki/
+      - ./loki/etc/loki:/loki:rw
+      - ./rules:/loki/rules:ro
     ports:
-      - "3100:3100/tcp"
-      - "9096:9096"
-    container_name: loki
-    tty: true
-    stdin_open: true
+      # - 3101:3100
+      # - 7946
+      - "9095"
+      #- "3101:3100"
+      - "3100"
+      - "7946"
+      # uncomment to use interactive debugging
+      # - "40000-40002:40000" # # makes the replicas available on ports 40000, 40001, 40002
+    #cap_add:
+    #  - SYS_PTRACE
+    #security_opt:
+    #  - apparmor=unconfined
+    command: "-config.file=/loki/loki-config.yaml -log.level={{ loki_log_level }} -target=read"
     env_file:
       - ./env
-    volumes:
-    - ./loki/etc/loki:/loki
-    labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.loki.rule=Host(`loki.{{ fqdn }}`)"
-    - "traefik.http.routers.loki.entrypoints=web"
-    - "traefik.http.services.loki.loadbalancer.server.port=3100"
-    command: -config.file=/loki/loki-config.yaml
     networks:
-    - loki
+      - loki
+    depends_on:
+      - minio
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 3
+    # only needed for interactive debugging with dlv
 {% raw %}
     logging:
       driver: json-file
@@ -424,13 +568,80 @@ services:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
 
+  loki-write:
+    user: "1000"
+    image: grafana/loki:2.8.0
+    volumes:
+      # - ./config:/etc/loki/
+      - ./loki/etc/loki:/loki:rw
+    ports:
+      - "9095"
+      #- "3102:3100"
+      - "3100"
+      - "7946"
+      # uncomment to use interactive debugging
+      # - "50000-50002:40000" # makes the replicas available on ports 50000, 50001, 50002
+    #cap_add:
+    #  - SYS_PTRACE
+    #security_opt:
+    #  - apparmor=unconfined
+    # command: "-config.file=/loki/loki-config.yaml -log.level={{ loki_log_level }} -target=write -frontend.downstream-url=http://loki-gateway:3100 -querier.frontend-address=http://loki-write:9095"
+    command: "-config.file=/loki/loki-config.yaml -log.level={{ loki_log_level }} -target=write -frontend.downstream-url=http://loki-gateway"
+    env_file:
+      - ./env
+    networks:
+      - loki
+    depends_on:
+      - minio
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 3
+{% raw %}
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
+
+#   loki:
+#     restart: always
+#     image: grafana/loki:2.8.0
+#     ports:
+#       - "3100:3100/tcp"
+#       - "9096:9096"
+#     container_name: loki
+#     tty: true
+#     stdin_open: true
+#     env_file:
+#       - ./env
+#     volumes:
+#     - ./loki/etc/loki:/loki
+#     labels:
+#     - "traefik.enable=true"
+#     - "traefik.http.routers.loki.rule=Host(`loki.{{ fqdn }}`)"
+#     - "traefik.http.routers.loki.entrypoints=web"
+#     - "traefik.http.services.loki.loadbalancer.server.port=3100"
+#     command: -config.file=/loki/loki-config.yaml
+#     networks:
+#     - loki
+{% raw %}
+#     logging:
+#       driver: json-file
+#       options:
+#         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
 
 
   promtail:
     # SOURCE: https://github.com/gilmrt/docker-compose/blob/5d8d7b3746fba48ba5f559f9913e56ae3d881eee/metrics/docker-compose.yml
     container_name: promtail
-    image: grafana/promtail:2.8.2
+    image: grafana/promtail:2.8.0
     restart: always
+    depends_on:
+      - 'loki-gateway'
+      - 'loki-read'
+      - 'loki-write'
     volumes:
       # - /var/log:/var/log:ro
       - ./promtail/promtail-gateway.yaml:/etc/promtail/promtail-gateway.yaml:ro
@@ -441,15 +652,19 @@ services:
       - ./promtail/var/run/promtail:/var/run/promtail
       # - /var/lib/docker/containers:/var/lib/docker/containers:ro
       # - /home/pi/dev/bossjones/elk-docker/rsyslog-conf/log:/log
-      # - ${DATADIR}/promtail/config/promtail-config.yaml:/etc/promtail/promtail-config.ya
+      # so we can get generated logs
+      - ./loki/:/var/log/:ro
     ports:
       - "9080:9080"
     expose:
     - 9080
-    # command: -config.file=/etc/promtail/promtail-config.yaml
-    command: -config.file=/etc/promtail/promtail-gateway.yaml
-    environment:
-    - TZ=UTC
+    command:
+    - '-config.file=/etc/promtail/promtail-gateway.yaml'
+    # - '-print-config-stderr'
+    # - '-log-config-reverse-order'
+    - '--inspect'
+    # environment:
+    #- TZ=UTC
     tty: true
     stdin_open: true
     env_file:
@@ -459,13 +674,13 @@ services:
     - "traefik.http.routers.promtail.rule=Host(`promtail.{{ fqdn }}`)"
     - "traefik.http.routers.promtail.entrypoints=web"
     - "traefik.http.services.promtail.loadbalancer.server.port=9080"
-    depends_on:
-    - loki
+    # depends_on:
+    # - loki
     networks:
     - loki
 
   grafana:
-    image: grafana/grafana
+    image: grafana/grafana:10.0.1
     container_name: grafana
     labels:
     - "traefik.enable=true"
@@ -474,12 +689,19 @@ services:
     - "traefik.http.services.grafana.loadbalancer.server.port=3000"
     depends_on:
       - prometheus
+      - loki-gateway
+    links:
+      - prometheus:prometheus
+      - loki-gateway:loki-gateway
+      - alertmanager:alertmanager
+      - influxdb:influxdb
     expose:
     - 3000
     ports:
       - 3000:3000
     volumes:
       - grafana_data:/var/lib/grafana
+      - ./grafana/etc/grafana/grafana.ini:/etc/grafana/grafana.ini
       - ./grafana/provisioning/:/etc/grafana/provisioning/
     env_file:
       - ./env
@@ -504,10 +726,70 @@ services:
     #     EOF
     #     /run.sh
     environment:
-    - TZ=UTC
+    #- TZ=UTC
     - GF_INSTALL_PLUGINS=grafana-clock-panel,natel-discrete-panel,grafana-piechart-panel
     - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
     - GF_AUTH_ANONYMOUS_ENABLED=true
     - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    - GF_DATAPROXY_TIMEOUT=310
+    - GF_LOG_LEVEL={{ grafana_log_level }}
+    - GF_DATAPROXY_LOGGING=true
+    - GF_EXPLORE_ENABLED=true
     networks:
     - loki
+
+  # https://github.com/lux4rd0/grafana-loki-syslog-aio/blob/main/docker-compose-with-generator.yml
+  syslog-ng:
+    image: balabit/syslog-ng:latest
+    container_name: syslog-ng
+    command: -edv --control /syslog-ng/syslog-ng.ctl
+    depends_on:
+    - promtail
+    networks:
+      loki: null
+    ports:
+    - protocol: udp
+      published: 514
+      target: 514
+    - protocol: tcp
+      published: 601
+      target: 601
+    restart: always
+    volumes:
+    - ./syslog-ng/syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf:ro
+    - ./syslog-ng:/syslog-ng:rw
+
+{% if syslog_ng_exporter_feature_flag %}
+  syslog_ng_exporter:
+    # build:
+    #   context: ./syslog_ng_exporter
+    image: brandond/syslog_ng_exporter:latest
+    container_name: syslog_ng_exporter
+    command:
+    - '--telemetry.address=:9577'
+    - '--telemetry.endpoint=/metrics'
+    - '--socket.path=/syslog-ng/syslog-ng.ctl'
+    # - '--log.level=info'
+    depends_on:
+    - syslog-ng
+    networks:
+      loki: null
+    ports:
+    - protocol: tcp
+      published: 9577
+      target: 9577
+    restart: always
+    volumes:
+    - ./syslog-ng:/syslog-ng:rw
+{% endif %}
+
+{% if log_generator_feature_flag %}
+  syslog-generator:
+    build:
+      context: ./syslog-generator
+    container_name: syslog-generator
+    depends_on:
+    - syslog-ng
+    networks:
+      loki: null
+{% endif %}

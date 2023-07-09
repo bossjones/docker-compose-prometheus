@@ -72,11 +72,12 @@ help: ## ** Show this help message
 .PHONY: up
 up:
 # docker-compose -f docker-compose.yml up -d
-	docker-compose --env-file env up
+	scripts/dc-up.sh
 
 .PHONY: down
 down:
-	docker-compose -f docker-compose.yml --env-file env down
+# docker-compose -f docker-compose.yml --env-file env down
+	scripts/dc-down.sh
 
 .PHONY: logs
 logs:
@@ -84,7 +85,8 @@ logs:
 
 .PHONY: rm
 rm:
-	docker-compose -f docker-compose.yml --env-file env rm
+# docker-compose -f docker-compose.yml --env-file env rm
+	scripts/dc-rm.sh
 
 .PHONY: restart
 restart: down up

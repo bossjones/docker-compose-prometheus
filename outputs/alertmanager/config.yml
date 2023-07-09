@@ -1,6 +1,11 @@
 
 route:
-  receiver: 'slack'
+  # receiver: 'slack'
+  receiver: 'default-receiver'
+  group_wait: 30s
+  group_interval: 30m
+  group_by: [ alertname ]
 
 receivers:
-  - name: 'slack'
+# - name: 'slack'
+  - name: 'default-receiver'

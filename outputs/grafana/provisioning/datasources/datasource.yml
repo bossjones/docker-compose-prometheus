@@ -34,7 +34,7 @@ datasources:
   # <bool> enable/disable with credentials headers
   withCredentials:
   # <bool> mark as default datasource. Max one per org
-  isDefault: true
+  # isDefault: true
   # <map> fields that will be converted to json and stored in json_data
   jsonData:
     graphiteVersion: "1.1"
@@ -48,20 +48,51 @@ datasources:
   version: 1
   # <bool> allow users to edit datasources from the UI.
   editable: true
+  uid: prometheus
+
+# - name: InfluxDB
+#   type: influxdb
+#   access: proxy
+#   database: unifi
+#   user: unifi-poller
+#   password: changeme
+#   url: http://influxdb:8086
 
 - name: InfluxDB
   type: influxdb
   access: proxy
-  database: unifi
+  # database: unifi
   user: unifi-poller
-  password: changeme
+  jsonData:
+      dbName: unifi
+      httpMode: GET
+  secureJsonData:
+    password: changeme
   url: http://influxdb:8086
-
-- name: Loki
-  type: loki
-  access: proxy
-  # orgId: 2
-  url: http://loki:3100
-  basicAuth: false
+  editable: true
+  uid: influxdb
   version: 1
-  editable: false
+  basicAuth: true
+
+# - name: Loki
+#   type: loki
+#   access: proxy
+#   # orgId: 2
+#   url: http://loki:3100
+#   basicAuth: false
+#   version: 1
+#   editable: false
+
+- access: proxy
+  basicAuth: false
+  jsonData:
+    httpHeaderName1: "X-Scope-OrgID"
+  secureJsonData:
+    httpHeaderValue1: "docker"
+  editable: true
+  isDefault: true
+  name: Loki
+  type: loki
+  uid: loki
+  url: http://loki-gateway
+  version: 1

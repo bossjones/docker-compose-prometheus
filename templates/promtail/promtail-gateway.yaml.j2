@@ -1,13 +1,18 @@
 server:
   http_listen_port: 9080
   grpc_listen_port: 0
-  log_level: "info"
+  log_level: "{{ promtail_log_level }}"
 
 positions:
   filename: /tmp/positions.yaml
 
 clients:
-  - url: http://loki:3100/loki/api/v1/push
+  - url: http://loki-gateway:80/loki/api/v1/push
+    tenant_id: docker
+    backoff_config:
+      min_period: 100ms
+      max_period: 10s
+      max_retries: 10
 
 scrape_configs:
   - job_name: syslog
@@ -20,18 +25,36 @@ scrape_configs:
     relabel_configs:
       # - source_labels: ['__syslog_message_hostname']
       #   target_label: 'hostname'
-      - source_labels: ['__syslog_connection_ip_address']
-        target_label: 'ip_address'
-      - source_labels: ['__syslog_message_severity']
-        target_label: 'severity'
-      - source_labels: ['__syslog_message_facility']
-        target_label: 'facility'
-      - source_labels: ['__syslog_message_app_name']
-        target_label: 'app'
+      # - source_labels: ['__syslog_connection_ip_address']
+      #   target_label: 'ip_address'
+      # - source_labels: ['__syslog_message_severity']
+      #   target_label: 'severity'
+      # - source_labels: ['__syslog_message_facility']
+      #   target_label: 'facility'
+      # - source_labels: ['__syslog_message_app_name']
+      #   target_label: 'app'
       - source_labels: ['__syslog_message_hostname']
         target_label: 'host'
-      - action: labelmap
-        regex: __syslog_message_(.+)
+        # labelmap: Match regex against all label names. Then copy the values of the matching labels to label names given by replacement with match group references (${1}, ${2}, …) in replacement substituted by their value.
+      # - action: labelmap
+      #   regex: __syslog_message_(.+)
+
+  - job_name: generated-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: generated-logs
+          __path__: /var/log/generated-logs.txt
+    pipeline_stages:
+      - json:
+          expressions:
+            http_method: 'method'
+            http_status: "status"
+      - labels:
+          http_method:
+          http_status:
+
 # - job_name: syslog
 #   syslog:
 #     listen_address: 0.0.0.0:1514

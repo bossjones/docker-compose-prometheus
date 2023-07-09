@@ -26,3 +26,48 @@ Just needed this to test out a couple things w/ a python asyncio app
 8. cd ./outputs
 9. docker-compose --env-file env ps
 10. docker-compose --env-file env up
+
+https://github.com/microdevops-com/microdevops-formula/blob/61ac0273f2e7559d73344934164ccc850eff52c0/loki/pillar.example
+
+
+# unifi
+
+https://docs.nxlog.co/userguide/integrate/unifi.html
+
+```
+This NXLog configuration uses the im_udp input module to listen for syslog messages on UDP port 514. It parses each message and uses regular expressions to extract further UniFi-specific fields from the event.
+
+nxlog.conf
+<Extension syslog>
+    Module        xm_syslog
+</Extension>
+
+<Extension json>
+    Module        xm_json
+</Extension>
+
+<Input syslog_udp>
+    Module        im_udp
+    ListenAddr    0.0.0.0:514
+    <Exec>
+        parse_syslog();
+        if $Message =~ / ([a-z]*): (.*)$/
+        {
+            $UFProcess = $1;
+            $UFMessage = $2;
+            if $UFMessage =~ /^([a-z0-9]*): (.*)$/
+            {
+                $UFSubsys = $1;
+                $UFMessage = $2;
+                if $UFMessage =~ /^STA (.*) ([A-Z0-9. ]*): (.*)$/
+                {
+                    $UFMac = $1;
+                    $UFProto = $2;
+                    $UFMessage = $3;
+                }
+            }
+        }
+        to_json();
+    </Exec>
+</Input>
+```

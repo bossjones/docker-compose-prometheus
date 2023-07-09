@@ -1,8 +1,8 @@
 #TODO: Uses some of this https://zeigren.com/posts/monitoring_prometheus_loki/
 # my global config
 global:
-  scrape_interval:     15s # By default, scrape targets every 15 seconds.
-  evaluation_interval: 15s # By default, scrape targets every 15 seconds.
+  scrape_interval:     5s # By default, scrape targets every 15 seconds.
+  # evaluation_interval: 15s # By default, scrape targets every 15 seconds.
   # evaluation_interval: 5s # By default, scrape targets every 15 seconds.
   # scrape_timeout:     1m
   # scrape_timeout is set to the global default (10s).
@@ -60,6 +60,7 @@ scrape_configs:
       replacement: 192.168.3.16:9130
   # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
 
+
   - job_name: 'prometheus'
 
     # Override the global default and scrape targets from this job every 5 seconds.
@@ -77,23 +78,23 @@ scrape_configs:
     static_configs:
         - targets: ['192.168.3.16:9100']
 
-  - job_name: 'loki'
-    metrics_path: /metrics
+  # - job_name: 'loki'
+  #   metrics_path: /metrics
 
-    # Override the global default and scrape targets from this job every 5 seconds.
-    scrape_interval: 5s
+  #   # Override the global default and scrape targets from this job every 5 seconds.
+  #   scrape_interval: 5s
 
-    static_configs:
-        - targets: ['192.168.3.16:3100']
+  #   static_configs:
+  #       - targets: ['192.168.3.16:3100']
 
-  - job_name: 'promtail'
-    metrics_path: /metrics
+  # - job_name: 'promtail'
+  #   metrics_path: /metrics
 
-    # Override the global default and scrape targets from this job every 5 seconds.
-    scrape_interval: 5s
+  #   # Override the global default and scrape targets from this job every 5 seconds.
+  #   scrape_interval: 5s
 
-    static_configs:
-        - targets: ['192.168.3.16:9080']
+  #   static_configs:
+  #       - targets: ['192.168.3.16:9080']
 
   - job_name: 'docker'
     metrics_path: /metrics
@@ -133,18 +134,18 @@ scrape_configs:
 #     static_configs:
 #     - targets: ['192.168.1.111:9100']
 
-  - job_name: traefik # Network metrics for internet facing services
-    # https://doc.traefik.io/traefik/observability/metrics/overview/
-    static_configs:
-      - targets:
-          - traefik:8080
-        labels:
-          host: 192.168.3.16
-    metric_relabel_configs:
-      # Only keep data that is used in graphs to reduce size
-      - source_labels: [__name__]
-        regex: traefik_service_requests_total|traefik_service_request_duration_seconds_sum|traefik_service_request_duration_seconds_count
-        action: keep
+  # - job_name: traefik # Network metrics for internet facing services
+  #   # https://doc.traefik.io/traefik/observability/metrics/overview/
+  #   static_configs:
+  #     - targets:
+  #         - traefik:8080
+  #       labels:
+  #         host: 192.168.3.16
+  #   metric_relabel_configs:
+  #     # Only keep data that is used in graphs to reduce size
+  #     - source_labels: [__name__]
+  #       regex: traefik_service_requests_total|traefik_service_request_duration_seconds_sum|traefik_service_request_duration_seconds_count
+  #       action: keep
 
   - job_name: 'netdata'
 
@@ -208,3 +209,40 @@ scrape_configs:
       - target_label: __address__
         # replacement: 192.168.1.102:9115  # The blackbox exporter's real hostname:port.
         replacement: 192.168.3.16:9115  # The blackbox exporter's real hostname:port.
+
+  - job_name: 'loki'
+    dns_sd_configs:
+      - names:
+          - loki-read
+          - loki-write
+        type: A
+        port: 3100
+
+  - job_name: 'promtail'
+    dns_sd_configs:
+      - names:
+          - promtail
+        type: A
+        port: 9080
+
+  - job_name: grafana
+    scheme: http
+    static_configs:
+    - targets: [grafana:3000]
+
+  - job_name: syslog_ng_exporter
+    scheme: http
+    static_configs:
+    - targets: [syslog_ng_exporter:9577]
+
+  - job_name: minio-cluster
+    metrics_path: /minio/v2/metrics/cluster
+    scheme: http
+    static_configs:
+    - targets: [minio:9000]
+
+  - job_name: minio-node
+    metrics_path: /minio/v2/metrics/node
+    scheme: http
+    static_configs:
+    - targets: [minio:9000]
