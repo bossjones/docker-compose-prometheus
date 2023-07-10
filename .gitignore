@@ -17,3 +17,4 @@ outputs/docker-heimdall/
 outputs/.data/
 outputs/loki/generated-logs.txt
 outputs/loki/etc/loki/wal/
+up.conf

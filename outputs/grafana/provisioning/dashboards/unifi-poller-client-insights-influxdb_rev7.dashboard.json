@@ -1,7 +1,7 @@
 {
   "__inputs": [
     {
-      "name": "DS_UNIFI_POLLER",
+      "name": "influxdb",
       "label": "UniFi Poller",
       "description": "",
       "type": "datasource",
@@ -103,7 +103,7 @@
   "panels": [
     {
       "columns": [],
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -488,7 +488,7 @@
     },
     {
       "columns": [],
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -814,7 +814,7 @@
         "label": "Others",
         "threshold": 0
       },
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "decimals": 0,
       "description": "Visualize wireless channel usage w/ wired client counts.",
       "fieldConfig": {
@@ -940,7 +940,7 @@
         "label": "Others",
         "threshold": 0
       },
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "decimals": 0,
       "description": "Visualize how many clients are connected to which radios/APs.",
       "fieldConfig": {
@@ -1027,7 +1027,7 @@
         "label": "Others",
         "threshold": 0
       },
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "decimals": 0,
       "description": "This shows an OUI breakdown from Unifi's perspective. e = wired, w = wireless",
       "fieldConfig": {
@@ -1115,7 +1115,7 @@
         "label": "Others",
         "threshold": 0
       },
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "decimals": 0,
       "description": "No real idea what these numbers are, but Unifi provides them, so I made a cool pie chart out of them. What's your pie chart look like?",
       "fieldConfig": {
@@ -1198,7 +1198,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "description": "Wired TX / RX bytes per second (calculated in 30 second buckets). Rx is on the negative axis. Does not include amazon and camera devices. Unaffected by the AP setting.",
       "fieldConfig": {
         "defaults": {
@@ -1412,7 +1412,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "description": "Bandwidth usage per wireless devices as reported by the UAPs. Rx is on the negative axis. Does not include amazon devices.",
       "fieldConfig": {
         "defaults": {
@@ -1639,7 +1639,7 @@
         }
       ],
       "crosshairColor": "#8F070C",
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "description": "Shows which wireless radio a client is connected to. Setting AP does not change this.",
       "display": "timeline",
       "expandFromQueryS": 0,
@@ -1821,7 +1821,7 @@
         }
       ],
       "crosshairColor": "#8F070C",
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "description": "Shows IPs assigned to non-static clients. Clients with many changes may indicate misconfiguration or two clients sharing the same name.",
       "display": "timeline",
       "expandFromQueryS": 0,
@@ -2031,7 +2031,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "description": "Amazon Devices TX / RX bytes per second (calculated in 30 second buckets). Rx is on the native axis. My home network has a ton of Amazon devices, so I broke them out separately. If you don't have Amazon devices, don't fret, just don't include this graph in the new dashboards you're building. :)",
       "fieldConfig": {
         "defaults": {
@@ -2354,7 +2354,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "description": "Cameras TX / RX bytes per second. Rx is on the negative axis. Cameras probably don't do much Tx. If you don't have cameras, don't include this graph on your dashboards. This graph shows any device with the word \"camera\" in its name and has nothing to do with UniFi Protect.",
       "fieldConfig": {
         "defaults": {
@@ -2553,7 +2553,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "decimals": 0,
       "fieldConfig": {
         "defaults": {
@@ -2704,7 +2704,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "fieldConfig": {
         "defaults": {
           "custom": {}
@@ -2853,7 +2853,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "fieldConfig": {
         "defaults": {
           "custom": {}
@@ -3002,7 +3002,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "description": "Client reported transmit rate.",
       "fieldConfig": {
         "defaults": {
@@ -3149,7 +3149,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "decimals": 0,
       "fieldConfig": {
         "defaults": {
@@ -3306,7 +3306,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "description": "Client reported receive rate.",
       "fieldConfig": {
         "defaults": {
@@ -3454,7 +3454,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "decimals": 0,
       "fieldConfig": {
         "defaults": {
@@ -3610,7 +3610,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "decimals": 0,
       "fieldConfig": {
         "defaults": {
@@ -3759,7 +3759,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "decimals": 0,
       "fieldConfig": {
         "defaults": {
@@ -3910,7 +3910,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "decimals": 0,
       "description": "",
       "fieldConfig": {
@@ -4060,7 +4060,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "decimals": 0,
       "fieldConfig": {
         "defaults": {
@@ -4210,7 +4210,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "decimals": 0,
       "description": "",
       "fieldConfig": {
@@ -4373,7 +4373,7 @@
       {
         "allValue": ".*",
         "current": {},
-        "datasource": "${DS_UNIFI_POLLER}",
+        "datasource": "influxdb",
         "definition": "SHOW TAG VALUES FROM \"clients\" WITH KEY = \"source\" ",
         "hide": 2,
         "includeAll": true,
@@ -4395,7 +4395,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_UNIFI_POLLER}",
+        "datasource": "influxdb",
         "definition": "SHOW TAG VALUES FROM \"clients\" WITH KEY = \"site_name\"  WHERE source =~ /^$Controller$/ ",
         "hide": 0,
         "includeAll": true,
@@ -4417,7 +4417,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_UNIFI_POLLER}",
+        "datasource": "influxdb",
         "definition": "SHOW TAG VALUES FROM \"clients\" WITH KEY = \"ap_name\" WHERE site_name =~ /^$Site$/ ",
         "hide": 0,
         "includeAll": true,
@@ -4439,7 +4439,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_UNIFI_POLLER}",
+        "datasource": "influxdb",
         "definition": "SHOW TAG VALUES FROM \"clients\" WITH KEY = \"sw_name\" WHERE site_name =~ /^$Site$/ ",
         "hide": 0,
         "includeAll": true,
@@ -4461,7 +4461,7 @@
       {
         "allValue": ".*",
         "current": {},
-        "datasource": "${DS_UNIFI_POLLER}",
+        "datasource": "influxdb",
         "definition": "SHOW TAG VALUES FROM \"clients\" WITH KEY = \"name\" WHERE site_name =~ /^$Site$/ AND ap_name =~ /^$AP$/ AND is_wired=false",
         "hide": 0,
         "includeAll": true,
@@ -4483,7 +4483,7 @@
       {
         "allValue": ".*",
         "current": {},
-        "datasource": "${DS_UNIFI_POLLER}",
+        "datasource": "influxdb",
         "definition": "SHOW TAG VALUES FROM \"clients\" WITH KEY = \"name\" WHERE site_name =~ /^$Site$/ AND sw_name =~ /^$Switch$/ AND is_wired=true",
         "hide": 0,
         "includeAll": true,

@@ -71,3 +71,55 @@ nxlog.conf
     </Exec>
 </Input>
 ```
+# Diagram
+
+The below diagram describes the various components of this deployment, and how data flows between them.
+
+
+```mermaid
+graph LR
+    Grafana --> |Query logs| nginx["nginx (port: 8080)"]
+    Promtail -->|Send logs| nginx
+
+    nginx -.-> |read path| QueryFrontend
+    nginx -.-> |write path| Distributor
+
+    subgraph LokiRead["loki -target=read"]
+        QueryFrontend["query-frontend"]
+        Querier["querier"]
+
+        QueryFrontend -.-> Querier
+    end
+
+    subgraph Minio["Minio Storage"]
+        Chunks
+        Indexes
+    end
+
+    subgraph LokiWrite["loki -target=write"]
+        Distributor["distributor"] -.-> Ingester["ingester"]
+        Ingester
+    end
+
+    Querier --> |reads| Chunks & Indexes
+    Ingester --> |writes| Chunks & Indexes
+```
+
+Simply run `docker-compose up` and all the components will start.
+
+It'll take a few seconds for all the components to start up and register in the [ring](http://localhost:8080/ring). Once all instances are `ACTIVE`, Loki will start accepting reads and writes. All logs will be stored with the tenant ID `docker`.
+
+All data will be stored in the `.data` directory.
+
+The nginx gateway runs on port `8080` and you can access Loki through it.
+
+Prometheus runs on port `9090`, and you can access all metrics from Loki & Promtail here.
+
+Grafana runs on port `3000`, and there are Loki & Prometheus datasources enabled by default.
+
+## Endpoints
+
+- [`/ring`](http://localhost:8080/ring) - view all components registered in the hash ring
+- [`/config`](http://localhost:8080/config) - view the configuration used by Loki
+- [`/memberlist`](http://localhost:8080/memberlist) - view all components in the memberlist cluster
+- [all other Loki API endpoints](https://grafana.com/docs/loki/latest/api/)
