@@ -1,281 +1,11 @@
-# # -------------------------------------------------------------------------------------
-# # previously working config
-# # -------------------------------------------------------------------------------------
-
-# auth_enabled: false
-
-# server:
-#   http_listen_port: 3100
-#   grpc_listen_port: 9096
-#   # SOURCE: https://github.com/grafana/loki/issues/4613#issuecomment-1018367471
-#   http_server_read_timeout: 60s # allow longer time span queries
-#   http_server_write_timeout: 60s # allow longer time span queries
-#   grpc_server_max_recv_msg_size: 33554432 # 32MiB (int bytes), default 4MB
-#   grpc_server_max_send_msg_size: 33554432 # 32MiB (int bytes), default 4MB
-#   # SOURCE: https://github.com/grafana/loki/issues/4613#issuecomment-1018367471
-#   # Log only messages with the given severity or above. Supported values [debug,
-#   # info, warn, error]
-#   # CLI flag: -log.level
-#   log_level: info
-
-# # SOURCE: https://github.com/grafana/loki/issues/4613#issuecomment-1018367471
-# # Configures the ingester and how the ingester will register itself to a
-# # key value store.
-# ingester:
-#   lifecycler:
-#     final_sleep: 0s
-#   chunk_idle_period: 1h       # Any chunk not receiving new logs in this time will be flushed
-#   max_chunk_age: 1h           # All chunks will be flushed when they hit this age, default is 1h
-#   chunk_target_size: 1048576  # Loki will attempt to build chunks up to 1.5MB, flushing first if chunk_idle_period or max_chunk_age is reached first
-#   chunk_retain_period: 30s    # Must be greater than index read cache TTL if using an index cache (Default index read cache TTL is 5m)
-#   max_transfer_retries: 0     # Chunk transfers disabled
-# # SOURCE: https://github.com/grafana/loki/issues/4613#issuecomment-1018367471
-
-# # loki v2.4.1 config
-# # schema_config:
-# #   configs:
-# #     # SOURCE: https://github.com/grafana/loki/issues/4613#issuecomment-1018367471
-# #     - from: 2020-11-01
-# #     # SOURCE: https://github.com/grafana/loki/issues/4613#issuecomment-1018367471
-# #       store: boltdb-shipper
-# #       object_store: filesystem
-# #       schema: v11
-# #       index:
-# #         prefix: index_
-# #         period: 24h
-
-# # v2.8.0 config
-# schema_config:
-#   configs:
-#     - from: 2020-10-24
-#       store: boltdb-shipper
-#       object_store: filesystem
-#       schema: v11
-#       index:
-#         prefix: index_
-#         period: 24h
-
-# # SOURCE: https://github.com/grafana/loki/issues/4613#issuecomment-1018367471
-# storage_config:
-#   boltdb:
-#     directory: /tmp/loki/index
-
-#   filesystem:
-#     directory: /tmp/loki/chunks
-
-#   boltdb_shipper:
-#     active_index_directory: /tmp/loki/boltdb-shipper-active
-#     cache_location: /tmp/loki/boltdb-shipper-cache
-#     cache_ttl: 72h         # Can be increased for faster performance over longer query periods, uses more disk space
-#     shared_store: filesystem
-
-# compactor:
-#   working_directory: /tmp/loki/boltdb-shipper-compactor
-#   shared_store: filesystem
-#   compaction_interval: 10m
-#   retention_enabled: true
-#   retention_delete_delay: 2h
-#   retention_delete_worker_count: 150
-# # SOURCE: https://github.com/grafana/loki/issues/4613#issuecomment-1018367471
-
-
-# limits_config:
-#   # ingestion_rate_mb: 64
-#   # ingestion_burst_size_mb: 64
-#   # SOURCE: https://github.com/grafana/loki/issues/4613#issuecomment-1018367471
-#   retention_period: 91d
-#   enforce_metric_name: false
-#   reject_old_samples: true
-#   # reject_old_samples_max_age: 168h
-#   reject_old_samples_max_age: 48h
-
-#   # Per-user ingestion rate limit in sample size per second. Units in MB.
-#   # CLI flag: -distributor.ingestion-rate-limit-mb
-#   ingestion_rate_mb: 8 # <float> | default = 4]
-
-#   # Per-user allowed ingestion burst size (in sample size). Units in MB.
-#   # The burst size refers to the per-distributor local rate limiter even in the
-#   # case of the "global" strategy, and should be set at least to the maximum logs
-#   # size expected in a single push request.
-#   # CLI flag: -distributor.ingestion-burst-size-mb
-#   ingestion_burst_size_mb: 16 # <int> | default = 6]
-
-#   # Maximum byte rate per second per stream,
-#   # also expressible in human readable forms (1MB, 256KB, etc).
-#   # CLI flag: -ingester.per-stream-rate-limit
-#   per_stream_rate_limit: 5MB # <string|int> | default = "3MB"
-
-#   # Maximum burst bytes per stream,
-#   # also expressible in human readable forms (1MB, 256KB, etc).
-#   # This is how far above the rate limit a stream can "burst" before the stream is limited.
-#   # CLI flag: -ingester.per-stream-rate-limit-burst
-#   per_stream_rate_limit_burst: 15MB # <string|int> | default = "15MB"
-
-#   # The limit to length of chunk store queries. 0 to disable.
-#   # CLI flag: -store.max-query-length
-#   max_query_length: 2165h # <duration> | default = 721h
-
-#   # Limit how far back in time series data and metadata can be queried,
-#   # up until lookback duration ago.
-#   # This limit is enforced in the query frontend, the querier and the ruler.
-#   # If the requested time range is outside the allowed range, the request will not fail,
-#   # but will be modified to only query data within the allowed time range.
-#   # The default value of 0 does not set a limit.
-#   # CLI flag: -querier.max-query-lookback
-#   max_query_lookback: 90d
-
-# querier:
-#   max_concurrent: 20
-
-# frontend:
-#   # Maximum number of outstanding requests per tenant per frontend; requests
-#   # beyond this error with HTTP 429.
-#   # CLI flag: -querier.max-outstanding-requests-per-tenant
-#   max_outstanding_per_tenant: 2048 # default = 100]
-
-#   # Compress HTTP responses.
-#   # CLI flag: -querier.compress-http-responses
-#   compress_responses: true # default = false]
-
-#   # Log queries that are slower than the specified duration. Set to 0 to disable.
-#   # Set to < 0 to enable on all queries.
-#   # CLI flag: -frontend.log-queries-longer-than
-#   log_queries_longer_than: 20s
-
-# frontend_worker:
-#   grpc_client_config:
-#     # The maximum size in bytes the client can send.
-#     # CLI flag: -<prefix>.grpc-max-send-msg-size
-#     max_send_msg_size: 33554432 # 32MiB, default = 16777216]
-#     max_recv_msg_size: 33554432
-
-# ingester_client:
-#   grpc_client_config:
-#     # The maximum size in bytes the client can send.
-#     # CLI flag: -<prefix>.grpc-max-send-msg-size
-#     max_send_msg_size: 33554432 # 32mb, default = 16777216]
-#     max_recv_msg_size: 33554432
-
-# query_scheduler:
-#   max_outstanding_requests_per_tenant: 2048
-#   grpc_client_config:
-#     # The maximum size in bytes the client can send.
-#     # CLI flag: -<prefix>.grpc-max-send-msg-size
-#     max_send_msg_size: 33554432 # 32mb, default = 16777216]
-#     max_recv_msg_size: 33554432
-
-# query_range:
-#   # https://github.com/grafana/loki/issues/4613#issuecomment-1022045445
-#   parallelise_shardable_queries: false
-#   # If i'm not mistaken then this splits the data fetching between the queriers if the query loads more data then can fit into 1 interval.
-#   split_queries_by_interval: 0 # 720h # 30d
-# # SOURCE: https://github.com/grafana/loki/issues/4613#issuecomment-1018367471
-#   results_cache:
-#     cache:
-#       embedded_cache:
-#         enabled: true
-#         max_size_mb: 100
-
-# ruler:
-#   storage:
-#     type: local
-#     local:
-#       directory: /tmp/loki/rules # volume, directory to scan for rules
-#   rule_path: /tmp/loki/rules-temp # volume, store temporary rule files
-#   alertmanager_url: http://192.168.3.16:9093
-#   enable_alertmanager_v2: true
-
-# # Common config to be shared between multiple modules.
-# # If a more specific config is given in other sections, the related config under this section
-# # will be ignored.
-# common:
-#   instance_addr: 127.0.0.1
-#   path_prefix: /tmp/loki
-#   storage:
-#     filesystem:
-#       chunks_directory: /tmp/loki/chunks
-#       rules_directory: /tmp/loki/rules
-#   replication_factor: 1
-#   ring:
-#     kvstore:
-#       store: inmemory
-# # -------------------------------------------------------------------------------------
-# # previously working config
-# # -------------------------------------------------------------------------------------
-
-# SOURCE: https://linuxblog.xyz/posts/grafana-loki/
-# TODO: try these settings out
-# auth_enabled: false
-
-# server:
-#   http_listen_port: 3100
-
-# ingester:
-#   lifecycler:
-#     address: 127.0.0.1
-#     ring:
-#       kvstore:
-#         store: inmemory
-#       replication_factor: 1
-#     final_sleep: 0s
-#   chunk_idle_period: 1h       # Any chunk not receiving new logs in this time will be flushed
-#   max_chunk_age: 1h           # All chunks will be flushed when they hit this age, default is 1h
-#   chunk_target_size: 1048576  # Loki will attempt to build chunks up to 1.5MB, flushing first if chunk_idle_period or max_chunk_age is reached first
-#   chunk_retain_period: 30s    # Must be greater than index read cache TTL if using an index cache (Default index read cache TTL is 5m)
-#   max_transfer_retries: 0     # Chunk transfers disabled
-
-# schema_config:
-#   configs:
-#     - from: 2020-10-24
-#       store: boltdb-shipper
-#       object_store: filesystem
-#       schema: v11
-#       index:
-#         prefix: index_
-#         period: 24h
-
-# storage_config:
-#   boltdb_shipper:
-#     active_index_directory: /loki/boltdb-shipper-active
-#     cache_location: /loki/boltdb-shipper-cache
-#     cache_ttl: 24h         # Can be increased for faster performance over longer query periods, uses more disk space
-#     shared_store: filesystem
-#   filesystem:
-#     directory: /loki/chunks
-
-# compactor:
-#   working_directory: /loki/boltdb-shipper-compactor
-#   shared_store: filesystem
-
-# limits_config:
-#   reject_old_samples: true
-#   reject_old_samples_max_age: 168h
-
-# chunk_store_config:
-#   max_look_back_period: 0s
-
-# table_manager:
-#   retention_deletes_enabled: false
-#   retention_period: 0s
-
-# ruler:
-#   storage:
-#     type: local
-#     local:
-#       directory: /loki/rules
-#   rule_path: /loki/rules-temp
-#   alertmanager_url: http://localhost:9093
-#   ring:
-#     kvstore:
-#       store: inmemory
-#   enable_api: true
-
-
 auth_enabled: false
 
 http_prefix:
 
 server:
+  # Limit on the number of concurrent streams for gRPC calls (0 = unlimited)
+  # CLI flag: -server.grpc-max-concurrent-streams
+  grpc_server_max_concurrent_streams: 1000
   http_listen_address: 0.0.0.0
   grpc_listen_address: 0.0.0.0
   http_listen_port: 3100
@@ -308,28 +38,24 @@ memberlist:
   bind_port: 7946
   gossip_interval: 2s
 
-ingester:
-  lifecycler:
-    join_after: 10s
-    observe_period: 5s
-    ring:
-      replication_factor: 3
-      kvstore:
-        store: memberlist
-    final_sleep: 0s
-  # chunk_idle_period: 1m
-  chunk_idle_period: 2h
-  wal:
-    enabled: true
-    dir: /loki/wal
-  # max_chunk_age: 1m
-  max_chunk_age: 2h
-  chunk_retain_period: 30s
-  chunk_encoding: snappy
-  # chunk_target_size: 1.572864e+06
-  chunk_target_size: 1536000
-  chunk_block_size: 262144
-  flush_op_timeout: 10s
+distributor:
+  ring:
+    kvstore:
+      store: memberlist
+  rate_store:
+    # The max number of concurrent requests to make to ingester stream apis
+    # CLI flag: -distributor.rate-store.max-request-parallelism
+    max_request_parallelism: 200
+
+    # The interval on which distributors will update current stream rates from
+    # ingesters
+    # CLI flag: -distributor.rate-store.stream-rate-update-interval
+    stream_rate_update_interval: 1s
+
+    # Timeout for communication between distributors and any given ingester when
+    # updating rates
+    # CLI flag: -distributor.rate-store.ingester-request-timeout
+    ingester_request_timeout: 500ms
 
 # ruler:
 #   enable_api: true
@@ -369,6 +95,19 @@ storage_config:
 
 
 limits_config:
+  # Whether the ingestion rate limit should be applied individually to each
+  # distributor instance (local), or evenly shared across the cluster (global).
+  # The ingestion rate strategy cannot be overridden on a per-tenant basis.
+  # - local: enforces the limit on a per distributor basis. The actual effective
+  # rate limit will be N times higher, where N is the number of distributor
+  # replicas.
+  # - global: enforces the limit globally, configuring a per-distributor local
+  # rate limiter as 'ingestion_rate / N', where N is the number of distributor
+  # replicas (it's automatically adjusted if the number of replicas change). The
+  # global strategy requires the distributors to form their own ring, which is
+  # used to keep track of the current number of healthy distributor replicas.
+  # CLI flag: -distributor.ingestion-rate-limit-strategy
+  ingestion_rate_strategy: global
   query_timeout: 300s
   max_query_parallelism: 24
   split_queries_by_interval: 15m
@@ -381,10 +120,25 @@ limits_config:
   reject_old_samples_max_age: 168h
   # ingestion_rate_mb: 10
   # ingestion_burst_size_mb: 20
+  # Per-user ingestion rate limit in sample size per second. Units in MB.
+  # CLI flag: -distributor.ingestion-rate-limit-mb
   ingestion_rate_mb: 20
+  # Per-user allowed ingestion burst size (in sample size). Units in MB. The burst
+  # size refers to the per-distributor local rate limiter even in the case of the
+  # 'global' strategy, and should be set at least to the maximum logs size
+  # expected in a single push request.
+  # CLI flag: -distributor.ingestion-burst-size-mb
   ingestion_burst_size_mb: 30
   # parallelize queries in 15min intervals
+
+  # Maximum byte rate per second per stream, also expressible in human readable
+  # forms (1MB, 256KB, etc).
+  # CLI flag: -ingester.per-stream-rate-limit
   per_stream_rate_limit: "3MB"
+  # Maximum burst bytes per stream, also expressible in human readable forms (1MB,
+  # 256KB, etc). This is how far above the rate limit a stream can 'burst' before
+  # the stream is limited.
+  # CLI flag: -ingester.per-stream-rate-limit-burst
   per_stream_rate_limit_burst: "10MB"
 
   # SOURCE: https://git.corp.adobe.com/experience-platform/skyline-ops/blob/868e3cf28a80468cabc970f8bd7ece759656baaf/configsets/loki-logging/loki_common.yaml.mustache
@@ -393,13 +147,20 @@ limits_config:
   # ingestion_burst_size_mb: 50
   # per_stream_rate_limit: 20M
   # per_stream_rate_limit_burst: 50M
+  # Limit how far back in time series data and metadata can be queried, up until
+  # lookback duration ago. This limit is enforced in the query frontend, the
+  # querier and the ruler. If the requested time range is outside the allowed
+  # range, the request will not fail, but will be modified to only query data
+  # within the allowed time range. The default value of 0 does not set a limit.
+  # CLI flag: -querier.max-query-lookback
+  max_query_lookback: 336h
 
-
-frontend_worker:
-  match_max_concurrent: true
 
 chunk_store_config:
-  max_look_back_period: 336h
+  # max_look_back_period: 336h
+  embedded_cache:
+    enabled: true
+    max_size_mb: 500
 
 table_manager:
   retention_deletes_enabled: true
@@ -407,9 +168,19 @@ table_manager:
 
 query_range:
   # make queries more cache-able by aligning them with their step intervals
+  # Mutate incoming queries to align their start and end with their step.
+  # CLI flag: -querier.align-querier-with-step
   align_queries_with_step: true
+  # Maximum number of retries for a single request; beyond this, the downstream
+  # error is returned.
+  # CLI flag: -querier.max-retries-per-request
   max_retries: 5
+  # Perform query parallelisations based on storage sharding configuration and
+  # query ASTs. This feature is supported only by the chunks storage engine.
+  # CLI flag: -querier.parallelise-shardable-queries
   parallelise_shardable_queries: true
+  # Cache query results.
+  # CLI flag: -querier.cache-results
   cache_results: true
   # SOURCE: https://git.corp.adobe.com/experience-platform/skyline-ops/blob/868e3cf28a80468cabc970f8bd7ece759656baaf/configsets/loki-logging/loki_common.yaml.mustache
   # parallelize queries in 15min intervals
@@ -430,8 +201,57 @@ frontend:
   compress_responses: true
   max_outstanding_per_tenant: 2048
 
+  # Max body size for downstream prometheus.
+  # CLI flag: -frontend.max-body-size
+  max_body_size: 104857600 # 100mb
+  # True to enable query statistics tracking. When enabled, a message with some
+  # statistics is logged for every query.
+  # CLI flag: -frontend.query-stats-enabled
+  query_stats_enabled: true
+
+  # Number of concurrent workers forwarding queries to single query-scheduler.
+  # CLI flag: -frontend.scheduler-worker-concurrency
+  scheduler_worker_concurrency: 5
+
+  # # URL of downstream Loki.
+  # # CLI flag: -frontend.downstream-url
+  # [downstream_url: <string> | default = ""]
+
+
   # cache_config:
   #  embedded_cache
+
+# The frontend_worker configures the worker - running within the Loki querier - picking up and executing queries enqueued by the query-frontend.
+frontend_worker:
+  # Force worker concurrency to match the -querier.max-concurrent option.
+  # Overrides querier.worker-parallelism.
+  # CLI flag: -querier.worker-match-max-concurrent
+  match_max_concurrent: true
+
+  # # Address of query frontend service, in host:port format. If
+  # # -querier.scheduler-address is set as well, querier will use scheduler instead.
+  # # Only one of -querier.frontend-address or -querier.scheduler-address can be
+  # # set. If neither is set, queries are only received via HTTP endpoint.
+  # # CLI flag: -querier.frontend-address
+  # [frontend_address: <string> | default = ""]
+
+  # # Hostname (and port) of scheduler that querier will periodically resolve,
+  # # connect to and receive queries from. Only one of -querier.frontend-address or
+  # # -querier.scheduler-address can be set. If neither is set, queries are only
+  # # received via HTTP endpoint.
+  # # CLI flag: -querier.scheduler-address
+  # [scheduler_address: <string> | default = ""]
+
+  # Number of simultaneous queries to process per query-frontend or
+  # query-scheduler.
+  # CLI flag: -querier.worker-parallelism
+  parallelism: 10
+
+  # The grpc_client block configures the gRPC client used to communicate between
+  # two Loki components.
+  # The CLI flags prefix for this block configuration is: querier.frontend-client
+  grpc_client_config:
+    max_send_msg_size: 104857600
 
 query_scheduler:
   max_outstanding_requests_per_tenant: 1024
@@ -441,15 +261,121 @@ querier:
   # worker_match_max_concurrent: true
   query_ingesters_within: 2h
   # query_timeout: 300s
-  engine:
-    timeout: 300s
+  # engine:
+  #   timeout: 300s
+  # Time to wait before sending more than the minimum successful query requests.
+  # CLI flag: -querier.extra-query-delay
+  extra_query_delay: 0s
+  # Maximum lookback beyond which queries are not sent to ingester. 0 means all
+  # queries are sent to ingester.
+  # CLI flag: -querier.query-ingesters-within
+  query_ingesters_within: 3h
+  # Maximum duration for which the live tailing requests are served.
+  # CLI flag: -querier.tail-max-duration
+  tail_max_duration: 1h
 
+ingester:
+  lifecycler:
+    join_after: 10s
+    observe_period: 5s
+    ring:
+      replication_factor: 3
+      kvstore:
+        store: memberlist
+    final_sleep: 0s
+  # chunk_idle_period: 1m
+
+  # How long chunks should sit in-memory with no updates before being flushed if
+  # they don't hit the max block size. This means that half-empty chunks will
+  # still be flushed after a certain period as long as they receive no further
+  # activity.
+  # CLI flag: -ingester.chunks-idle-period
+  chunk_idle_period: 2h
+  wal:
+    enabled: true
+    dir: /loki/wal
+  # max_chunk_age: 1m
+  # The maximum duration of a timeseries chunk in memory. If a timeseries runs for
+  # longer than this, the current chunk will be flushed to the store and a new
+  # chunk created.
+  # CLI flag: -ingester.max-chunk-age
+  max_chunk_age: 2h
+  # How long chunks should be retained in-memory after they've been flushed.
+  # CLI flag: -ingester.chunks-retain-period
+  chunk_retain_period: 30s
+  chunk_encoding: snappy
+  # chunk_target_size: 1.572864e+06
+
+  # A target _compressed_ size in bytes for chunks. This is a desired size not an
+  # exact size, chunks may be slightly bigger or significantly smaller if they get
+  # flushed for other reasons (e.g. chunk_idle_period). A value of 0 creates
+  # chunks with a fixed 10 blocks, a non zero value will create chunks with a
+  # variable number of blocks to meet the target size.
+  # CLI flag: -ingester.chunk-target-size
+  chunk_target_size: 1536000
+  # # The targeted _uncompressed_ size in bytes of a chunk block When this threshold
+  # is exceeded the head block will be cut and compressed inside the chunk.
+  # CLI flag: -ingester.chunks-block-size
+  chunk_block_size: 262144
+  # The timeout before a flush is cancelled.
+  # CLI flag: -ingester.flush-op-timeout
+  flush_op_timeout: 10s
+
+  # # How far back should an ingester be allowed to query the store for data, for
+  # # use only with boltdb-shipper/tsdb index and filesystem object store. -1 for
+  # # infinite.
+  # # CLI flag: -ingester.query-store-max-look-back-period
+  # [query_store_max_look_back_period: <duration> | default = 0s]
+
+# https://grafana.com/docs/loki/latest/configuration/#compactor
 compactor:
+  # Directory where files can be downloaded for compaction.
+  # CLI flag: -boltdb.shipper.compactor.working-directory
   working_directory: /tmp/compactor
   shared_store: s3
+
+  # Maximum number of tables to compact in parallel. While increasing this value,
+  # please make sure compactor has enough disk space allocated to be able to store
+  # and compact as many tables.
+  # CLI flag: -boltdb.shipper.compactor.max-compaction-parallelism
+  max_compaction_parallelism: 1
+
+  # Number of upload/remove operations to execute in parallel when finalizing a
+  # compaction. NOTE: This setting is per compaction operation, which can be
+  # executed in parallel. The upper bound on the number of concurrent uploads is
+  # upload_parallelism * max_compaction_parallelism.
+  # CLI flag: -boltdb.shipper.compactor.upload-parallelism
+  upload_parallelism: 10
+
+  # The hash ring configuration used by compactors to elect a single instance for
+  # running compactions. The CLI flags prefix for this block config is:
+  # boltdb.shipper.compactor.ring
+  compactor_ring:
+    kvstore:
+      # Backend storage to use for the ring. Supported values are: consul, etcd,
+      # inmemory, memberlist, multi.
+      # CLI flag: -boltdb.shipper.compactor.ring.store
+      store: memberlist
 
 
 ingester_client:
   grpc_client_config:
     max_recv_msg_size: 104857600  # 100 Mb
     max_send_msg_size: 104857600  # 100 Mb
+
+table_manager:
+    # Periodic tables grace period (duration which table will be created/deleted
+    # before/after it's needed).
+    # CLI flag: -table-manager.periodic-table.grace-period
+    creation_grace_period: 3h
+    # How frequently to poll backend to learn our capacity.
+    # CLI flag: -table-manager.poll-interval
+    poll_interval: 10m
+    # If true, enables retention deletes of DB tables
+    # CLI flag: -table-manager.retention-deletes-enabled
+    retention_deletes_enabled: false
+    # Tables older than this retention period are deleted. Must be either 0
+    # (disabled) or a multiple of 24h. When enabled, be aware this setting is
+    # destructive to data!
+    # CLI flag: -table-manager.retention-period
+    retention_period: 0
