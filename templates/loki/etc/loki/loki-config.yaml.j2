@@ -157,14 +157,10 @@ limits_config:
 
 
 chunk_store_config:
-  # max_look_back_period: 336h
-  embedded_cache:
-    enabled: true
-    max_size_mb: 500
-
-table_manager:
-  retention_deletes_enabled: true
-  retention_period: 336h
+  max_look_back_period: 336h
+  #embedded_cache:
+  #  enabled: true
+  #  max_size_mb: 500
 
 query_range:
   # make queries more cache-able by aligning them with their step intervals
@@ -259,7 +255,6 @@ query_scheduler:
 querier:
   max_concurrent: 8
   # worker_match_max_concurrent: true
-  query_ingesters_within: 2h
   # query_timeout: 300s
   # engine:
   #   timeout: 300s
@@ -329,6 +324,7 @@ ingester:
 
 # https://grafana.com/docs/loki/latest/configuration/#compactor
 compactor:
+  retention_enabled: true
   # Directory where files can be downloaded for compaction.
   # CLI flag: -boltdb.shipper.compactor.working-directory
   working_directory: /tmp/compactor
@@ -379,3 +375,7 @@ table_manager:
     # destructive to data!
     # CLI flag: -table-manager.retention-period
     retention_period: 0
+
+# table_manager:
+#   retention_deletes_enabled: true
+#   retention_period: 336h
