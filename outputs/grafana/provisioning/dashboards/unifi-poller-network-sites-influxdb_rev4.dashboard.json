@@ -1,7 +1,7 @@
 {
   "__inputs": [
     {
-      "name": "DS_UNIFI_POLLER",
+      "name": "influxdb",
       "label": "UniFi Poller",
       "description": "",
       "type": "datasource",
@@ -103,7 +103,7 @@
   "panels": [
     {
       "content": "Each site contains 5 subsystems: wan, lan, wlan, www, vpn. Each subsystem contains data specific to that system, but every subsystem shares the same fields. \nThis means that most fields you find appear empty. That means the field is probably for a different subsystem.\nThe site metrics tend to contain a lot of data about the local USG.\nNote: The three singlestat panels with thresholds do not have a subsystem selected and they may not be entirely accurate.\n\n",
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -121,7 +121,7 @@
     },
     {
       "collapsed": true,
-      "datasource": "${DS_UNIFI_POLLER}",
+      "datasource": "influxdb",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -139,7 +139,7 @@
             "rgba(237, 129, 40, 0.89)",
             "#d44a3a"
           ],
-          "datasource": "${DS_UNIFI_POLLER}",
+          "datasource": "influxdb",
           "format": "ms",
           "gauge": {
             "maxValue": 400,
@@ -254,7 +254,7 @@
             "rgba(237, 129, 40, 0.89)",
             "#d44a3a"
           ],
-          "datasource": "${DS_UNIFI_POLLER}",
+          "datasource": "influxdb",
           "format": "ms",
           "gauge": {
             "maxValue": 200,
@@ -369,7 +369,7 @@
             "rgba(237, 129, 40, 0.89)",
             "#d44a3a"
           ],
-          "datasource": "${DS_UNIFI_POLLER}",
+          "datasource": "influxdb",
           "format": "percent",
           "gauge": {
             "maxValue": 100,
@@ -484,7 +484,7 @@
             "rgba(237, 129, 40, 0.89)",
             "#d44a3a"
           ],
-          "datasource": "${DS_UNIFI_POLLER}",
+          "datasource": "influxdb",
           "format": "percent",
           "gauge": {
             "maxValue": 100,
@@ -592,7 +592,7 @@
         },
         {
           "columns": [],
-          "datasource": "${DS_UNIFI_POLLER}",
+          "datasource": "influxdb",
           "fontSize": "100%",
           "gridPos": {
             "h": 4,
@@ -777,7 +777,7 @@
             "rgba(237, 129, 40, 0.89)",
             "#d44a3a"
           ],
-          "datasource": "${DS_UNIFI_POLLER}",
+          "datasource": "influxdb",
           "format": "none",
           "gauge": {
             "maxValue": 100,
@@ -892,7 +892,7 @@
             "rgba(237, 129, 40, 0.89)",
             "#d44a3a"
           ],
-          "datasource": "${DS_UNIFI_POLLER}",
+          "datasource": "influxdb",
           "format": "none",
           "gauge": {
             "maxValue": 100,
@@ -1007,7 +1007,7 @@
             "rgba(237, 129, 40, 0.89)",
             "#d44a3a"
           ],
-          "datasource": "${DS_UNIFI_POLLER}",
+          "datasource": "influxdb",
           "format": "none",
           "gauge": {
             "maxValue": 100,
@@ -1122,7 +1122,7 @@
             "rgba(237, 129, 40, 0.89)",
             "#d44a3a"
           ],
-          "datasource": "${DS_UNIFI_POLLER}",
+          "datasource": "influxdb",
           "format": "none",
           "gauge": {
             "maxValue": 100,
@@ -1237,7 +1237,7 @@
             "rgba(237, 129, 40, 0.89)",
             "#d44a3a"
           ],
-          "datasource": "${DS_UNIFI_POLLER}",
+          "datasource": "influxdb",
           "format": "none",
           "gauge": {
             "maxValue": 100,
@@ -1352,7 +1352,7 @@
             "rgba(237, 129, 40, 0.89)",
             "#d44a3a"
           ],
-          "datasource": "${DS_UNIFI_POLLER}",
+          "datasource": "influxdb",
           "format": "none",
           "gauge": {
             "maxValue": 100,
@@ -1467,7 +1467,7 @@
             "rgba(237, 129, 40, 0.89)",
             "#d44a3a"
           ],
-          "datasource": "${DS_UNIFI_POLLER}",
+          "datasource": "influxdb",
           "format": "none",
           "gauge": {
             "maxValue": 100,
@@ -1575,7 +1575,7 @@
         },
         {
           "columns": [],
-          "datasource": "${DS_UNIFI_POLLER}",
+          "datasource": "influxdb",
           "fontSize": "100%",
           "gridPos": {
             "h": 4,
@@ -1721,7 +1721,7 @@
         },
         {
           "columns": [],
-          "datasource": "${DS_UNIFI_POLLER}",
+          "datasource": "influxdb",
           "fontSize": "100%",
           "gridPos": {
             "h": 4,
@@ -1913,7 +1913,7 @@
             "rgba(237, 129, 40, 0.89)",
             "#d44a3a"
           ],
-          "datasource": "${DS_UNIFI_POLLER}",
+          "datasource": "influxdb",
           "format": "none",
           "gauge": {
             "maxValue": 100,
@@ -2028,7 +2028,7 @@
             "rgba(237, 129, 40, 0.89)",
             "#d44a3a"
           ],
-          "datasource": "${DS_UNIFI_POLLER}",
+          "datasource": "influxdb",
           "description": "This panel currently does not select a subsystem, so the data reflected here may only be fore 1 random system. Keep this in mind when you build your own graphs from this data.",
           "format": "none",
           "gauge": {
@@ -2138,7 +2138,7 @@
             "#C4162A",
             "#C4162A"
           ],
-          "datasource": "${DS_UNIFI_POLLER}",
+          "datasource": "influxdb",
           "format": "none",
           "gauge": {
             "maxValue": 100,
@@ -2247,7 +2247,7 @@
             "#C4162A",
             "#C4162A"
           ],
-          "datasource": "${DS_UNIFI_POLLER}",
+          "datasource": "influxdb",
           "format": "none",
           "gauge": {
             "maxValue": 100,
@@ -2356,7 +2356,7 @@
             "#C4162A",
             "#C4162A"
           ],
-          "datasource": "${DS_UNIFI_POLLER}",
+          "datasource": "influxdb",
           "format": "none",
           "gauge": {
             "maxValue": 100,
@@ -2465,7 +2465,7 @@
             "rgba(237, 129, 40, 0.89)",
             "#d44a3a"
           ],
-          "datasource": "${DS_UNIFI_POLLER}",
+          "datasource": "influxdb",
           "format": "none",
           "gauge": {
             "maxValue": 100,
@@ -2580,7 +2580,7 @@
             "rgba(237, 129, 40, 0.89)",
             "#d44a3a"
           ],
-          "datasource": "${DS_UNIFI_POLLER}",
+          "datasource": "influxdb",
           "format": "none",
           "gauge": {
             "maxValue": 100,
@@ -2688,7 +2688,7 @@
         },
         {
           "columns": [],
-          "datasource": "${DS_UNIFI_POLLER}",
+          "datasource": "influxdb",
           "fontSize": "100%",
           "gridPos": {
             "h": 3,
@@ -2882,7 +2882,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "${DS_UNIFI_POLLER}",
+          "datasource": "influxdb",
           "decimals": null,
           "description": "Shows data transfer for each subsystem on the site. RX is on the negative axis.",
           "fill": 0,
@@ -3061,7 +3061,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "${DS_UNIFI_POLLER}",
+          "datasource": "influxdb",
           "decimals": 0,
           "description": "This graphs shows clients connected to the site.",
           "fill": 0,
@@ -3251,7 +3251,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "${DS_UNIFI_POLLER}",
+          "datasource": "influxdb",
           "decimals": 0,
           "description": "This graph only works if DPI is enabled on the controller and DPI collection is enabled in UniFi Poller. Rx is on the negative axis.",
           "fill": 0,
@@ -3447,7 +3447,7 @@
       {
         "allValue": ".*",
         "current": {},
-        "datasource": "${DS_UNIFI_POLLER}",
+        "datasource": "influxdb",
         "definition": "show tag values from \"subsystems\" with key=\"source\"",
         "hide": 0,
         "includeAll": true,
@@ -3469,7 +3469,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_UNIFI_POLLER}",
+        "datasource": "influxdb",
         "definition": "show tag values from \"subsystems\" with key=\"site_name\" WHERE source =~ /^$Controller$/ ",
         "hide": 2,
         "includeAll": true,
@@ -3491,7 +3491,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_UNIFI_POLLER}",
+        "datasource": "influxdb",
         "definition": "show tag values from \"subsystems\" with key=\"subsystem\"",
         "hide": 2,
         "includeAll": false,
