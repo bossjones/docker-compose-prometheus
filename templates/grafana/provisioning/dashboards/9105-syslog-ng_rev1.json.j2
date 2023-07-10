@@ -97,7 +97,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(syslog_ng_source_messages_processed_total{instance=~\"$instance\",type=\"dst.syslog\"}[1m])) by (instance)",
+          "expr": "sum(rate(syslog_ng_destination_messages_processed_total{type=\"dst.syslog\"}[1m])) by (instance)",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -203,7 +203,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(promhttp_metric_handler_requests_total{instance=~\"$instance\",code=~\"500|503\"}[1m]))",
+          "expr": "sum(rate(promhttp_metric_handler_requests_total{code=~\"500|503|502|504\"}[1m]))",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -288,7 +288,7 @@
         "allValue": null,
         "current": {},
         "datasource": "Prometheus",
-        "definition": "label_values(syslog_ng_source_messages_processed_total,instance)",
+        "definition": "label_values(syslog_ng_destination_messages_processed_total,instance)",
         "error": null,
         "hide": 0,
         "includeAll": false,
@@ -296,7 +296,7 @@
         "multi": false,
         "name": "instance",
         "options": [],
-        "query": "label_values(syslog_ng_source_messages_processed_total,instance)",
+        "query": "label_values(syslog_ng_destination_messages_processed_total,instance)",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
