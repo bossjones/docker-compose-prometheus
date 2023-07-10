@@ -58,6 +58,7 @@ scrape_configs:
             count_entry_bytes: true
             action: add
 
+{% if log_generator_feature_flag %}
   - job_name: generated-logs
     static_configs:
       - targets:
@@ -91,6 +92,7 @@ scrape_configs:
               match_all: true
               count_entry_bytes: true
               action: add
+{% endif %}
 
 # - job_name: syslog
 #   syslog:
