@@ -1,4 +1,5 @@
 {% raw %}
+
 {
   "__inputs": [
     {
@@ -174,7 +175,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate (loki_distributor_ingester_appends_total[1m])",
+          "expr": "rate(loki_distributor_ingester_appends_total[1m])",
           "refId": "A"
         }
       ],
@@ -262,7 +263,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum (promtail_file_bytes_total{instance=~\".*\"}) by (instance)",
+          "expr": "sum(my_promtail_custom_log_bytes_total{host=~\".*\"}) by (host)",
           "refId": "A"
         }
       ],
@@ -348,10 +349,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum (promtail_encoded_bytes_total{pod=~'.*'}) by (pod)",
+          "expr": "sum(promtail_encoded_bytes_total{host=~'.*'}) by (host)",
           "format": "time_series",
           "instant": false,
-          "legendFormat": "{{ pod }}",
+          "legendFormat": "{{ host }}",
           "refId": "A"
         }
       ],
