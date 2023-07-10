@@ -217,6 +217,15 @@ scrape_configs:
           - loki-write
         type: A
         port: 3100
+    relabel_configs:
+    - source_labels: [__meta_dns_name]
+      target_label: service
+    - source_labels: [__meta_dns_srv_record_target]
+      target_label: dns_srv_record_target
+    - source_labels: [__meta_dns_srv_record_port]
+      target_label: dns_srv_record_port
+    - source_labels: [__meta_dns_mx_record_target]
+      target_label: dns_mx_record_target
 
   - job_name: 'promtail'
     dns_sd_configs:

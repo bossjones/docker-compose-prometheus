@@ -636,6 +636,9 @@ services:
       # - /run/log/journal/:/run/log/journal/:ro
       - /etc/machine-id:/etc/machine-id:ro
       - ./promtail/var/run/promtail:/var/run/promtail
+      # to read container labels and logs
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
       # - /var/lib/docker/containers:/var/lib/docker/containers:ro
       # - /home/pi/dev/bossjones/elk-docker/rsyslog-conf/log:/log
       # so we can get generated logs
