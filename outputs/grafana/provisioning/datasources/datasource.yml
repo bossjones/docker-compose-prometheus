@@ -62,12 +62,14 @@ datasources:
   type: influxdb
   access: proxy
   # database: unifi
-  user: unifi-poller
+  user: unifipoller
   jsonData:
       dbName: unifi
       httpMode: GET
   secureJsonData:
     password: changeme
+  basicAuthUser: unifipoller
+  basicAuthPassword: changeme
   url: http://influxdb:8086
   editable: true
   uid: influxdb
