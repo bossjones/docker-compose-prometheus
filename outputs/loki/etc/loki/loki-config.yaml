@@ -110,7 +110,7 @@ limits_config:
   ingestion_rate_strategy: global
   query_timeout: 300s
   max_query_parallelism: 24
-  split_queries_by_interval: 15m
+  split_queries_by_interval: 24h
   # increment_duplicate_timestamp: true
   max_cache_freshness_per_query: '10m'
   # Enforce every sample has a metric name.
@@ -253,7 +253,7 @@ query_scheduler:
   max_outstanding_requests_per_tenant: 1024
 
 querier:
-  max_concurrent: 10
+  max_concurrent: 8
   # worker_match_max_concurrent: true
   # query_timeout: 300s
   # engine:

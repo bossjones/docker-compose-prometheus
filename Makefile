@@ -118,3 +118,6 @@ dashboards:
 
 render:
 	bash ./render.sh
+
+get_running_config:
+	curl localhost:3100/config
