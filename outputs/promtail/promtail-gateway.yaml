@@ -40,9 +40,9 @@ scrape_configs:
       #   regex: __syslog_message_(.+)
     pipeline_stages:
     - match:
-      selector: '{host="USW_MINI"} |~ ".*Send normal inform to.*Time.*"'
-      action: drop
-      drop_counter_reason: promtail_noisy_error
+        selector: '{host="USW_MINI"} |~ ".*Send normal inform to.*"'
+        action: drop
+        drop_counter_reason: promtail_noisy_error
     - metrics:
         log_lines_total:
           type: Counter
