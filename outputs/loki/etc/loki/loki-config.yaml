@@ -174,8 +174,9 @@ chunk_store_config:
 
 query_range:
   results_cache:
-    embedded_cache:
-      enabled: true
+    cache:
+      embedded_cache:
+        enabled: true
   # make queries more cache-able by aligning them with their step intervals
   # Mutate incoming queries to align their start and end with their step.
   # CLI flag: -querier.align-querier-with-step
