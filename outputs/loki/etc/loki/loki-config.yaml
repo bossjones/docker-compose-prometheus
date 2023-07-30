@@ -296,6 +296,7 @@ querier:
   tail_max_duration: 1h
 
 ingester:
+  autoforget_unhealthy: true
   lifecycler:
     join_after: 10s
     observe_period: 5s
