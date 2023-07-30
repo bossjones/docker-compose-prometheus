@@ -18,6 +18,9 @@ server:
   log_level: info
 
 common:
+  ring:
+    kvstore:
+      store: memberlist
   storage:
     s3:
       endpoint: minio:9000
@@ -57,6 +60,10 @@ distributor:
     # CLI flag: -distributor.rate-store.ingester-request-timeout
     ingester_request_timeout: 500ms
 
+ruler:
+  ring:
+    kvstore:
+      store: memberlist
 # ruler:
 #   enable_api: true
 #   wal:
@@ -265,6 +272,10 @@ frontend_worker:
 
 query_scheduler:
   max_outstanding_requests_per_tenant: 1024
+  use_scheduler_ring: true
+  scheduler_ring:
+    kvstore:
+      store: memberlist
 
 querier:
   max_concurrent: 25
