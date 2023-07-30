@@ -89,6 +89,7 @@ datasources:
   basicAuth: false
   jsonData:
     httpHeaderName1: "X-Scope-OrgID"
+    maxLines: 1000
   secureJsonData:
     httpHeaderValue1: "docker"
   editable: true

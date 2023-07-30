@@ -87,6 +87,9 @@ schema_config:
       period: 24h
 
 storage_config:
+  index_queries_cache_config:
+    embedded_cache:
+      enabled: true
   boltdb_shipper:
     shared_store: s3
     active_index_directory: /tmp/index
@@ -95,6 +98,9 @@ storage_config:
 
 
 limits_config:
+  # Maximum number of concurrent tail requests.
+  # CLI flag: -querier.max-concurrent-tail-requests
+  max_concurrent_tail_requests: 20
   # Whether the ingestion rate limit should be applied individually to each
   # distributor instance (local), or evenly shared across the cluster (global).
   # The ingestion rate strategy cannot be overridden on a per-tenant basis.
@@ -110,7 +116,7 @@ limits_config:
   ingestion_rate_strategy: global
   query_timeout: 300s
   max_query_parallelism: 24
-  split_queries_by_interval: 24h
+  split_queries_by_interval: 48h
   # increment_duplicate_timestamp: true
   max_cache_freshness_per_query: '10m'
   # Enforce every sample has a metric name.
@@ -157,12 +163,19 @@ limits_config:
 
 
 chunk_store_config:
+  chunk_cache_config:
+    embedded_cache:
+      enabled: true
+
   max_look_back_period: 336h
   #embedded_cache:
   #  enabled: true
   #  max_size_mb: 500
 
 query_range:
+  results_cache:
+    embedded_cache:
+      enabled: true
   # make queries more cache-able by aligning them with their step intervals
   # Mutate incoming queries to align their start and end with their step.
   # CLI flag: -querier.align-querier-with-step
@@ -253,11 +266,12 @@ query_scheduler:
   max_outstanding_requests_per_tenant: 1024
 
 querier:
-  max_concurrent: 8
+  max_concurrent: 25
   # worker_match_max_concurrent: true
-  # query_timeout: 300s
-  # engine:
-  #   timeout: 300s
+  query_timeout: 300s
+  engine:
+    timeout: 300s
+    max_look_back_period: 2m
   # Time to wait before sending more than the minimum successful query requests.
   # CLI flag: -querier.extra-query-delay
   extra_query_delay: 0s
