@@ -18,9 +18,10 @@ server:
   log_level: info
 
 common:
-  ring:
-    kvstore:
-      store: memberlist
+  #temp disable to see if it fixes the read servers
+  #ring:
+  #  kvstore:
+  #    store: memberlist
   storage:
     s3:
       endpoint: minio:9000
