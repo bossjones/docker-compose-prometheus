@@ -17,9 +17,14 @@ server:
   http_server_read_timeout: 310s
   log_level: {{loki_log_level}}
 
+# SOURCE: https://community.grafana.com/t/loki-error-on-port-9095-error-contacting-scheduler/67263/2
 common:
+  instance_interface_names:
+  - lo
   #temp disable to see if it fixes the read servers
-  #ring:
+  ring:
+    instance_interface_names:
+      - lo
   #  kvstore:
   #    store: memberlist
   storage:
@@ -281,7 +286,6 @@ query_scheduler:
 querier:
   max_concurrent: 25
   # worker_match_max_concurrent: true
-  query_timeout: 300s
   engine:
     timeout: 300s
     max_look_back_period: 2m
