@@ -29,11 +29,20 @@ http {
     server loki-write:3100;
   }
 
+  # upstream grpccluster {
+  #   server loki-read:9095;
+  #   server loki-write:9095;
+  # }
+
   server {
     listen 80;
     listen 3100;
     proxy_read_timeout 310s;
     proxy_send_timeout 310s;
+
+    # location = / {
+    #     grpc_pass       http://grpccluster$request_uri;
+    # }
 
     location = /ring {
         proxy_pass       http://cluster$request_uri;
