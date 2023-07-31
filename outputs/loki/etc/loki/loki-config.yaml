@@ -19,12 +19,12 @@ server:
 
 # SOURCE: https://community.grafana.com/t/loki-error-on-port-9095-error-contacting-scheduler/67263/2
 common:
-  instance_interface_names:
-  - lo
+  #instance_interface_names:
+  #- eth0
   #temp disable to see if it fixes the read servers
-  ring:
-    instance_interface_names:
-      - lo
+  #ring:
+  #  instance_interface_names:
+  #    - eth0
   #  kvstore:
   #    store: memberlist
   storage:
