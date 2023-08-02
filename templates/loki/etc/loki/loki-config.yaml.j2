@@ -71,7 +71,7 @@ ruler:
   ring:
     kvstore:
       store: memberlist
-  rule_path: /tmp/prom-rules
+  rule_path: /loki/prom-rules
   remote_write:
     enabled: true
     clients:
@@ -134,6 +134,11 @@ storage_config:
     active_index_directory: /tmp/index
     cache_location: /tmp/boltdb-cache
     resync_interval: 5s
+  # New tsdb-shipper configuration
+  tsdb_shipper:
+    active_index_directory: /tmp/tsdb-index
+    cache_location: /tmp/tsdb-cache
+    shared_store: s3
 
 
 limits_config:
@@ -199,7 +204,7 @@ limits_config:
   # within the allowed time range. The default value of 0 does not set a limit.
   # CLI flag: -querier.max-query-lookback
   max_query_lookback: 336h
-  volume_enabled: true
+  # volume_enabled: true
 
 
 chunk_store_config:
@@ -207,7 +212,7 @@ chunk_store_config:
     embedded_cache:
       enabled: true
 
-  max_look_back_period: 336h
+  # max_look_back_period: 336h
   #embedded_cache:
   #  enabled: true
   #  max_size_mb: 500
@@ -304,13 +309,20 @@ frontend_worker:
     max_send_msg_size: 104857600
 
 query_scheduler:
-  max_outstanding_requests_per_tenant: 1024
+  # https://grafana.com/docs/loki/latest/operations/storage/tsdb/
+  # the TSDB index dispatches many more, but each individually smaller, requests.
+  # We increase the pending request queue sizes to compensate.
+  max_outstanding_requests_per_tenant: 32768
   use_scheduler_ring: true
   scheduler_ring:
     kvstore:
       store: memberlist
 
 querier:
+  # Each `querier` component process runs a number of parallel workers to process queries simultaneously.
+  # You may want to adjust this up or down depending on your resource usage
+  # (more available cpu and memory can tolerate higher values and vice versa),
+  # but we find the most success running at around `16` with tsdb
   max_concurrent: 25
   # worker_match_max_concurrent: true
   engine:

@@ -75,7 +75,7 @@ services:
   # Loki would not have permissions to create the directories.
   # Therefore the init container changes permissions of the mounted directory.
   init:
-    image: grafana/loki:2.8.0
+    image: grafana/loki:2.8.3
     user: root
     entrypoint:
       - "chown"
@@ -552,7 +552,7 @@ services:
 
   loki-read:
     user: "1000"
-    image: grafana/loki:2.8.0
+    image: grafana/loki:2.8.3
     volumes:
       # - ./config:/etc/loki/
       # - ./loki/etc/loki:/etc/loki/
@@ -571,7 +571,7 @@ services:
     #  - SYS_PTRACE
     #security_opt:
     #  - apparmor=unconfined
-    command: "-config.file=/loki/loki-config.yaml -log.level={{ loki_log_level }} -target=read"
+    command: "-config.file=/loki/loki-config.yaml -log.level={{ loki_log_level }} -target=read -legacy-read-mode=false"
     env_file:
       - ./env
     networks:
@@ -592,7 +592,7 @@ services:
 
   loki-write:
     user: "1000"
-    image: grafana/loki:2.8.0
+    image: grafana/loki:2.8.3
     volumes:
       # - ./config:/etc/loki/
       - ./loki/etc/loki:/loki:rw
@@ -628,7 +628,7 @@ services:
 
   loki-backend:
     user: "1000"
-    image: grafana/loki:2.8.0
+    image: grafana/loki:2.8.3
     volumes:
       # - ./config:/etc/loki/
       - ./loki/etc/loki:/loki:rw
@@ -644,7 +644,7 @@ services:
     #security_opt:
     #  - apparmor=unconfined
     # command: "-config.file=/loki/loki-config.yaml -log.level={{ loki_log_level }} -target=write -frontend.downstream-url=http://loki-gateway:3100 -querier.frontend-address=http://loki-write:9095"
-    command: "-config.file=/loki/loki-config.yaml -log.level={{ loki_log_level }} -target=backend"
+    command: "-config.file=/loki/loki-config.yaml -log.level={{ loki_log_level }} -target=backend -legacy-read-mode=false"
     env_file:
       - ./env
     networks:
@@ -664,7 +664,7 @@ services:
 
 #   loki:
 #     restart: always
-#     image: grafana/loki:2.8.0
+#     image: grafana/loki:2.8.3
 #     ports:
 #       - "3100:3100/tcp"
 #       - "9096:9096"
@@ -694,12 +694,13 @@ services:
   promtail:
     # SOURCE: https://github.com/gilmrt/docker-compose/blob/5d8d7b3746fba48ba5f559f9913e56ae3d881eee/metrics/docker-compose.yml
     container_name: promtail
-    image: grafana/promtail:2.8.0
+    image: grafana/promtail:2.8.3
     restart: always
     depends_on:
       - 'loki-gateway'
       - 'loki-read'
       - 'loki-write'
+      - 'loki-backend'
     volumes:
       # - /var/log:/var/log:ro
       - ./promtail/promtail-gateway.yaml:/etc/promtail/promtail-gateway.yaml:ro

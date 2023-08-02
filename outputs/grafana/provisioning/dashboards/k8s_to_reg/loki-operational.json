@@ -472,7 +472,7 @@
                   "expr": "increase(kube_pod_container_status_restarts_total{cluster=\"$cluster\", namespace=\"$namespace\"}[10m]) > 0",
                   "hide": false,
                   "interval": "",
-                  "legendFormat": "{{container}}-{{pod}}",
+                  "legendFormat": "{{container}}-{{service}}",
                   "refId": "B"
                }
             ],
@@ -779,7 +779,7 @@
             "steppedLine": false,
             "targets": [
                {
-                  "expr": "sum(rate(loki_request_duration_seconds_count{cluster=\"$cluster\", namespace=\"$namespace\", service=~\"loki-write\", status_code!~\"5[0-9]{2}\"}[$__rate_interval])) by (route)\n/\nsum(rate(loki_request_duration_seconds_count{cluster=\"$cluster\", namespace=\"$namespace\", service=~\"loki-write\"}[$__rate_interval])) by (route) > 0",
+                  "expr": "sum(rate(loki_request_duration_seconds_count{cluster=\"$cluster\",  service=~\"loki-write\", status_code!~\"5[0-9]{2}\"}[$__rate_interval])) by (route)\n/\nsum(rate(loki_request_duration_seconds_count{cluster=\"$cluster\",  service=~\"loki-write\"}[$__rate_interval])) by (route) > 0",
                   "interval": "",
                   "legendFormat": "{{route}}",
                   "refId": "A"
@@ -985,7 +985,7 @@
             "steppedLine": false,
             "targets": [
                {
-                  "expr": "sum(rate(loki_request_duration_seconds_count{cluster=\"$cluster\", namespace=\"$namespace\", service=~\"loki-write\", status_code!~\"5[0-9]{2}\", route=\"/logproto.Pusher/Push\"}[$__rate_interval])) by (route)\n/\nsum(rate(loki_request_duration_seconds_count{cluster=\"$cluster\", namespace=\"$namespace\", service=~\"loki-write\", route=\"/logproto.Pusher/Push\"}[$__rate_interval])) by (route) > 0",
+                  "expr": "sum(rate(loki_request_duration_seconds_count{cluster=\"$cluster\",  service=~\"loki-write\", status_code!~\"5[0-9]{2}\", route=\"/logproto.Pusher/Push\"}[$__rate_interval])) by (route)\n/\nsum(rate(loki_request_duration_seconds_count{cluster=\"$cluster\",  service=~\"loki-write\", route=\"/logproto.Pusher/Push\"}[$__rate_interval])) by (route) > 0",
                   "interval": "",
                   "legendFormat": "{{route}}",
                   "refId": "A"
@@ -1297,7 +1297,7 @@
             "steppedLine": false,
             "targets": [
                {
-                  "expr": "sum(rate(loki_request_duration_seconds_count{cluster=\"$cluster\", namespace=\"$namespace\", service=~\"loki-read\", status_code!~\"5[0-9]{2}\"}[$__rate_interval])) by (route)\n/\nsum(rate(loki_request_duration_seconds_count{cluster=\"$cluster\", namespace=\"$namespace\", service=~\"loki-read\"}[$__rate_interval])) by (route) > 0",
+                  "expr": "sum(rate(loki_request_duration_seconds_count{cluster=\"$cluster\",  service=~\"loki-read\", status_code!~\"5[0-9]{2}\"}[$__rate_interval])) by (route)\n/\nsum(rate(loki_request_duration_seconds_count{cluster=\"$cluster\",  service=~\"loki-read\"}[$__rate_interval])) by (route) > 0",
                   "interval": "",
                   "legendFormat": "{{route}}",
                   "refId": "A"
@@ -1502,7 +1502,7 @@
             "steppedLine": false,
             "targets": [
                {
-                  "expr": "sum(rate(loki_request_duration_seconds_count{cluster=\"$cluster\", namespace=\"$namespace\", service=~\"loki-write\", status_code!~\"5[0-9]{2}\", route=~\"/logproto.Querier/Query|/logproto.Querier/Label|/logproto.Querier/Series|/logproto.Querier/QuerySample|/logproto.Querier/GetChunkIDs\"}[$__rate_interval])) by (route)\n/\nsum(rate(loki_request_duration_seconds_count{cluster=\"$cluster\", namespace=\"$namespace\", service=~\"loki-write\", route=~\"/logproto.Querier/Query|/logproto.Querier/Label|/logproto.Querier/Series|/logproto.Querier/QuerySample|/logproto.Querier/GetChunkIDs\"}[$__rate_interval])) by (route) > 0",
+                  "expr": "sum(rate(loki_request_duration_seconds_count{cluster=\"$cluster\",  service=~\"loki-write\", status_code!~\"5[0-9]{2}\", route=~\"/logproto.Querier/Query|/logproto.Querier/Label|/logproto.Querier/Series|/logproto.Querier/QuerySample|/logproto.Querier/GetChunkIDs\"}[$__rate_interval])) by (route)\n/\nsum(rate(loki_request_duration_seconds_count{cluster=\"$cluster\",  service=~\"loki-write\", route=~\"/logproto.Querier/Query|/logproto.Querier/Label|/logproto.Querier/Series|/logproto.Querier/QuerySample|/logproto.Querier/GetChunkIDs\"}[$__rate_interval])) by (route) > 0",
                   "interval": "",
                   "legendFormat": "{{route}}",
                   "refId": "A"
@@ -1800,9 +1800,9 @@
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster=\"$cluster\", namespace=\"$namespace\", pod=~\"(loki|enterprise-logs)-write.*\"}",
+                        "expr": "node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster=\"$cluster\",  service=~\"loki-write\"}",
                         "intervalFactor": 3,
-                        "legendFormat": "{{pod}}-{{container}}",
+                        "legendFormat": "{{service}}-{{container}}",
                         "refId": "A"
                      }
                   ],
@@ -1891,10 +1891,10 @@
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "go_memstats_heap_inuse_bytes{cluster=\"$cluster\", namespace=\"$namespace\", pod=~\"(loki|enterprise-logs)-write.*\"}",
+                        "expr": "go_memstats_heap_inuse_bytes{cluster=\"$cluster\",  service=~\"loki-write\"}",
                         "instant": false,
                         "intervalFactor": 3,
-                        "legendFormat": "{{pod}}",
+                        "legendFormat": "{{service}}",
                         "refId": "A"
                      }
                   ],
@@ -1986,7 +1986,7 @@
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "sum(rate({cluster=\"$cluster\", namespace=\"$namespace\", service=~\"loki-write\"} | logfmt | level=\"error\"[1m]))",
+                        "expr": "sum(rate({cluster=\"$cluster\",  service=~\"loki-write\"} | logfmt | level=\"error\"[1m]))",
                         "refId": "A"
                      }
                   ],
@@ -2049,7 +2049,7 @@
                   "panels": [ ],
                   "targets": [
                      {
-                        "expr": "{cluster=\"$cluster\", namespace=\"$namespace\", service=~\"loki-write\"} |= \"level=error\"",
+                        "expr": "{cluster=\"$cluster\",  service=~\"loki-write\"} |= \"level=error\"",
                         "refId": "A"
                      }
                   ],
@@ -2100,7 +2100,7 @@
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "sum(rate(loki_request_duration_seconds_count{cluster=\"$cluster\", namespace=\"$namespace\", service=~\"loki-write\", status_code!~\"5[0-9]{2}\"}[$__rate_interval])) by (route)\n/\nsum(rate(loki_request_duration_seconds_count{cluster=\"$cluster\", namespace=\"$namespace\", service=~\"loki-write\"}[$__rate_interval])) by (route) > 0",
+                        "expr": "sum(rate(loki_request_duration_seconds_count{cluster=\"$cluster\",  service=~\"loki-write\", status_code!~\"5[0-9]{2}\"}[$__rate_interval])) by (route)\n/\nsum(rate(loki_request_duration_seconds_count{cluster=\"$cluster\",  service=~\"loki-write\"}[$__rate_interval])) by (route) > 0",
                         "interval": "",
                         "intervalFactor": 1,
                         "legendFormat": "{{route}}",
@@ -2192,7 +2192,7 @@
                      {
                         "expr": "sum(rate(loki_distributor_ingester_append_failures_total{cluster=\"$cluster\", namespace=\"$namespace\"}[5m])) by (pod)",
                         "intervalFactor": 1,
-                        "legendFormat": "{{pod}}",
+                        "legendFormat": "{{service}}",
                         "refId": "A"
                      }
                   ],
@@ -2281,7 +2281,7 @@
                      {
                         "expr": "sum(rate(loki_distributor_bytes_received_total{cluster=\"$cluster\", namespace=\"$namespace\"}[5m])) by (pod)",
                         "intervalFactor": 1,
-                        "legendFormat": "{{pod}}",
+                        "legendFormat": "{{service}}",
                         "refId": "A"
                      }
                   ],
@@ -2370,7 +2370,7 @@
                      {
                         "expr": "sum(rate(loki_distributor_lines_received_total{cluster=\"$cluster\", namespace=\"$namespace\"}[5m])) by (pod)",
                         "intervalFactor": 1,
-                        "legendFormat": "{{pod}}",
+                        "legendFormat": "{{service}}",
                         "refId": "A"
                      }
                   ],
@@ -3007,9 +3007,9 @@
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster=\"$cluster\", namespace=\"$namespace\", pod=~\"(loki|enterprise-logs)-read.*\"}",
+                        "expr": "node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster=\"$cluster\",  service=~\"loki-read\"}",
                         "intervalFactor": 3,
-                        "legendFormat": "{{pod}}-{{container}}",
+                        "legendFormat": "{{service}}-{{container}}",
                         "refId": "A"
                      }
                   ],
@@ -3098,10 +3098,10 @@
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "go_memstats_heap_inuse_bytes{cluster=\"$cluster\", namespace=\"$namespace\", pod=~\"(loki|enterprise-logs)-read.*\"}",
+                        "expr": "go_memstats_heap_inuse_bytes{cluster=\"$cluster\",  service=~\"loki-read\"}",
                         "instant": false,
                         "intervalFactor": 3,
-                        "legendFormat": "{{pod}}",
+                        "legendFormat": "{{service}}",
                         "refId": "A"
                      }
                   ],
@@ -3193,7 +3193,7 @@
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "sum(rate({cluster=\"$cluster\", namespace=\"$namespace\", service=~\"loki-read\"} | logfmt |  level=\"error\"[1m]))",
+                        "expr": "sum(rate({cluster=\"$cluster\",  service=~\"loki-read\"} | logfmt |  level=\"error\"[1m]))",
                         "refId": "A"
                      }
                   ],
@@ -3256,7 +3256,7 @@
                   "panels": [ ],
                   "targets": [
                      {
-                        "expr": "{cluster=\"$cluster\", namespace=\"$namespace\", service=~\"loki-read\"} |= \"level=error\"",
+                        "expr": "{cluster=\"$cluster\",  service=~\"loki-read\"} |= \"level=error\"",
                         "refId": "A"
                      }
                   ],
@@ -3307,7 +3307,7 @@
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "sum(rate(loki_request_duration_seconds_count{cluster=\"$cluster\", namespace=\"$namespace\", service=~\"loki-read\", status_code!~\"5[0-9]{2}\"}[$__rate_interval])) by (route)\n/\nsum(rate(loki_request_duration_seconds_count{cluster=\"$cluster\", namespace=\"$namespace\", service=~\"loki-read\"}[$__rate_interval])) by (route) > 0",
+                        "expr": "sum(rate(loki_request_duration_seconds_count{cluster=\"$cluster\",  service=~\"loki-read\", status_code!~\"5[0-9]{2}\"}[$__rate_interval])) by (route)\n/\nsum(rate(loki_request_duration_seconds_count{cluster=\"$cluster\",  service=~\"loki-read\"}[$__rate_interval])) by (route) > 0",
                         "interval": "",
                         "intervalFactor": 1,
                         "legendFormat": "{{route}}",
@@ -3838,17 +3838,17 @@
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "histogram_quantile(.99, sum(rate(loki_bigtable_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"/google.bigtable.v2.Bigtable/MutateRows\"}[5m])) by (operation, le))",
+                        "expr": "histogram_quantile(.99, sum(rate(loki_bigtable_request_duration_seconds_bucket{cluster=\"$cluster\",  operation=\"/google.bigtable.v2.Bigtable/MutateRows\"}[5m])) by (operation, le))",
                         "intervalFactor": 1,
                         "legendFormat": ".9",
                         "refId": "A"
                      },
                      {
-                        "expr": "histogram_quantile(.9, sum(rate(loki_bigtable_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"/google.bigtable.v2.Bigtable/MutateRows\"}[5m])) by (operation, le))",
+                        "expr": "histogram_quantile(.9, sum(rate(loki_bigtable_request_duration_seconds_bucket{cluster=\"$cluster\",  operation=\"/google.bigtable.v2.Bigtable/MutateRows\"}[5m])) by (operation, le))",
                         "refId": "B"
                      },
                      {
-                        "expr": "histogram_quantile(.5, sum(rate(loki_bigtable_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"/google.bigtable.v2.Bigtable/MutateRows\"}[5m])) by (operation, le))",
+                        "expr": "histogram_quantile(.5, sum(rate(loki_bigtable_request_duration_seconds_bucket{cluster=\"$cluster\",  operation=\"/google.bigtable.v2.Bigtable/MutateRows\"}[5m])) by (operation, le))",
                         "refId": "C"
                      }
                   ],
@@ -3936,20 +3936,20 @@
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "histogram_quantile(.99, sum(rate(loki_bigtable_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"/google.bigtable.v2.Bigtable/ReadRows\"}[5m])) by (operation, le))",
+                        "expr": "histogram_quantile(.99, sum(rate(loki_bigtable_request_duration_seconds_bucket{cluster=\"$cluster\",  operation=\"/google.bigtable.v2.Bigtable/ReadRows\"}[5m])) by (operation, le))",
                         "interval": "",
                         "intervalFactor": 1,
                         "legendFormat": "99%",
                         "refId": "A"
                      },
                      {
-                        "expr": "histogram_quantile(.9, sum(rate(loki_bigtable_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"/google.bigtable.v2.Bigtable/ReadRows\"}[5m])) by (operation, le))",
+                        "expr": "histogram_quantile(.9, sum(rate(loki_bigtable_request_duration_seconds_bucket{cluster=\"$cluster\",  operation=\"/google.bigtable.v2.Bigtable/ReadRows\"}[5m])) by (operation, le))",
                         "interval": "",
                         "legendFormat": "90%",
                         "refId": "B"
                      },
                      {
-                        "expr": "histogram_quantile(.5, sum(rate(loki_bigtable_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"/google.bigtable.v2.Bigtable/ReadRows\"}[5m])) by (operation, le))",
+                        "expr": "histogram_quantile(.5, sum(rate(loki_bigtable_request_duration_seconds_bucket{cluster=\"$cluster\",  operation=\"/google.bigtable.v2.Bigtable/ReadRows\"}[5m])) by (operation, le))",
                         "interval": "",
                         "legendFormat": "50%",
                         "refId": "C"
@@ -4039,20 +4039,20 @@
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "histogram_quantile(.99, sum(rate(loki_bigtable_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"/google.bigtable.admin.v2.BigtableTableAdmin/GetTable\"}[5m])) by (operation, le))",
+                        "expr": "histogram_quantile(.99, sum(rate(loki_bigtable_request_duration_seconds_bucket{cluster=\"$cluster\",  operation=\"/google.bigtable.admin.v2.BigtableTableAdmin/GetTable\"}[5m])) by (operation, le))",
                         "interval": "",
                         "intervalFactor": 1,
                         "legendFormat": "99%",
                         "refId": "A"
                      },
                      {
-                        "expr": "histogram_quantile(.9, sum(rate(loki_bigtable_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"/google.bigtable.admin.v2.BigtableTableAdmin/GetTable\"}[5m])) by (operation, le))",
+                        "expr": "histogram_quantile(.9, sum(rate(loki_bigtable_request_duration_seconds_bucket{cluster=\"$cluster\",  operation=\"/google.bigtable.admin.v2.BigtableTableAdmin/GetTable\"}[5m])) by (operation, le))",
                         "interval": "",
                         "legendFormat": "90%",
                         "refId": "B"
                      },
                      {
-                        "expr": "histogram_quantile(.5, sum(rate(loki_bigtable_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"/google.bigtable.admin.v2.BigtableTableAdmin/GetTable\"}[5m])) by (operation, le))",
+                        "expr": "histogram_quantile(.5, sum(rate(loki_bigtable_request_duration_seconds_bucket{cluster=\"$cluster\",  operation=\"/google.bigtable.admin.v2.BigtableTableAdmin/GetTable\"}[5m])) by (operation, le))",
                         "interval": "",
                         "legendFormat": "50%",
                         "refId": "C"
@@ -4142,17 +4142,17 @@
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "histogram_quantile(.99, sum(rate(loki_bigtable_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"/google.bigtable.admin.v2.BigtableTableAdmin/ListTables\"}[5m])) by (operation, le))",
+                        "expr": "histogram_quantile(.99, sum(rate(loki_bigtable_request_duration_seconds_bucket{cluster=\"$cluster\",  operation=\"/google.bigtable.admin.v2.BigtableTableAdmin/ListTables\"}[5m])) by (operation, le))",
                         "intervalFactor": 1,
                         "legendFormat": ".9",
                         "refId": "A"
                      },
                      {
-                        "expr": "histogram_quantile(.9, sum(rate(loki_bigtable_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"/google.bigtable.admin.v2.BigtableTableAdmin/ListTables\"}[5m])) by (operation, le))",
+                        "expr": "histogram_quantile(.9, sum(rate(loki_bigtable_request_duration_seconds_bucket{cluster=\"$cluster\",  operation=\"/google.bigtable.admin.v2.BigtableTableAdmin/ListTables\"}[5m])) by (operation, le))",
                         "refId": "B"
                      },
                      {
-                        "expr": "histogram_quantile(.5, sum(rate(loki_bigtable_request_duration_seconds_bucket{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"/google.bigtable.admin.v2.BigtableTableAdmin/ListTables\"}[5m])) by (operation, le))",
+                        "expr": "histogram_quantile(.5, sum(rate(loki_bigtable_request_duration_seconds_bucket{cluster=\"$cluster\",  operation=\"/google.bigtable.admin.v2.BigtableTableAdmin/ListTables\"}[5m])) by (operation, le))",
                         "refId": "C"
                      }
                   ],
@@ -4240,7 +4240,7 @@
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "sum(rate(loki_bigtable_request_duration_seconds_count{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"/google.bigtable.v2.Bigtable/MutateRows\"}[5m])) by (status_code)",
+                        "expr": "sum(rate(loki_bigtable_request_duration_seconds_count{cluster=\"$cluster\",  operation=\"/google.bigtable.v2.Bigtable/MutateRows\"}[5m])) by (status_code)",
                         "intervalFactor": 1,
                         "legendFormat": "{{status_code}}",
                         "refId": "A"
@@ -4330,7 +4330,7 @@
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "sum(rate(loki_bigtable_request_duration_seconds_count{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"/google.bigtable.v2.Bigtable/ReadRows\"}[5m])) by (status_code)",
+                        "expr": "sum(rate(loki_bigtable_request_duration_seconds_count{cluster=\"$cluster\",  operation=\"/google.bigtable.v2.Bigtable/ReadRows\"}[5m])) by (status_code)",
                         "intervalFactor": 1,
                         "legendFormat": "{{status_code}}",
                         "refId": "A"
@@ -4420,7 +4420,7 @@
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "sum(rate(loki_bigtable_request_duration_seconds_count{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"/google.bigtable.admin.v2.BigtableTableAdmin/GetTable\"}[5m])) by (status_code)",
+                        "expr": "sum(rate(loki_bigtable_request_duration_seconds_count{cluster=\"$cluster\",  operation=\"/google.bigtable.admin.v2.BigtableTableAdmin/GetTable\"}[5m])) by (status_code)",
                         "intervalFactor": 1,
                         "legendFormat": "{{status_code}}",
                         "refId": "A"
@@ -4510,7 +4510,7 @@
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "sum(rate(loki_bigtable_request_duration_seconds_count{cluster=\"$cluster\", namespace=\"$namespace\", operation=\"/google.bigtable.admin.v2.BigtableTableAdmin/ListTables\"}[5m])) by (status_code)",
+                        "expr": "sum(rate(loki_bigtable_request_duration_seconds_count{cluster=\"$cluster\",  operation=\"/google.bigtable.admin.v2.BigtableTableAdmin/ListTables\"}[5m])) by (status_code)",
                         "intervalFactor": 1,
                         "legendFormat": "{{status_code}}",
                         "refId": "A"
