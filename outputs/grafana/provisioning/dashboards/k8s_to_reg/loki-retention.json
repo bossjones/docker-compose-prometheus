@@ -70,7 +70,7 @@
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~\"$cluster\", service=~\"loki-read\", container=\"loki\", pod=~\"(loki|enterprise-logs)-read.*\"}[$__rate_interval]))",
+                        "expr": "sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~\"$cluster\", service=~\"loki-read\", container=\"loki\"}[$__rate_interval]))",
                         "format": "time_series",
                         "intervalFactor": 2,
                         "legendFormat": "{{pod}}",
@@ -78,7 +78,7 @@
                         "step": 10
                      },
                      {
-                        "expr": "min(kube_pod_container_resource_requests{cluster=~\"$cluster\", service=~\"loki-read\", container=\"loki\", pod=~\"(loki|enterprise-logs)-read.*\", resource=\"cpu\"} > 0)",
+                        "expr": "min(kube_pod_container_resource_requests{cluster=~\"$cluster\", service=~\"loki-read\", container=\"loki\", resource=\"cpu\"} > 0)",
                         "format": "time_series",
                         "intervalFactor": 2,
                         "legendFormat": "request",
@@ -86,7 +86,7 @@
                         "step": 10
                      },
                      {
-                        "expr": "min(container_spec_cpu_quota{cluster=~\"$cluster\", service=~\"loki-read\", container=\"loki\", pod=~\"(loki|enterprise-logs)-read.*\"} / container_spec_cpu_period{cluster=~\"$cluster\", service=~\"loki-read\", container=\"loki\", pod=~\"(loki|enterprise-logs)-read.*\"})",
+                        "expr": "min(container_spec_cpu_quota{cluster=~\"$cluster\", service=~\"loki-read\", container=\"loki\"} / container_spec_cpu_period{cluster=~\"$cluster\", service=~\"loki-read\", container=\"loki\"})",
                         "format": "time_series",
                         "intervalFactor": 2,
                         "legendFormat": "limit",
@@ -171,7 +171,7 @@
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "max by(pod) (container_memory_working_set_bytes{cluster=~\"$cluster\", service=~\"loki-read\", container=\"loki\", pod=~\"(loki|enterprise-logs)-read.*\"})",
+                        "expr": "max by(pod) (container_memory_working_set_bytes{cluster=~\"$cluster\", service=~\"loki-read\", container=\"loki\"})",
                         "format": "time_series",
                         "intervalFactor": 2,
                         "legendFormat": "{{pod}}",
@@ -179,7 +179,7 @@
                         "step": 10
                      },
                      {
-                        "expr": "min(kube_pod_container_resource_requests{cluster=~\"$cluster\", service=~\"loki-read\", container=\"loki\", pod=~\"(loki|enterprise-logs)-read.*\", resource=\"memory\"} > 0)",
+                        "expr": "min(kube_pod_container_resource_requests{cluster=~\"$cluster\", service=~\"loki-read\", container=\"loki\", resource=\"memory\"} > 0)",
                         "format": "time_series",
                         "intervalFactor": 2,
                         "legendFormat": "request",
@@ -187,7 +187,7 @@
                         "step": 10
                      },
                      {
-                        "expr": "min(container_spec_memory_limit_bytes{cluster=~\"$cluster\", service=~\"loki-read\", container=\"loki\", pod=~\"(loki|enterprise-logs)-read.*\"} > 0)",
+                        "expr": "min(container_spec_memory_limit_bytes{cluster=~\"$cluster\", service=~\"loki-read\", container=\"loki\"} > 0)",
                         "format": "time_series",
                         "intervalFactor": 2,
                         "legendFormat": "limit",
