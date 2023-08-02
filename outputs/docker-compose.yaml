@@ -113,19 +113,6 @@ services:
     networks:
       - loki
 
-  # for testing purposes only, disable in production
-  log-generator:
-    image: mingrammer/flog
-    command:
-      - --loop
-      - --format=json
-      - --number=10 # number of log lines to generate per second
-      - --delay=100ms # delay between log lines
-      - --output=/var/log/generated-logs.txt
-      - --overwrite
-      - --type=log
-    volumes:
-      - ./loki/:/var/log/
 
   whoami:
     image: "traefik/whoami:v1.8.0"
@@ -821,11 +808,3 @@ services:
     volumes:
     - ./syslog-ng:/syslog-ng:rw
 
-  syslog-generator:
-    build:
-      context: ./syslog-generator
-    container_name: syslog-generator
-    depends_on:
-    - syslog-ng
-    networks:
-      loki: null

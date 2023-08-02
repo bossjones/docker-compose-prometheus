@@ -121,3 +121,6 @@ render:
 
 get_running_config:
 	curl localhost:3100/config
+
+clean:
+	bash .scripts/start-clean.sh

@@ -64,39 +64,6 @@ scrape_configs:
             count_entry_bytes: true
             action: add
 
-  - job_name: generated-logs
-    static_configs:
-      - targets:
-          - localhost
-        labels:
-          job: generated-logs
-          __path__: /var/log/generated-logs.txt
-    pipeline_stages:
-      - json:
-          expressions:
-            http_method: 'method'
-            http_status: "status"
-      - labels:
-          http_method:
-          http_status:
-      - metrics:
-          log_lines_total:
-            type: Counter
-            description: "total number of log lines"
-            prefix: my_promtail_custom_
-            max_idle_duration: 24h
-            config:
-              match_all: true
-              action: inc
-          log_bytes_total:
-            type: Counter
-            description: "total bytes of log lines"
-            prefix: my_promtail_custom_
-            max_idle_duration: 24h
-            config:
-              match_all: true
-              count_entry_bytes: true
-              action: add
 
 # - job_name: syslog
 #   syslog:
