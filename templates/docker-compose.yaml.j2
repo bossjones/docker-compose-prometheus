@@ -24,6 +24,7 @@ volumes:
     chronograf-storage:
     grafana-storage:
     alertmanager-data:
+    loki:
 {% endraw %}
 
 {% raw %}
@@ -273,7 +274,7 @@ services:
       - '--enable-feature=remote-write-receiver'
       - '--query.lookback-delta=30s'
     ports:
-      - 9090:9090
+      - 9092:9090
     links:
 {% if cadvisor_feature_flag %}
       - cadvisor:cadvisor
@@ -625,6 +626,42 @@ services:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
 
+  loki-backend:
+    user: "1000"
+    image: grafana/loki:2.8.0
+    volumes:
+      # - ./config:/etc/loki/
+      - ./loki/etc/loki:/loki:rw
+    ports:
+      - "9095"
+      #- "3102:3100"
+      - "3100"
+      - "7946"
+      # uncomment to use interactive debugging
+      # - "50000-50002:40000" # makes the replicas available on ports 50000, 50001, 50002
+    #cap_add:
+    #  - SYS_PTRACE
+    #security_opt:
+    #  - apparmor=unconfined
+    # command: "-config.file=/loki/loki-config.yaml -log.level={{ loki_log_level }} -target=write -frontend.downstream-url=http://loki-gateway:3100 -querier.frontend-address=http://loki-write:9095"
+    command: "-config.file=/loki/loki-config.yaml -log.level={{ loki_log_level }} -target=backend"
+    env_file:
+      - ./env
+    networks:
+      - loki
+    depends_on:
+      - minio
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 3
+{% raw %}
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
+
 #   loki:
 #     restart: always
 #     image: grafana/loki:2.8.0
@@ -759,6 +796,7 @@ services:
     - GF_LOG_LEVEL={{ grafana_log_level }}
     - GF_DATAPROXY_LOGGING=true
     - GF_EXPLORE_ENABLED=true
+    - GF_PATHS_CONFIG=/etc/grafana/grafana.ini
     networks:
     - loki
 

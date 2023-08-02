@@ -25,7 +25,7 @@
       "rows": [
          {
             "collapse": false,
-            "height": "250px",
+            "height": "100px",
             "panels": [
                {
                   "aliasColors": { },
@@ -34,6 +34,7 @@
                   "dashes": false,
                   "datasource": "$datasource",
                   "fill": 1,
+                  "format": "none",
                   "id": 1,
                   "legend": {
                      "avg": false,
@@ -59,24 +60,23 @@
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "sum(loki_ingester_memory_chunks{cluster=\"$cluster\", service=~\"loki-write\"})",
+                        "expr": "sum(loki_compactor_pending_delete_requests_count{cluster=~\"$cluster\", service=~\"loki-read\"})",
                         "format": "time_series",
+                        "instant": true,
                         "intervalFactor": 2,
-                        "legendFormat": "series",
-                        "legendLink": null,
-                        "step": 10
+                        "refId": "A"
                      }
                   ],
-                  "thresholds": [ ],
+                  "thresholds": "70,80",
                   "timeFrom": null,
                   "timeShift": null,
-                  "title": "Series",
+                  "title": "Number of Pending Requests",
                   "tooltip": {
                      "shared": true,
                      "sort": 2,
                      "value_type": "individual"
                   },
-                  "type": "graph",
+                  "type": "singlestat",
                   "xaxis": {
                      "buckets": null,
                      "mode": "time",
@@ -110,6 +110,7 @@
                   "dashes": false,
                   "datasource": "$datasource",
                   "fill": 1,
+                  "format": "dtdurations",
                   "id": 2,
                   "legend": {
                      "avg": false,
@@ -135,24 +136,23 @@
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "sum(loki_ingester_memory_chunks{cluster=\"$cluster\", service=~\"loki-write\"}) / sum(loki_ingester_memory_streams{cluster=\"$cluster\", service=~\"loki-write\"})",
+                        "expr": "max(loki_compactor_oldest_pending_delete_request_age_seconds{cluster=~\"$cluster\", service=~\"loki-read\"})",
                         "format": "time_series",
+                        "instant": true,
                         "intervalFactor": 2,
-                        "legendFormat": "chunks",
-                        "legendLink": null,
-                        "step": 10
+                        "refId": "A"
                      }
                   ],
-                  "thresholds": [ ],
+                  "thresholds": "70,80",
                   "timeFrom": null,
                   "timeShift": null,
-                  "title": "Chunks per series",
+                  "title": "Oldest Pending Request Age",
                   "tooltip": {
                      "shared": true,
                      "sort": 2,
                      "value_type": "individual"
                   },
-                  "type": "graph",
+                  "type": "singlestat",
                   "xaxis": {
                      "buckets": null,
                      "mode": "time",
@@ -183,8 +183,8 @@
             "repeat": null,
             "repeatIteration": null,
             "repeatRowId": null,
-            "showTitle": true,
-            "title": "Active Series / Chunks",
+            "showTitle": false,
+            "title": "Headlines",
             "titleSize": "h6"
          },
          {
@@ -218,39 +218,23 @@
                   "renderer": "flot",
                   "seriesOverrides": [ ],
                   "spaceLength": 10,
-                  "span": 6,
+                  "span": 4,
                   "stack": false,
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "histogram_quantile(0.99, sum(rate(loki_ingester_chunk_utilization_bucket{cluster=\"$cluster\", service=~\"loki-write\"}[$__rate_interval])) by (le)) * 1",
+                        "expr": "(loki_compactor_delete_requests_received_total{cluster=~\"$cluster\", service=~\"loki-read\"} or on() vector(0)) - on () (loki_compactor_delete_requests_processed_total{cluster=~\"$cluster\", service=~\"loki-read\"} or on () vector(0))",
                         "format": "time_series",
                         "intervalFactor": 2,
-                        "legendFormat": "99th Percentile",
-                        "refId": "A",
-                        "step": 10
-                     },
-                     {
-                        "expr": "histogram_quantile(0.50, sum(rate(loki_ingester_chunk_utilization_bucket{cluster=\"$cluster\", service=~\"loki-write\"}[$__rate_interval])) by (le)) * 1",
-                        "format": "time_series",
-                        "intervalFactor": 2,
-                        "legendFormat": "50th Percentile",
-                        "refId": "B",
-                        "step": 10
-                     },
-                     {
-                        "expr": "sum(rate(loki_ingester_chunk_utilization_sum{cluster=\"$cluster\", service=~\"loki-write\"}[$__rate_interval])) * 1 / sum(rate(loki_ingester_chunk_utilization_count{cluster=\"$cluster\", service=~\"loki-write\"}[$__rate_interval]))",
-                        "format": "time_series",
-                        "intervalFactor": 2,
-                        "legendFormat": "Average",
-                        "refId": "C",
+                        "legendFormat": "in progress",
+                        "legendLink": null,
                         "step": 10
                      }
                   ],
                   "thresholds": [ ],
                   "timeFrom": null,
                   "timeShift": null,
-                  "title": "Utilization",
+                  "title": "# of Delete Requests (received - processed) ",
                   "tooltip": {
                      "shared": true,
                      "sort": 2,
@@ -266,7 +250,7 @@
                   },
                   "yaxes": [
                      {
-                        "format": "percentunit",
+                        "format": "short",
                         "label": null,
                         "logBase": 1,
                         "max": null,
@@ -310,39 +294,23 @@
                   "renderer": "flot",
                   "seriesOverrides": [ ],
                   "spaceLength": 10,
-                  "span": 6,
+                  "span": 4,
                   "stack": false,
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "histogram_quantile(0.99, sum(rate(loki_ingester_chunk_age_seconds_bucket{cluster=\"$cluster\", service=~\"loki-write\"}[$__rate_interval])) by (le)) * 1e3",
+                        "expr": "sum(increase(loki_compactor_delete_requests_received_total{cluster=~\"$cluster\", service=~\"loki-read\"}[1d]))",
                         "format": "time_series",
                         "intervalFactor": 2,
-                        "legendFormat": "99th Percentile",
-                        "refId": "A",
-                        "step": 10
-                     },
-                     {
-                        "expr": "histogram_quantile(0.50, sum(rate(loki_ingester_chunk_age_seconds_bucket{cluster=\"$cluster\", service=~\"loki-write\"}[$__rate_interval])) by (le)) * 1e3",
-                        "format": "time_series",
-                        "intervalFactor": 2,
-                        "legendFormat": "50th Percentile",
-                        "refId": "B",
-                        "step": 10
-                     },
-                     {
-                        "expr": "sum(rate(loki_ingester_chunk_age_seconds_sum{cluster=\"$cluster\", service=~\"loki-write\"}[$__rate_interval])) * 1e3 / sum(rate(loki_ingester_chunk_age_seconds_count{cluster=\"$cluster\", service=~\"loki-write\"}[$__rate_interval]))",
-                        "format": "time_series",
-                        "intervalFactor": 2,
-                        "legendFormat": "Average",
-                        "refId": "C",
+                        "legendFormat": "received",
+                        "legendLink": null,
                         "step": 10
                      }
                   ],
                   "thresholds": [ ],
                   "timeFrom": null,
                   "timeShift": null,
-                  "title": "Age",
+                  "title": "Delete Requests Received / Day",
                   "tooltip": {
                      "shared": true,
                      "sort": 2,
@@ -358,7 +326,7 @@
                   },
                   "yaxes": [
                      {
-                        "format": "ms",
+                        "format": "short",
                         "label": null,
                         "logBase": 1,
                         "max": null,
@@ -374,19 +342,7 @@
                         "show": false
                      }
                   ]
-               }
-            ],
-            "repeat": null,
-            "repeatIteration": null,
-            "repeatRowId": null,
-            "showTitle": true,
-            "title": "Flush Stats",
-            "titleSize": "h6"
-         },
-         {
-            "collapse": false,
-            "height": "250px",
-            "panels": [
+               },
                {
                   "aliasColors": { },
                   "bars": false,
@@ -414,39 +370,23 @@
                   "renderer": "flot",
                   "seriesOverrides": [ ],
                   "spaceLength": 10,
-                  "span": 6,
+                  "span": 4,
                   "stack": false,
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "histogram_quantile(0.99, sum(rate(loki_ingester_chunk_entries_bucket{cluster=\"$cluster\", service=~\"loki-write\"}[$__rate_interval])) by (le)) * 1",
+                        "expr": "sum(increase(loki_compactor_delete_requests_processed_total{cluster=~\"$cluster\", service=~\"loki-read\"}[1d]))",
                         "format": "time_series",
                         "intervalFactor": 2,
-                        "legendFormat": "99th Percentile",
-                        "refId": "A",
-                        "step": 10
-                     },
-                     {
-                        "expr": "histogram_quantile(0.50, sum(rate(loki_ingester_chunk_entries_bucket{cluster=\"$cluster\", service=~\"loki-write\"}[$__rate_interval])) by (le)) * 1",
-                        "format": "time_series",
-                        "intervalFactor": 2,
-                        "legendFormat": "50th Percentile",
-                        "refId": "B",
-                        "step": 10
-                     },
-                     {
-                        "expr": "sum(rate(loki_ingester_chunk_entries_sum{cluster=\"$cluster\", service=~\"loki-write\"}[$__rate_interval])) * 1 / sum(rate(loki_ingester_chunk_entries_count{cluster=\"$cluster\", service=~\"loki-write\"}[$__rate_interval]))",
-                        "format": "time_series",
-                        "intervalFactor": 2,
-                        "legendFormat": "Average",
-                        "refId": "C",
+                        "legendFormat": "processed",
+                        "legendLink": null,
                         "step": 10
                      }
                   ],
                   "thresholds": [ ],
                   "timeFrom": null,
                   "timeShift": null,
-                  "title": "Log Entries Per Chunk",
+                  "title": "Delete Requests Processed / Day",
                   "tooltip": {
                      "shared": true,
                      "sort": 2,
@@ -478,7 +418,19 @@
                         "show": false
                      }
                   ]
-               },
+               }
+            ],
+            "repeat": null,
+            "repeatIteration": null,
+            "repeatRowId": null,
+            "showTitle": true,
+            "title": "Churn",
+            "titleSize": "h6"
+         },
+         {
+            "collapse": false,
+            "height": "250px",
+            "panels": [
                {
                   "aliasColors": { },
                   "bars": false,
@@ -506,100 +458,12 @@
                   "renderer": "flot",
                   "seriesOverrides": [ ],
                   "spaceLength": 10,
-                  "span": 6,
+                  "span": 4,
                   "stack": false,
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "sum(rate(loki_chunk_store_index_entries_per_chunk_sum{cluster=\"$cluster\", service=~\"loki-write\"}[5m])) / sum(rate(loki_chunk_store_index_entries_per_chunk_count{cluster=\"$cluster\", service=~\"loki-write\"}[5m]))",
-                        "format": "time_series",
-                        "intervalFactor": 2,
-                        "legendFormat": "Index Entries",
-                        "legendLink": null,
-                        "step": 10
-                     }
-                  ],
-                  "thresholds": [ ],
-                  "timeFrom": null,
-                  "timeShift": null,
-                  "title": "Index Entries Per Chunk",
-                  "tooltip": {
-                     "shared": true,
-                     "sort": 2,
-                     "value_type": "individual"
-                  },
-                  "type": "graph",
-                  "xaxis": {
-                     "buckets": null,
-                     "mode": "time",
-                     "name": null,
-                     "show": true,
-                     "values": [ ]
-                  },
-                  "yaxes": [
-                     {
-                        "format": "short",
-                        "label": null,
-                        "logBase": 1,
-                        "max": null,
-                        "min": 0,
-                        "show": true
-                     },
-                     {
-                        "format": "short",
-                        "label": null,
-                        "logBase": 1,
-                        "max": null,
-                        "min": null,
-                        "show": false
-                     }
-                  ]
-               }
-            ],
-            "repeat": null,
-            "repeatIteration": null,
-            "repeatRowId": null,
-            "showTitle": true,
-            "title": "Flush Stats",
-            "titleSize": "h6"
-         },
-         {
-            "collapse": false,
-            "height": "250px",
-            "panels": [
-               {
-                  "aliasColors": { },
-                  "bars": false,
-                  "dashLength": 10,
-                  "dashes": false,
-                  "datasource": "$datasource",
-                  "fill": 1,
-                  "id": 7,
-                  "legend": {
-                     "avg": false,
-                     "current": false,
-                     "max": false,
-                     "min": false,
-                     "show": true,
-                     "total": false,
-                     "values": false
-                  },
-                  "lines": true,
-                  "linewidth": 1,
-                  "links": [ ],
-                  "nullPointMode": "null as zero",
-                  "percentage": false,
-                  "pointradius": 5,
-                  "points": false,
-                  "renderer": "flot",
-                  "seriesOverrides": [ ],
-                  "spaceLength": 10,
-                  "span": 6,
-                  "stack": false,
-                  "steppedLine": false,
-                  "targets": [
-                     {
-                        "expr": "cortex_ingester_flush_queue_length{cluster=\"$cluster\", service=~\"loki-write\"}",
+                        "expr": "node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster=~\"$cluster\", service=~\"loki-read\"}",
                         "format": "time_series",
                         "intervalFactor": 2,
                         "legendFormat": "{{pod}}",
@@ -610,7 +474,7 @@
                   "thresholds": [ ],
                   "timeFrom": null,
                   "timeShift": null,
-                  "title": "Queue Length",
+                  "title": "Compactor CPU usage",
                   "tooltip": {
                      "shared": true,
                      "sort": 2,
@@ -644,20 +508,88 @@
                   ]
                },
                {
-                  "aliasColors": {
-                     "1xx": "#EAB839",
-                     "2xx": "#7EB26D",
-                     "3xx": "#6ED0E0",
-                     "4xx": "#EF843C",
-                     "5xx": "#E24D42",
-                     "error": "#E24D42",
-                     "success": "#7EB26D"
-                  },
+                  "aliasColors": { },
                   "bars": false,
                   "dashLength": 10,
                   "dashes": false,
                   "datasource": "$datasource",
-                  "fill": 10,
+                  "fill": 1,
+                  "id": 7,
+                  "legend": {
+                     "avg": false,
+                     "current": false,
+                     "max": false,
+                     "min": false,
+                     "show": true,
+                     "total": false,
+                     "values": false
+                  },
+                  "lines": true,
+                  "linewidth": 1,
+                  "links": [ ],
+                  "nullPointMode": "null as zero",
+                  "percentage": false,
+                  "pointradius": 5,
+                  "points": false,
+                  "renderer": "flot",
+                  "seriesOverrides": [ ],
+                  "spaceLength": 10,
+                  "span": 4,
+                  "stack": false,
+                  "steppedLine": false,
+                  "targets": [
+                     {
+                        "expr": "go_memstats_heap_inuse_bytes{cluster=~\"$cluster\", service=~\"loki-read\"} / 1024 / 1024 ",
+                        "format": "time_series",
+                        "intervalFactor": 2,
+                        "legendFormat": " {{pod}} ",
+                        "legendLink": null,
+                        "step": 10
+                     }
+                  ],
+                  "thresholds": [ ],
+                  "timeFrom": null,
+                  "timeShift": null,
+                  "title": "Compactor memory usage (MiB)",
+                  "tooltip": {
+                     "shared": true,
+                     "sort": 2,
+                     "value_type": "individual"
+                  },
+                  "type": "graph",
+                  "xaxis": {
+                     "buckets": null,
+                     "mode": "time",
+                     "name": null,
+                     "show": true,
+                     "values": [ ]
+                  },
+                  "yaxes": [
+                     {
+                        "format": "short",
+                        "label": null,
+                        "logBase": 1,
+                        "max": null,
+                        "min": 0,
+                        "show": true
+                     },
+                     {
+                        "format": "short",
+                        "label": null,
+                        "logBase": 1,
+                        "max": null,
+                        "min": null,
+                        "show": false
+                     }
+                  ]
+               },
+               {
+                  "aliasColors": { },
+                  "bars": false,
+                  "dashLength": 10,
+                  "dashes": false,
+                  "datasource": "$datasource",
+                  "fill": 1,
                   "id": 8,
                   "legend": {
                      "avg": false,
@@ -669,7 +601,7 @@
                      "values": false
                   },
                   "lines": true,
-                  "linewidth": 0,
+                  "linewidth": 1,
                   "links": [ ],
                   "nullPointMode": "null as zero",
                   "percentage": false,
@@ -678,23 +610,23 @@
                   "renderer": "flot",
                   "seriesOverrides": [ ],
                   "spaceLength": 10,
-                  "span": 6,
-                  "stack": true,
+                  "span": 4,
+                  "stack": false,
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "sum by (status) (\n  label_replace(label_replace(rate(loki_ingester_chunk_age_seconds_count{cluster=\"$cluster\", service=~\"loki-write\"}[$__rate_interval]),\n  \"status\", \"${1}xx\", \"status_code\", \"([0-9])..\"),\n  \"status\", \"${1}\", \"status_code\", \"([a-z]+)\"))\n",
+                        "expr": "loki_boltdb_shipper_compact_tables_operation_duration_seconds{cluster=~\"$cluster\", service=~\"loki-read\"}",
                         "format": "time_series",
                         "intervalFactor": 2,
-                        "legendFormat": "{{status}}",
-                        "refId": "A",
+                        "legendFormat": "{{pod}}",
+                        "legendLink": null,
                         "step": 10
                      }
                   ],
                   "thresholds": [ ],
                   "timeFrom": null,
                   "timeShift": null,
-                  "title": "Flush Rate",
+                  "title": "Compaction run duration (seconds)",
                   "tooltip": {
                      "shared": true,
                      "sort": 2,
@@ -732,7 +664,7 @@
             "repeatIteration": null,
             "repeatRowId": null,
             "showTitle": true,
-            "title": "Flush Stats",
+            "title": "Compactor",
             "titleSize": "h6"
          },
          {
@@ -771,10 +703,10 @@
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "sum(rate(loki_ingester_chunks_flushed_total{cluster=\"$cluster\", service=~\"loki-write\"}[$__rate_interval]))",
+                        "expr": "sum(increase(loki_compactor_load_pending_requests_attempts_total{status=\"fail\", cluster=~\"$cluster\", service=~\"loki-read\"}[1h]))",
                         "format": "time_series",
                         "intervalFactor": 2,
-                        "legendFormat": "{{pod}}",
+                        "legendFormat": "failures",
                         "legendLink": null,
                         "step": 10
                      }
@@ -782,7 +714,7 @@
                   "thresholds": [ ],
                   "timeFrom": null,
                   "timeShift": null,
-                  "title": "Chunks Flushed/Second",
+                  "title": "Failures in Loading Delete Requests / Hour",
                   "tooltip": {
                      "shared": true,
                      "sort": 2,
@@ -843,14 +775,14 @@
                   "seriesOverrides": [ ],
                   "spaceLength": 10,
                   "span": 6,
-                  "stack": true,
+                  "stack": false,
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "sum by (reason) (rate(loki_ingester_chunks_flushed_total{cluster=\"$cluster\", service=~\"loki-write\"}[$__rate_interval])) / ignoring(reason) group_left sum(rate(loki_ingester_chunks_flushed_total{cluster=\"$cluster\", service=~\"loki-write\"}[$__rate_interval]))",
+                        "expr": "sum(rate(loki_compactor_deleted_lines{cluster=~\"$cluster\",job=~\"$namespace/(loki|enterprise-logs)-read\"}[$__rate_interval])) by (user)",
                         "format": "time_series",
                         "intervalFactor": 2,
-                        "legendFormat": "{{reason}}",
+                        "legendFormat": "{{user}}",
                         "legendLink": null,
                         "step": 10
                      }
@@ -858,7 +790,7 @@
                   "thresholds": [ ],
                   "timeFrom": null,
                   "timeShift": null,
-                  "title": "Chunk Flush Reason",
+                  "title": "Lines Deleted / Sec",
                   "tooltip": {
                      "shared": true,
                      "sort": 2,
@@ -877,7 +809,7 @@
                         "format": "short",
                         "label": null,
                         "logBase": 1,
-                        "max": 1,
+                        "max": null,
                         "min": 0,
                         "show": true
                      },
@@ -885,7 +817,7 @@
                         "format": "short",
                         "label": null,
                         "logBase": 1,
-                        "max": 1,
+                        "max": null,
                         "min": null,
                         "show": false
                      }
@@ -896,7 +828,7 @@
             "repeatIteration": null,
             "repeatRowId": null,
             "showTitle": true,
-            "title": "Flush Stats",
+            "title": "Deletion metrics",
             "titleSize": "h6"
          },
          {
@@ -904,331 +836,37 @@
             "height": "250px",
             "panels": [
                {
-                  "cards": {
-                     "cardPadding": null,
-                     "cardRound": null
-                  },
-                  "color": {
-                     "cardColor": "#b4ff00",
-                     "colorScale": "sqrt",
-                     "colorScheme": "interpolateSpectral",
-                     "exponent": 0.5,
-                     "mode": "spectrum"
-                  },
-                  "dataFormat": "tsbuckets",
-                  "datasource": "$datasource",
-                  "heatmap": { },
-                  "hideZeroBuckets": false,
-                  "highlightCards": true,
+                  "datasource": "$loki_datasource",
                   "id": 11,
-                  "legend": {
-                     "show": true
-                  },
-                  "span": 12,
+                  "span": 6,
                   "targets": [
                      {
-                        "expr": "sum by (le) (rate(loki_ingester_chunk_utilization_bucket{cluster=\"$cluster\", service=~\"loki-write\"}[$__rate_interval]))",
-                        "format": "heatmap",
-                        "intervalFactor": 2,
-                        "legendFormat": "{{le}}",
+                        "expr": "{cluster=~\"$cluster\", service=~\"loki-read\"} |~ \"Started processing delete request|delete request for user marked as processed\" | logfmt | line_format \"{{.ts}} user={{.user}} delete_request_id={{.delete_request_id}} msg={{.msg}}\" ",
                         "refId": "A"
                      }
                   ],
-                  "title": "Chunk Utilization",
-                  "tooltip": {
-                     "show": true,
-                     "showHistogram": true
-                  },
-                  "type": "heatmap",
-                  "xAxis": {
-                     "show": true
-                  },
-                  "xBucketNumber": null,
-                  "xBucketSize": null,
-                  "yAxis": {
-                     "decimals": 0,
-                     "format": "percentunit",
-                     "show": true,
-                     "splitFactor": null
-                  },
-                  "yBucketBound": "auto"
-               }
-            ],
-            "repeat": null,
-            "repeatIteration": null,
-            "repeatRowId": null,
-            "showTitle": true,
-            "title": "Utilization",
-            "titleSize": "h6"
-         },
-         {
-            "collapse": false,
-            "height": "250px",
-            "panels": [
+                  "title": "In progress/finished",
+                  "type": "logs"
+               },
                {
-                  "cards": {
-                     "cardPadding": null,
-                     "cardRound": null
-                  },
-                  "color": {
-                     "cardColor": "#b4ff00",
-                     "colorScale": "sqrt",
-                     "colorScheme": "interpolateSpectral",
-                     "exponent": 0.5,
-                     "mode": "spectrum"
-                  },
-                  "dataFormat": "tsbuckets",
-                  "datasource": "$datasource",
-                  "heatmap": { },
-                  "hideZeroBuckets": false,
-                  "highlightCards": true,
+                  "datasource": "$loki_datasource",
                   "id": 12,
-                  "legend": {
-                     "show": true
-                  },
-                  "span": 12,
+                  "span": 6,
                   "targets": [
                      {
-                        "expr": "sum(rate(loki_ingester_chunk_size_bytes_bucket{cluster=\"$cluster\", service=~\"loki-write\"}[$__rate_interval])) by (le)",
-                        "format": "heatmap",
-                        "intervalFactor": 2,
-                        "legendFormat": "{{le}}",
+                        "expr": "{cluster=~\"$cluster\", service=~\"loki-read\"} |~ \"delete request for user added\" | logfmt | line_format \"{{.ts}} user={{.user}} query='{{.query}}'\"",
                         "refId": "A"
                      }
                   ],
-                  "title": "Chunk Size Bytes",
-                  "tooltip": {
-                     "show": true,
-                     "showHistogram": true
-                  },
-                  "type": "heatmap",
-                  "xAxis": {
-                     "show": true
-                  },
-                  "xBucketNumber": null,
-                  "xBucketSize": null,
-                  "yAxis": {
-                     "decimals": 0,
-                     "format": "bytes",
-                     "show": true,
-                     "splitFactor": null
-                  },
-                  "yBucketBound": "auto"
+                  "title": "Requests",
+                  "type": "logs"
                }
             ],
             "repeat": null,
             "repeatIteration": null,
             "repeatRowId": null,
             "showTitle": true,
-            "title": "Utilization",
-            "titleSize": "h6"
-         },
-         {
-            "collapse": false,
-            "height": "250px",
-            "panels": [
-               {
-                  "aliasColors": { },
-                  "bars": false,
-                  "dashLength": 10,
-                  "dashes": false,
-                  "datasource": "$datasource",
-                  "fill": 1,
-                  "id": 13,
-                  "legend": {
-                     "avg": false,
-                     "current": false,
-                     "max": false,
-                     "min": false,
-                     "show": true,
-                     "total": false,
-                     "values": false
-                  },
-                  "lines": true,
-                  "linewidth": 1,
-                  "links": [ ],
-                  "nullPointMode": "null as zero",
-                  "percentage": false,
-                  "pointradius": 5,
-                  "points": false,
-                  "renderer": "flot",
-                  "seriesOverrides": [ ],
-                  "spaceLength": 10,
-                  "span": 12,
-                  "stack": false,
-                  "steppedLine": false,
-                  "targets": [
-                     {
-                        "expr": "histogram_quantile(0.99, sum(rate(loki_ingester_chunk_size_bytes_bucket{cluster=\"$cluster\", service=~\"loki-write\"}[1m])) by (le))",
-                        "format": "time_series",
-                        "intervalFactor": 2,
-                        "legendFormat": "p99",
-                        "legendLink": null,
-                        "step": 10
-                     },
-                     {
-                        "expr": "histogram_quantile(0.90, sum(rate(loki_ingester_chunk_size_bytes_bucket{cluster=\"$cluster\", service=~\"loki-write\"}[1m])) by (le))",
-                        "format": "time_series",
-                        "intervalFactor": 2,
-                        "legendFormat": "p90",
-                        "legendLink": null,
-                        "step": 10
-                     },
-                     {
-                        "expr": "histogram_quantile(0.50, sum(rate(loki_ingester_chunk_size_bytes_bucket{cluster=\"$cluster\", service=~\"loki-write\"}[1m])) by (le))",
-                        "format": "time_series",
-                        "intervalFactor": 2,
-                        "legendFormat": "p50",
-                        "legendLink": null,
-                        "step": 10
-                     }
-                  ],
-                  "thresholds": [ ],
-                  "timeFrom": null,
-                  "timeShift": null,
-                  "title": "Chunk Size Quantiles",
-                  "tooltip": {
-                     "shared": true,
-                     "sort": 2,
-                     "value_type": "individual"
-                  },
-                  "type": "graph",
-                  "xaxis": {
-                     "buckets": null,
-                     "mode": "time",
-                     "name": null,
-                     "show": true,
-                     "values": [ ]
-                  },
-                  "yaxes": [
-                     {
-                        "format": "bytes",
-                        "label": null,
-                        "logBase": 1,
-                        "max": null,
-                        "min": 0,
-                        "show": true
-                     },
-                     {
-                        "format": "short",
-                        "label": null,
-                        "logBase": 1,
-                        "max": null,
-                        "min": null,
-                        "show": false
-                     }
-                  ]
-               }
-            ],
-            "repeat": null,
-            "repeatIteration": null,
-            "repeatRowId": null,
-            "showTitle": true,
-            "title": "Utilization",
-            "titleSize": "h6"
-         },
-         {
-            "collapse": false,
-            "height": "250px",
-            "panels": [
-               {
-                  "aliasColors": { },
-                  "bars": false,
-                  "dashLength": 10,
-                  "dashes": false,
-                  "datasource": "$datasource",
-                  "fill": 1,
-                  "id": 14,
-                  "legend": {
-                     "avg": false,
-                     "current": false,
-                     "max": false,
-                     "min": false,
-                     "show": true,
-                     "total": false,
-                     "values": false
-                  },
-                  "lines": true,
-                  "linewidth": 1,
-                  "links": [ ],
-                  "nullPointMode": "null as zero",
-                  "percentage": false,
-                  "pointradius": 5,
-                  "points": false,
-                  "renderer": "flot",
-                  "seriesOverrides": [ ],
-                  "spaceLength": 10,
-                  "span": 12,
-                  "stack": false,
-                  "steppedLine": false,
-                  "targets": [
-                     {
-                        "expr": "histogram_quantile(0.5, sum(rate(loki_ingester_chunk_bounds_hours_bucket{cluster=\"$cluster\", service=~\"loki-write\"}[5m])) by (le))",
-                        "format": "time_series",
-                        "intervalFactor": 2,
-                        "legendFormat": "p50",
-                        "legendLink": null,
-                        "step": 10
-                     },
-                     {
-                        "expr": "histogram_quantile(0.99, sum(rate(loki_ingester_chunk_bounds_hours_bucket{cluster=\"$cluster\", service=~\"loki-write\"}[5m])) by (le))",
-                        "format": "time_series",
-                        "intervalFactor": 2,
-                        "legendFormat": "p99",
-                        "legendLink": null,
-                        "step": 10
-                     },
-                     {
-                        "expr": "sum(rate(loki_ingester_chunk_bounds_hours_sum{cluster=\"$cluster\", service=~\"loki-write\"}[5m])) / sum(rate(loki_ingester_chunk_bounds_hours_count{cluster=\"$cluster\", service=~\"loki-write\"}[5m]))",
-                        "format": "time_series",
-                        "intervalFactor": 2,
-                        "legendFormat": "avg",
-                        "legendLink": null,
-                        "step": 10
-                     }
-                  ],
-                  "thresholds": [ ],
-                  "timeFrom": null,
-                  "timeShift": null,
-                  "title": "Chunk Duration hours (end-start)",
-                  "tooltip": {
-                     "shared": true,
-                     "sort": 2,
-                     "value_type": "individual"
-                  },
-                  "type": "graph",
-                  "xaxis": {
-                     "buckets": null,
-                     "mode": "time",
-                     "name": null,
-                     "show": true,
-                     "values": [ ]
-                  },
-                  "yaxes": [
-                     {
-                        "format": "short",
-                        "label": null,
-                        "logBase": 1,
-                        "max": null,
-                        "min": 0,
-                        "show": true
-                     },
-                     {
-                        "format": "short",
-                        "label": null,
-                        "logBase": 1,
-                        "max": null,
-                        "min": null,
-                        "show": false
-                     }
-                  ]
-               }
-            ],
-            "repeat": null,
-            "repeatIteration": null,
-            "repeatRowId": null,
-            "showTitle": true,
-            "title": "Duration",
+            "title": "List of deletion requests",
             "titleSize": "h6"
          }
       ],
@@ -1250,6 +888,20 @@
                "name": "datasource",
                "options": [ ],
                "query": "prometheus",
+               "refresh": 1,
+               "regex": "",
+               "type": "datasource"
+            },
+            {
+               "current": {
+                  "text": "default",
+                  "value": "default"
+               },
+               "hide": 0,
+               "label": "Loki Data Source",
+               "name": "loki_datasource",
+               "options": [ ],
+               "query": "loki",
                "refresh": 1,
                "regex": "",
                "type": "datasource"
@@ -1332,8 +984,8 @@
          ]
       },
       "timezone": "utc",
-      "title": "Loki / Chunks",
-      "uid": "chunks",
+      "title": "Loki / Deletion",
+      "uid": "deletion",
       "version": 0
    }
 {% endraw %}

@@ -67,9 +67,20 @@ distributor:
     ingester_request_timeout: 500ms
 
 ruler:
+  enable_api: true
   ring:
     kvstore:
       store: memberlist
+  rule_path: /tmp/prom-rules
+  remote_write:
+    enabled: true
+    clients:
+      local:
+        url: http://prometheus:9090/api/v1/write
+        queue_config:
+          # send immediately as soon as a sample is generated
+          capacity: 1
+          batch_send_deadline: 0s
 # ruler:
 #   enable_api: true
 #   wal:
@@ -90,11 +101,26 @@ ruler:
 #             batch_send_deadline: 0s
 
 schema_config:
+  # configs:
+  # - from: 2018-04-15
+  #   store: boltdb-shipper
+  #   object_store: s3
+  #   schema: v11
+  #   index:
+  #     prefix: index_
+  #     period: 24h
   configs:
-  - from: 2018-04-15
+  - from: 2020-08-01
     store: boltdb-shipper
     object_store: s3
     schema: v11
+    index:
+      prefix: index_
+      period: 24h
+  - from: 2023-07-11
+    store: tsdb
+    object_store: s3
+    schema: v12
     index:
       prefix: index_
       period: 24h
@@ -173,6 +199,7 @@ limits_config:
   # within the allowed time range. The default value of 0 does not set a limit.
   # CLI flag: -querier.max-query-lookback
   max_query_lookback: 336h
+  volume_enabled: true
 
 
 chunk_store_config:
