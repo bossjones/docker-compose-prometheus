@@ -779,7 +779,7 @@
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "sum(rate(loki_compactor_deleted_lines{cluster=~\"$cluster\",job=~\"$namespace/(loki|enterprise-logs)-read\"}[$__rate_interval])) by (user)",
+                        "expr": "sum(rate(loki_compactor_deleted_lines{cluster=~\"$cluster\",service=~\"loki-read\"}[$__rate_interval])) by (user)",
                         "format": "time_series",
                         "intervalFactor": 2,
                         "legendFormat": "{{user}}",
@@ -841,7 +841,7 @@
                   "span": 6,
                   "targets": [
                      {
-                        "expr": "{cluster=~\"$cluster\", service=~\"loki-read\"} |~ \"Started processing delete request|delete request for user marked as processed\" | logfmt | line_format \"{{.ts}} user={{.user}} delete_request_id={{.delete_request_id}} msg={{.msg}}\" ",
+                        "expr": "{cluster=~\"$cluster\", service=~\"loki-read\"} |~ \"Started processing delete request|delete request for user marked as processed\" | json | line_format \"{{.ts}} user={{.user}} delete_request_id={{.delete_request_id}} msg={{.msg}}\" ",
                         "refId": "A"
                      }
                   ],
@@ -854,7 +854,7 @@
                   "span": 6,
                   "targets": [
                      {
-                        "expr": "{cluster=~\"$cluster\", service=~\"loki-read\"} |~ \"delete request for user added\" | logfmt | line_format \"{{.ts}} user={{.user}} query='{{.query}}'\"",
+                        "expr": "{cluster=~\"$cluster\", service=~\"loki-read\"} |~ \"delete request for user added\" | json | line_format \"{{.ts}} user={{.user}} query='{{.query}}'\"",
                         "refId": "A"
                      }
                   ],

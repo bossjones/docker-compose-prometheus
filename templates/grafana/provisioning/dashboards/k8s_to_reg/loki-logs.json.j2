@@ -772,7 +772,7 @@
             "steppedLine": false,
             "targets": [
                {
-                  "expr": "sum(rate({cluster=\"$cluster\", container=~\"$container\" } |logfmt| level=\"$level\" |= \"$filter\" [5m])) by (level)",
+                  "expr": "sum(rate({cluster=\"$cluster\", container=~\"$container\" } |json| level=\"$level\" |= \"$filter\" [5m])) by (level)",
                   "intervalFactor": 3,
                   "legendFormat": "{{level}}",
                   "refId": "A"
@@ -837,7 +837,7 @@
             },
             "targets": [
                {
-                  "expr": "{cluster=\"$cluster\", container=~\"$container\"} | logfmt | level=\"$level\" |= \"$filter\"",
+                  "expr": "{cluster=\"$cluster\", container=~\"$container\"} | json | level=\"$level\" |= \"$filter\"",
                   "refId": "A"
                }
             ],

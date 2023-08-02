@@ -1986,7 +1986,7 @@
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "sum(rate({cluster=\"$cluster\",  service=~\"loki-write\"} | logfmt | level=\"error\"[1m]))",
+                        "expr": "sum(rate({cluster=\"$cluster\",  service=~\"loki-write\"} | json | level=\"error\"[1m]))",
                         "refId": "A"
                      }
                   ],
@@ -3193,7 +3193,7 @@
                   "steppedLine": false,
                   "targets": [
                      {
-                        "expr": "sum(rate({cluster=\"$cluster\",  service=~\"loki-read\"} | logfmt |  level=\"error\"[1m]))",
+                        "expr": "sum(rate({cluster=\"$cluster\",  service=~\"loki-read\"} | json |  level=\"error\"[1m]))",
                         "refId": "A"
                      }
                   ],
