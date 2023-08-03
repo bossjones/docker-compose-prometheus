@@ -98,6 +98,27 @@ scrape_configs:
       - __name__
       target_label: cluster
 
+  - job_name: 'pihole'
+    # Override the global default and scrape targets from this job every 5 seconds.
+    scrape_interval: 5s
+    dns_sd_configs:
+      - names:
+          - 'pihole'
+        type: A
+        port: 9617
+    relabel_configs:
+    - regex: '(.+)'
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    metric_relabel_configs:
+    - regex: (.+)
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+
   - job_name: 'node-exporter'
     metrics_path: /metrics
 

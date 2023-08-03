@@ -1,0 +1,35 @@
+
+# SOURCE: https://github.com/skalavala/mysmarthome/blob/04c001d2f3699febf34b2e64eb3dce1c74386243/traefik/config/traefik.yaml
+global:
+  # Send anonymous usage data
+  sendAnonymousUsage: false
+
+accessLog: {}
+
+metrics:
+  prometheus:
+    addEntryPointsLabels: true
+    addRoutersLabels: true
+    addServicesLabels: true
+    entryPoint: metrics
+
+## Static configuration
+entryPoints:
+  web:
+    address: ":89"
+  traefik:
+    address: ":8989"
+  metrics:
+    address: :8082
+
+# Docker configuration backend
+providers:
+  docker:
+    # defaultRule: "Host(`{{ trimPrefix `/` .Name }}.docker.localhost`)"
+    exposedByDefault: false
+    watch: true
+    endpoint: "unix:///var/run/docker.sock"
+
+# API and dashboard configuration
+api:
+  insecure: true
