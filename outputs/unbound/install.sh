@@ -31,3 +31,31 @@ sudo systemctl enable unbound
 echo "/var/log/unbound/unbound.log rw," | sudo tee -a /etc/apparmor.d/local/usr.sbin.unbound
 sudo apparmor_parser -r /etc/apparmor.d/usr.sbin.unbound
 sudo service unbound restart
+
+go install github.com/letsencrypt/unbound_exporter@latest
+
+PATH_TO_UNBOUND_EXPORTER=$(which unbound_exporter)
+
+sudo cp -a ${PATH_TO_UNBOUND_EXPORTER} /usr/local/bin/unbound_exporter
+sudo ls -lta /usr/local/bin/unbound_exporter
+
+sudo cp -a unbound_exporter.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable unbound_exporter
+sudo systemctl start unbound_exporter
+
+# pi@boss-monitor ~/dev/bossjones/docker-compose-prometheus/outputs/unbound feature-perf* 41s
+# ❯ unbound_exporter -h
+# Usage of unbound_exporter:
+#   -unbound.ca string
+#         Unbound server certificate. (default "/etc/unbound/unbound_server.pem")
+#   -unbound.cert string
+#         Unbound client certificate. (default "/etc/unbound/unbound_control.pem")
+#   -unbound.host string
+#         Unix or TCP address of Unbound control socket. (default "tcp://localhost:8953")
+#   -unbound.key string
+#         Unbound client key. (default "/etc/unbound/unbound_control.key")
+#   -web.listen-address string
+#         Address to listen on for web interface and telemetry. (default ":9167")
+#   -web.telemetry-path string
+#         Path under which to expose metrics. (default "/metrics")
