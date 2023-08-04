@@ -20,4 +20,5 @@ docker cp 99-edns.conf pihole:/etc/dnsmasq.d/99-edns.conf
 sudo touch /var/log/unbound.log
 sudo chown unbound:unbound /var/log/unbound.log
 
+
 sudo service unbound restart
