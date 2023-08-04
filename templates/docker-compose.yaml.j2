@@ -236,7 +236,7 @@ services:
     - PROXY_LOCATION=pi.hole
     # Set to your server's LAN IP, used by web block modes.
     - FTLCONF_LOCAL_IPV4={{ prometheus_server_ip }}
-    # - LOCAL_IPV4=192.168.3.13
+    # - LOCAL_IPV4={{ prometheus_server_ip }}
     - WEBLOGS_STDOUT=1
     - DHCP_ACTIVE=false
     - DNSSEC=true
@@ -416,11 +416,14 @@ services:
 {% endif %}
       - alertmanager:alertmanager
       - loki-gateway:loki-gateway
+      - pihole-exporter:pihole-exporter
     depends_on:
 {% if cadvisor_feature_flag %}
       - cadvisor
 {% endif %}
       - alertmanager
+      - loki-gateway
+      - pihole-exporter
     restart: always
 
     # environment:

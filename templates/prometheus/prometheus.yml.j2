@@ -99,12 +99,12 @@ scrape_configs:
       target_label: cluster
 
 {% if pihole_feature_flag %}
-  - job_name: 'pihole'
+  - job_name: 'pihole-exporter'
     # Override the global default and scrape targets from this job every 5 seconds.
     scrape_interval: 5s
     dns_sd_configs:
       - names:
-          - 'pihole'
+          - 'pihole-exporter'
         type: A
         port: 9617
     relabel_configs:
@@ -154,7 +154,7 @@ scrape_configs:
     scrape_interval: 5s
 
     static_configs:
-        - targets: ['localhost:9323']
+        - targets: ['{{ prometheus_server_ip }}:9323']
     relabel_configs:
     - regex: '(.+)'
       replacement: k3d
@@ -186,13 +186,13 @@ scrape_configs:
     # Override the global default and scrape targets from this job every 5 seconds.
     scrape_interval: 5s
 
-    # static_configs:
-    #    - targets: ['{{ prometheus_server_ip }}:8081']
-    dns_sd_configs:
-      - names:
-          - cadvisor
-        type: A
-        port: 8081
+    static_configs:
+      - targets: ['{{ prometheus_server_ip }}:8081']
+    # dns_sd_configs:
+    #   - names:
+    #       - cadvisor
+    #     type: A
+    #     port: 8081
 
   - job_name: 'snmp-exporter'
     static_configs:
