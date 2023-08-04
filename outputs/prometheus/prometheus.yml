@@ -295,6 +295,7 @@ scrape_configs:
       - names:
           - loki-read
           - loki-write
+          - loki-backend
         type: A
         port: 3100
     relabel_configs:
