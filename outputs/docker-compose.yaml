@@ -232,6 +232,7 @@ services:
   pihole-exporter:
     image: "ekofr/pihole-exporter:latest"
     # For DHCP it is recommended to remove these ports and instead add: network_mode: "host"
+    hostname: 'pihole-exporter'
     ports:
       - "9617:9617/tcp"
     container_name: pihole-exporter
