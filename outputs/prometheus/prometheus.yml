@@ -101,11 +101,13 @@ scrape_configs:
   - job_name: 'pihole-exporter'
     # Override the global default and scrape targets from this job every 5 seconds.
     scrape_interval: 5s
-    dns_sd_configs:
-      - names:
-          - 'pihole-exporter'
-        type: A
-        port: 9617
+    static_configs:
+      - targets: ['pihole-exporter:9617']
+    # dns_sd_configs:
+    #   - names:
+    #       - 'pihole-exporter'
+    #     type: A
+    #     port: 9617
     relabel_configs:
     - regex: '(.+)'
       replacement: k3d
