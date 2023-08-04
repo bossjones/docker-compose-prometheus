@@ -179,7 +179,7 @@ services:
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
-  pihole:
+  scope:
     image: "weaveworks/scope:1.13.2"
     network_mode: "host"
     pid: "host"
@@ -966,4 +966,3 @@ services:
     restart: always
     volumes:
     - ./syslog-ng:/syslog-ng:rw
-

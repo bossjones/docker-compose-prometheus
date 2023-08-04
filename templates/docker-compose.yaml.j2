@@ -201,7 +201,7 @@ services:
 {% endraw %}
 
 {% if weave_scope_feature_flag %}
-  pihole:
+  scope:
     image: "weaveworks/scope:1.13.2"
     network_mode: "host"
     pid: "host"
@@ -213,11 +213,9 @@ services:
     command:
       - "--probe.docker=true"
     container_name: scope
-
     cap_add:
       - NET_ADMIN # Required if you are using Pi-hole as your DHCP server, else not needed
     restart: unless-stopped
-
 {% raw %}
     logging:
       driver: json-file
@@ -279,6 +277,7 @@ services:
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
+
   pihole-exporter:
     image: "ekofr/pihole-exporter:latest"
     # For DHCP it is recommended to remove these ports and instead add: network_mode: "host"
