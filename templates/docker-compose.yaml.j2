@@ -212,6 +212,8 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:rw"
     command:
       - "--probe.docker=true"
+      - "--weave=false"
+      - "--app.http.address=':4041'"
     container_name: scope
     cap_add:
       - NET_ADMIN # Required if you are using Pi-hole as your DHCP server, else not needed
