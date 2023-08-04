@@ -58,7 +58,7 @@ scrape_configs:
     - source_labels: [__param_target]
       target_label: instance
     - target_label: __address__
-      replacement: {{ prometheus_server_ip }}:9130
+      replacement: localhost:9130
     - regex: '(.+)'
       replacement: k3d
       source_labels:
