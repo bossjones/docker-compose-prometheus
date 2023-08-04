@@ -1,32 +1,10 @@
-# /lib/systemd/system/unbound.service
-[Unit]
-Description=Unbound Exporter
-Documentation=man:unbound(8)
-After=network.target
-Before=nss-lookup.target
-Wants=nss-lookup.target
-
-[Service]
-Type=notify
-Restart=on-failure
-EnvironmentFile=-/etc/default/unbound
-ExecStartPre=-/usr/lib/unbound/package-helper chroot_setup
-ExecStartPre=-/usr/lib/unbound/package-helper root_trust_anchor_update
-ExecStart=/usr/sbin/unbound -d -p $DAEMON_OPTS
-ExecStopPost=-/usr/lib/unbound/package-helper chroot_teardown
-ExecReload=+/bin/kill -HUP $MAINPID
-
-[Install]
-WantedBy=multi-user.target
-
-
-
 [Unit]
 Description=Prometheus exporter for Unbound metrics, written in Go with pluggable metric collectors. The metrics exporter converts Unbound metric names to Prometheus metric names and labels by using a set of regular expressions.
 Documentation=https://github.com/letsencrypt/unbound_exporter
 After=network.target
 
 [Service]
+Restart=on-failure
 Type=simple
 ExecStart=/usr/local/bin/unbound_exporter \
     -unbound.host "unix:///var/run/unbound-remote-control.sock"
