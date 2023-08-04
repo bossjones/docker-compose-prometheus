@@ -186,13 +186,13 @@ scrape_configs:
     # Override the global default and scrape targets from this job every 5 seconds.
     scrape_interval: 5s
 
-    static_configs:
-      - targets: ['{{ prometheus_server_ip }}:8081']
-    # dns_sd_configs:
-    #   - names:
-    #       - cadvisor
-    #     type: A
-    #     port: 8081
+    #static_configs:
+    #  - targets: ['{{ prometheus_server_ip }}:8081']
+    dns_sd_configs:
+      - names:
+          - cadvisor
+        type: A
+        port: 8081
 
   - job_name: 'snmp-exporter'
     static_configs:
