@@ -43,7 +43,8 @@ services:
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:89"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
       - "--entrypoints.traefik.address=:8989"
       - "--metrics.prometheus=true"
       - "--metrics.prometheus.addrouterslabels=true"
@@ -58,7 +59,8 @@ services:
       - "--providers.file.filename=/etc/traefik/dynamic/dynamic.yaml"
       - "--providers.file.watch=true"
     ports:
-      - "8900:89"
+      - "80:80"
+      - "443:443"
       - "8989:8989"
       - "8082:8082"
     volumes:

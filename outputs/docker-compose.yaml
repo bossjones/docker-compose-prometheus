@@ -41,7 +41,8 @@ services:
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:89"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
       - "--entrypoints.traefik.address=:8989"
       - "--metrics.prometheus=true"
       - "--metrics.prometheus.addrouterslabels=true"
@@ -50,14 +51,14 @@ services:
       - "--providers.docker.network=loki"
       - "--ping=true"
       - "--ping.entrypoint=traefik"
-      - "--providers.docker.swarmMode=false"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.file.directory=/etc/traefik/dynamic"
       - "--providers.file.filename=/etc/traefik/dynamic/dynamic.yaml"
       - "--providers.file.watch=true"
     ports:
-      - "8900:89"
+      - "80:80"
+      - "443:443"
       - "8989:8989"
       - "8082:8082"
     volumes:
@@ -73,9 +74,9 @@ services:
       - "traefik.docker.network=loki"
     networks:
       loki: null
+    # - loki
     extra_hosts:
       - host.docker.internal:172.17.0.1
-    # - loki
 
     logging:
       driver: json-file
@@ -950,3 +951,4 @@ services:
     restart: always
     volumes:
     - ./syslog-ng:/syslog-ng:rw
+
