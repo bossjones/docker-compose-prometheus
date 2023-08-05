@@ -75,6 +75,8 @@ services:
     networks:
       loki: null
     # - loki
+    extra_hosts:
+      - host.docker.internal:172.17.0.1
 {% raw %}
     logging:
       driver: json-file

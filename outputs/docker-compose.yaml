@@ -50,6 +50,7 @@ services:
       - "--providers.docker.network=loki"
       - "--ping=true"
       - "--ping.entrypoint=traefik"
+      - "--providers.docker.swarmMode=false"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.file.directory=/etc/traefik/dynamic"
@@ -72,6 +73,8 @@ services:
       - "traefik.docker.network=loki"
     networks:
       loki: null
+    extra_hosts:
+      - host.docker.internal:172.17.0.1
     # - loki
 
     logging:
@@ -947,4 +950,3 @@ services:
     restart: always
     volumes:
     - ./syslog-ng:/syslog-ng:rw
-
