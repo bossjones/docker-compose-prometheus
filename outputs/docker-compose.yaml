@@ -65,7 +65,7 @@ services:
       - ./traefik/dynamic:/etc/traefik/dynamic
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.traefik.rule=Host(`traefik.localhost`)"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.scarlettlab.home`)"
       - "traefik.http.routers.traefik.service=api@internal"
       - "traefik.http.routers.traefik.entrypoints=web"
       - "traefik.http.services.traefik.loadbalancer.server.port=8989"
@@ -92,10 +92,10 @@ services:
       - "3100:3100"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.loki-gateway-http.rule=Host(`loki-gateway.localhost`)"
+      - "traefik.http.routers.loki-gateway-http.rule=Host(`loki-gateway.scarlettlab.home`)"
       - "traefik.http.routers.loki-gateway-http.entrypoints=web"
-      - "traefik.http.routers.loki-gateway-http.service=loki-gateway-http-service"
-      - "traefik.http.services.loki-gateway-http-service.loadbalancer.server.port=80"
+      - "traefik.http.routers.loki-gateway-http.service=loki-gateway-http"
+      - "traefik.http.services.loki-gateway-http.loadbalancer.server.port=80"
     networks:
       - loki
 
@@ -145,10 +145,10 @@ services:
       - "9001:9001"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.minio-http.rule=Host(`minio.localhost`)"
+      - "traefik.http.routers.minio-http.rule=Host(`minio.scarlettlab.home`)"
       - "traefik.http.routers.minio-http.entrypoints=web"
-      - "traefik.http.routers.minio-http.service=minio-http-service"
-      - "traefik.http.services.minio-http-service.loadbalancer.server.port=9000"
+      - "traefik.http.routers.minio-http.service=minio-http"
+      - "traefik.http.services.minio-http.loadbalancer.server.port=9000"
     volumes:
       - ./.data/minio:/data
     networks:
@@ -162,6 +162,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.whoami.rule=Host(`whoami.scarlettlab.home`)"
       - "traefik.http.routers.whoami.entrypoints=web"
+      - "traefik.http.routers.whoami.service=whoami"
       - "traefik.http.services.whoami.loadbalancer.server.port=10080"
     expose:
       - 10080
@@ -191,13 +192,11 @@ services:
     command:
       - "--probe.docker=true"
       - "--weave=false"
-      - "--app.http.address=:4041"
+      - "--app.http.address=':4041'"
     container_name: scope
-
     cap_add:
       - NET_ADMIN # Required if you are using Pi-hole as your DHCP server, else not needed
     restart: unless-stopped
-
 
     logging:
       driver: json-file
@@ -218,6 +217,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.pihole.rule=Host(`pihole.scarlettlab.home`)"
       - "traefik.http.routers.pihole.entrypoints=web"
+      - "traefik.http.routers.pihole.service=pihole"
       - "traefik.http.services.pihole.loadbalancer.server.port=80"
     # Volumes store your data between container upgrades
     expose:
@@ -234,7 +234,7 @@ services:
     - WEBPASSWORD=raspberry
     # Use the Pi-hole web UI to change the DNS settings Interface listening behavior to "Listen on all interfaces, permit all origins", if using Docker's default bridge network setting. (This can also be achieved by setting the environment variable DNSMASQ_LISTENING to all)
     - DNSMASQ_LISTENING=all
-    - PIHOLE_DNS_=127.0.0.1;1.1.1.1;1.0.0.1
+    - PIHOLE_DNS_=127.0.0.1#5335;1.1.1.1;1.0.0.1
     - NETWORK_ACCESS=internal
     - VIRTUAL_HOST=pi.hole
     - PROXY_LOCATION=pi.hole
@@ -255,6 +255,7 @@ services:
       driver: json-file
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+
   pihole-exporter:
     image: "ekofr/pihole-exporter:latest"
     # For DHCP it is recommended to remove these ports and instead add: network_mode: "host"
@@ -266,7 +267,9 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.pihole-exporter.rule=Host(`pihole-exporter.scarlettlab.home`)"
       - "traefik.http.routers.pihole-exporter.entrypoints=web"
+      - "traefik.http.routers.pihole-exporter.service=pihole-exporter"
       - "traefik.http.services.pihole-exporter.loadbalancer.server.port=9617"
+      # - "traefik.docker.network=loki"
     # Volumes store your data between container upgrades
     expose:
     - 9617
@@ -295,6 +298,7 @@ services:
     - "traefik.enable=true"
     - "traefik.http.routers.influxdb.rule=Host(`influxdb.scarlettlab.home`)"
     - "traefik.http.routers.influxdb.entrypoints=web"
+    - "traefik.http.routers.influxdb.service=influxdb"
     - "traefik.http.services.influxdb.loadbalancer.server.port=8086"
     ports:
       - '8086:8086'
@@ -354,6 +358,7 @@ services:
     - "traefik.enable=true"
     - "traefik.http.routers.chronograf.rule=Host(`chronograf.scarlettlab.home`)"
     - "traefik.http.routers.chronograf.entrypoints=web"
+    - "traefik.http.routers.chronograf.service=chronograf"
     - "traefik.http.services.chronograf.loadbalancer.server.port=8888"
     ports:
       - '8888:8888'
@@ -406,10 +411,10 @@ services:
       - 9092:9090
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.prometheus-http.rule=Host(`prometheus.localhost`)"
+      - "traefik.http.routers.prometheus-http.rule=Host(`prometheus.scarlettlab.home`)"
       - "traefik.http.routers.prometheus-http.entrypoints=web"
-      - "traefik.http.routers.prometheus-http.service=prometheus-http-service"
-      - "traefik.http.services.prometheus-http-service.loadbalancer.server.port=9090"
+      - "traefik.http.routers.prometheus-http.service=prometheus-http"
+      - "traefik.http.services.prometheus-http.loadbalancer.server.port=9090"
     links:
       - cadvisor:cadvisor
       - alertmanager:alertmanager
@@ -441,6 +446,7 @@ services:
     - "traefik.enable=true"
     - "traefik.http.routers.node-exporter.rule=Host(`node-exporter.scarlettlab.home`)"
     - "traefik.http.routers.node-exporter.entrypoints=web"
+    - "traefik.http.routers.node-exporter.service=node-exporter"
     - "traefik.http.services.node-exporter.loadbalancer.server.port=9100"
     volumes:
       - /proc:/host/proc:ro
@@ -478,7 +484,8 @@ services:
     - "traefik.enable=true"
     - "traefik.http.routers.alertmanager.rule=Host(`alertmanager.scarlettlab.home`)"
     - "traefik.http.routers.alertmanager.entrypoints=web"
-    - "traefik.http.services.prometheus.loadbalancer.server.port=9093"
+    - "traefik.http.routers.alertmanager.service=alertmanager"
+    - "traefik.http.services.alertmanager.loadbalancer.server.port=9093"
     tty: true
     stdin_open: true
     expose:
@@ -514,6 +521,7 @@ services:
     - "traefik.enable=true"
     - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.scarlettlab.home`)"
     - "traefik.http.routers.cadvisor.entrypoints=web"
+    - "traefik.http.routers.cadvisor.service=cadvisor"
     - "traefik.http.services.cadvisor.loadbalancer.server.port=8081"
     volumes:
         - /:/rootfs:ro
@@ -574,6 +582,7 @@ services:
     - "traefik.enable=true"
     - "traefik.http.routers.blackbox.rule=Host(`blackbox.scarlettlab.home`)"
     - "traefik.http.routers.blackbox.entrypoints=web"
+    - "traefik.http.routers.blackbox.service=blackbox"
     - "traefik.http.services.blackbox.loadbalancer.server.port=9115"
     tty: true
     stdin_open: true
@@ -601,39 +610,6 @@ services:
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
-#   heimdall:
-#     image: linuxserver/heimdall
-#     build: ./docker-heimdall
-#     container_name: heimdall
-#     restart: always
-#     environment:
-#       - PUID=1000
-#       - PGID=1000
-#       #- TZ=UTC
-#     volumes:
-#       - ./docker-heimdall/config:/config
-#     ports:
-#       - 4040:4040
-#       - 4443:4443
-#     labels:
-#     - "traefik.enable=true"
-#     - "traefik.http.routers.heimdall.rule=Host(`heimdall.scarlettlab.home`)"
-#     - "traefik.http.routers.heimdall.entrypoints=web"
-#     - "traefik.http.services.heimdall.loadbalancer.server.port=4040"
-#     tty: true
-#     stdin_open: true
-#     expose:
-#     - 4040
-#     - 4443
-#     networks:
-#     - loki
-
-#     logging:
-#       driver: json-file
-#       options:
-#         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
-
-
   unifi-poller:
     restart: always
     # 2023: Use -> ghcr.io/unpoller/unpoller:${POLLER_TAG}
@@ -655,6 +631,7 @@ services:
     - "traefik.enable=true"
     - "traefik.http.routers.unifipoller.rule=Host(`unifi-poller.scarlettlab.home`)"
     - "traefik.http.routers.unifipoller.entrypoints=web"
+    - "traefik.http.routers.unifipoller.service=unifipoller"
     - "traefik.http.services.unifipoller.loadbalancer.server.port=37288"
     depends_on:
       - grafana
@@ -860,6 +837,7 @@ services:
     - "traefik.enable=true"
     - "traefik.http.routers.promtail.rule=Host(`promtail.scarlettlab.home`)"
     - "traefik.http.routers.promtail.entrypoints=web"
+    - "traefik.http.routers.promtail.service=promtail"
     - "traefik.http.services.promtail.loadbalancer.server.port=9080"
     # depends_on:
     # - loki
@@ -873,6 +851,7 @@ services:
     - "traefik.enable=true"
     - "traefik.http.routers.grafana.rule=Host(`grafana.scarlettlab.home`)"
     - "traefik.http.routers.grafana.entrypoints=web"
+    - "traefik.http.routers.grafana.service=grafana"
     - "traefik.http.services.grafana.loadbalancer.server.port=3000"
     depends_on:
       - prometheus
@@ -968,3 +947,4 @@ services:
     restart: always
     volumes:
     - ./syslog-ng:/syslog-ng:rw
+
