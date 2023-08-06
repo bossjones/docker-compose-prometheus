@@ -72,6 +72,9 @@ ruler:
     local:
       directory: /loki/rules
   enable_api: true
+  alertmanager_url: http://alertmanager:9093
+  enable_alertmanager_v2: true
+  enable_sharding: true
   ring:
     kvstore:
       store: memberlist

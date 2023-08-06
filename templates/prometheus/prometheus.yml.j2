@@ -73,6 +73,27 @@ scrape_configs:
   # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
 
 
+  - job_name: 'traefik'
+    # Override the global default and scrape targets from this job every 5 seconds.
+    scrape_interval: 30s
+    dns_sd_configs:
+      - names:
+          - 'traefik'
+        type: A
+        port: 8082
+    relabel_configs:
+    - regex: '(.+)'
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    metric_relabel_configs:
+    - regex: (.+)
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+
   - job_name: 'prometheus'
 
     # Override the global default and scrape targets from this job every 5 seconds.
