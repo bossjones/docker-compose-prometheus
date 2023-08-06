@@ -126,4 +126,4 @@ clean:
 	bash .scripts/start-clean.sh
 
 sort-yaml:
-    dyff yaml --restructure --in-place
+    dyff yaml --restructure --in-place templates/loki/etc/loki/rules/fake/rules.yml.j2
