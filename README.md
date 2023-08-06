@@ -356,3 +356,36 @@ pi@boss-monitor ~/dev/bossjones/docker-compose-prometheus/outputs feature-perf* 
 ❯
 
 ```
+
+# alert manager email example
+
+```
+# SOURCE: https://github.com/Suyeshsingh/Prometheus-Alert-Manager-With-Loki-Stack-Grafana/blob/main/Prometheus-Alert-Manager%20/alert-manager-configmap.yaml
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: alertmanager-config
+  namespace: monitoring
+data:
+  config.yml: |-
+    global:
+    templates:
+    - '/etc/alertmanager/*.tmpl'
+    route:
+      receiver: alert-emailer
+      group_by: ['alertname', 'priority']
+      group_wait: 10s
+      repeat_interval: 30m
+
+    receivers:
+    - name: alert-emailer
+      email_configs:
+      - to: suyeshsingh@outlook.com
+        send_resolved: true
+        from: from-email@email.com
+        smarthost: smtp.eample.com:25
+        require_tls: false
+        auth_username: mail_id@gmail.com
+        auth_identity: mail_id@gmail.com
+        auth_password: <Enter password here>
+```

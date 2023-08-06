@@ -67,6 +67,10 @@ distributor:
     ingester_request_timeout: 500ms
 
 ruler:
+  storage:
+    type: local
+    local:
+      directory: /loki/rules
   enable_api: true
   ring:
     kvstore:

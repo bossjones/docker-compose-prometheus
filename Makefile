@@ -124,3 +124,6 @@ get_running_config:
 
 clean:
 	bash .scripts/start-clean.sh
+
+sort-yaml:
+    dyff yaml --restructure --in-place
