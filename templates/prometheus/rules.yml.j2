@@ -1,6 +1,6 @@
 {% raw %}
 groups:
-- name: loki_rules
+- name: loki_rules_extended
   rules:
   - expr: histogram_quantile(0.99, sum(rate(loki_request_duration_seconds_bucket[1m]))
       by (le, cluster, job))

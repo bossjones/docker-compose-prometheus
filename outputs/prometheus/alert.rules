@@ -29,9 +29,9 @@ groups:
       message: |
         {{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}% errors.
     expr: |
-      100 * sum(rate(loki_request_duration_seconds_count{status_code=~"5.."}[2m])) by (namespace, job, route)
+      100 * sum(rate(loki_request_duration_seconds_count{status_code=~"5.."}[2m])) by (service, job, route)
         /
-      sum(rate(loki_request_duration_seconds_count[2m])) by (namespace, job, route)
+      sum(rate(loki_request_duration_seconds_count[2m])) by (service, job, route)
         > 10
     for: 15m
     labels:
@@ -41,7 +41,7 @@ groups:
       message: |
         {{ $labels.job }} is experiencing {{ printf "%.2f" $value }}% increase of panics.
     expr: |
-      sum(increase(loki_panic_total[10m])) by (namespace, job) > 0
+      sum(increase(loki_panic_total[10m])) by (service, job) > 0
     labels:
       severity: critical
   - alert: LokiRequestLatency
@@ -49,19 +49,20 @@ groups:
       message: |
         {{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}s 99th percentile latency.
     expr: |
-      cluster_namespace_job_route:loki_request_duration_seconds:99quantile{route!~"(?i).*tail.*|/schedulerpb.SchedulerForQuerier/QuerierLoop"} > 1
+      cluster_service_job_route:loki_request_duration_seconds:99quantile{route!~"(?i).*tail.*|/schedulerpb.SchedulerForQuerier/QuerierLoop"} > 1
     for: 15m
     labels:
       severity: critical
   - alert: LokiTooManyCompactorsRunning
     annotations:
       message: |
-        {{ $labels.cluster }} {{ $labels.namespace }} has had {{ printf "%.0f" $value }} compactors running for more than 5m. Only one compactor should run at a time.
+        {{ $labels.cluster }} {{ $labels.service }} has had {{ printf "%.0f" $value }} compactors running for more than 5m. Only one compactor should run at a time.
     expr: |
-      sum(loki_boltdb_shipper_compactor_running) by (namespace, cluster) > 1
+      sum(loki_boltdb_shipper_compactor_running) by (service, cluster) > 1
     for: 5m
     labels:
       severity: warning
+
 - name: loki_rules
   rules:
   - expr: histogram_quantile(0.99, sum(rate(loki_request_duration_seconds_bucket[1m]))
@@ -96,21 +97,41 @@ groups:
   - expr: sum(rate(loki_request_duration_seconds_count[1m])) by (cluster, job, route)
     record: cluster_job_route:loki_request_duration_seconds_count:sum_rate
   - expr: histogram_quantile(0.99, sum(rate(loki_request_duration_seconds_bucket[1m]))
-      by (le, cluster, namespace, job, route))
-    record: cluster_namespace_job_route:loki_request_duration_seconds:99quantile
+      by (le, cluster, service, job, route))
+    record: cluster_service_job_route:loki_request_duration_seconds:99quantile
   - expr: histogram_quantile(0.50, sum(rate(loki_request_duration_seconds_bucket[1m]))
-      by (le, cluster, namespace, job, route))
-    record: cluster_namespace_job_route:loki_request_duration_seconds:50quantile
-  - expr: sum(rate(loki_request_duration_seconds_sum[1m])) by (cluster, namespace,
+      by (le, cluster, service, job, route))
+    record: cluster_service_job_route:loki_request_duration_seconds:50quantile
+  - expr: sum(rate(loki_request_duration_seconds_sum[1m])) by (cluster, service,
       job, route) / sum(rate(loki_request_duration_seconds_count[1m])) by (cluster,
-      namespace, job, route)
-    record: cluster_namespace_job_route:loki_request_duration_seconds:avg
-  - expr: sum(rate(loki_request_duration_seconds_bucket[1m])) by (le, cluster, namespace,
+      service, job, route)
+    record: cluster_service_job_route:loki_request_duration_seconds:avg
+  - expr: sum(rate(loki_request_duration_seconds_bucket[1m])) by (le, cluster, service,
       job, route)
-    record: cluster_namespace_job_route:loki_request_duration_seconds_bucket:sum_rate
-  - expr: sum(rate(loki_request_duration_seconds_sum[1m])) by (cluster, namespace,
+    record: cluster_service_job_route:loki_request_duration_seconds_bucket:sum_rate
+  - expr: sum(rate(loki_request_duration_seconds_sum[1m])) by (cluster, service,
       job, route)
-    record: cluster_namespace_job_route:loki_request_duration_seconds_sum:sum_rate
-  - expr: sum(rate(loki_request_duration_seconds_count[1m])) by (cluster, namespace,
+    record: cluster_service_job_route:loki_request_duration_seconds_sum:sum_rate
+  - expr: sum(rate(loki_request_duration_seconds_count[1m])) by (cluster, service,
       job, route)
-    record: cluster_namespace_job_route:loki_request_duration_seconds_count:sum_rate
+    record: cluster_service_job_route:loki_request_duration_seconds_count:sum_rate
+
+- name: Sample Rule Group
+  interval: 5s
+  rules:
+    - record: generated_logs:rate1m
+      expr: sum by (http_method) (rate({job="generated-logs"}[1m]))
+      labels:
+        source: "recording rule"
+    - record: scalar
+      expr: 10
+      labels:
+        source: "static"
+    - alert: NoGeneratedLogs
+      expr: absent_over_time({job="generated-logs"}[1m])
+      labels:
+        source: "alerting rule"
+    - alert: AlwaysFiring
+      expr: absent_over_time({job="blah"}[1m])
+      labels:
+        source: "alerting rule"
