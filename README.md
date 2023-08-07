@@ -389,3 +389,30 @@ data:
         auth_identity: mail_id@gmail.com
         auth_password: <Enter password here>
 ```
+
+
+## stahtd parse
+
+```
+# for log line: stahtd: stahtd[1440]: [STA-TRACKER].stahtd_dump_event(): {"message_type":"STA_ASSOC_TRACKER","mac":"f4:d4:88:5d:b1:ce","vap":"ath2","event_type":"fixup","assoc_status":"0","event_id":"4","arp_reply_gw_seen":"yes","dns_resp_seen":"yes","avg_rssi":"-69"}
+
+{job="syslog"} |~ ".*stahtd.*" | regexp "^(?P<stahtd_logs>.*?) (?P<stahtd_json>\\{.*?\\})"
+
+produces:
+
+cluster
+k3d
+
+host
+UniFiAP-AC-Pro
+
+job
+syslog
+
+stahtd_json
+{"message_type":"STA_ASSOC_TRACKER","mac":"20:fe:00:d8:fc:c2","vap":"ath2","event_type":"fixup","assoc_status":"0","event_id":"1","arp_reply_gw_seen":"yes","dns_resp_seen":"yes","avg_rssi":"-65"}
+
+stahtd_logs
+stahtd: stahtd[1440]: [STA-TRACKER].stahtd_dump_event():
+
+```
