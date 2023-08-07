@@ -70,9 +70,9 @@ server:
 
     # SOURCE: https://github.com/letsencrypt/unbound_exporter
     extended-statistics: yes
+    statistics-cumulative: true
 
 remote-control:
     control-enable: yes
-    control-interface: /var/run/unbound/unbound-remote-control.sock
+    control-interface: /var/run/unbound.sock
     control-use-cert: no
-    # control-port: 8953

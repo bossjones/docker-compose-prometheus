@@ -25,7 +25,7 @@ sudo touch /var/log/unbound/unbound.log
 sudo chown unbound /var/log/unbound/unbound.log
 
 sudo mkdir -p /var/run/unbound
-sudo chown unbound /var/run/unbound
+sudo chown unbound:unbound /var/run/unbound
 sudo chmod 777 /var/run/unbound
 
 sudo service unbound restart
