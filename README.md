@@ -420,5 +420,7 @@ stahtd: stahtd[1440]: [STA-TRACKER].stahtd_dump_event():
 ### All WAN related firewall rules
 
 ```
-{job="syslog"} |~ ".*WAN.*" |  pattern `[<firewall_action>]` | logfmt
+# from GROK: \[%{WORD:firewall.interface}-%{WORD:firewall.rule_index}-%{WORD:firewall.rule_action}\
+
+{job="syslog"} |~ ".*WAN.*" |  pattern `[<firewall_interface>-<firewall_rule_index>-<firewall_rule_action>]` | logfmt
 ```
