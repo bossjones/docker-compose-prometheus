@@ -416,3 +416,9 @@ stahtd_logs
 stahtd: stahtd[1440]: [STA-TRACKER].stahtd_dump_event():
 
 ```
+
+### All WAN related firewall rules
+
+```
+{job="syslog"} |~ ".*WAN.*" |  pattern `[<firewall_action>]` | logfmt
+```
