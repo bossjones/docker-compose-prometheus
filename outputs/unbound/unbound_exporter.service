@@ -7,7 +7,7 @@ After=network.target
 Restart=on-failure
 Type=simple
 ExecStart=/usr/local/bin/unbound_exporter \
-    -unbound.host "tcp://localhost:8953"
+    -unbound.host "unix:///var/run/unbound/unbound-remote-control.sock"
 
 [Install]
 WantedBy=multi-user.target

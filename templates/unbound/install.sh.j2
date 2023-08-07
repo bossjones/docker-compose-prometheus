@@ -24,6 +24,9 @@ sudo mkdir -p /var/log/unbound
 sudo touch /var/log/unbound/unbound.log
 sudo chown unbound /var/log/unbound/unbound.log
 
+sudo mkdir -p /var/run/unbound
+sudo chown unbound /var/run/unbound
+sudo chmod 777 /var/run/unbound
 
 sudo service unbound restart
 sudo systemctl enable unbound
@@ -42,7 +45,7 @@ sudo ls -lta /usr/local/bin/unbound_exporter
 sudo cp -a unbound_exporter.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable unbound_exporter
-sudo systemctl start unbound_exporter
+sudo systemctl restart unbound_exporter
 
 # pi@boss-monitor ~/dev/bossjones/docker-compose-prometheus/outputs/unbound feature-perf* 41s
 # ❯ unbound_exporter -h
