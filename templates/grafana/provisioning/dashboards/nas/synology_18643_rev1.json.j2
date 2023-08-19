@@ -95,7 +95,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -146,7 +146,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "modelName{job=~'$job',instance=~'$instance'}",
@@ -163,7 +163,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -214,7 +214,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "serialNumber{job=~'$job',instance=~'$instance'}",
@@ -231,7 +231,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "The percentage of CPU time spent processing user-level code, calculated over the last minute.",
       "fieldConfig": {
@@ -298,7 +298,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "100 - ssCpuIdle{job=~'$job',instance=~'$instance'}",
@@ -316,7 +316,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "The temperature of Disk Station uses Celsius degree",
       "fieldConfig": {
@@ -383,7 +383,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "temperature{job=~'$job',instance=~'$instance'}",
@@ -401,7 +401,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -460,7 +460,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "(100 / memTotalReal{job=~'$job',instance=~'$instance'}) * (memTotalReal{job=~'$job',instance=~'$instance'} - memAvailReal{job=~'$job',instance=~'$instance'} - memCached{job=~'$job',instance=~'$instance'} - memBuffer{job=~'$job',instance=~'$instance'})",
@@ -478,7 +478,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -545,7 +545,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "(memTotalSwap{job=~'$job',instance=~'$instance'} - memAvailSwap{job=~'$job',instance=~'$instance'}) / memTotalSwap{job=~'$job',instance=~'$instance'} * 100",
@@ -561,7 +561,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -636,7 +636,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "100-(100/raidTotalSize{job=~'$job',instance=~'$instance',raidName=\"Volume 1\"}*raidFreeSize{job=~'$job',instance=~'$instance',raidName=\"Volume 1\"})",
@@ -655,7 +655,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -730,7 +730,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "100-(100/raidTotalSize{job=~'$job',instance=~'$instance',raidName=\"Volume 2\"}*raidFreeSize{job=~'$job',instance=~'$instance',raidName=\"Volume 2\"})",
@@ -749,7 +749,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -811,7 +811,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "hrSystemUptime{job=~'$job',instance=~'$instance'} / 100",
@@ -827,7 +827,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -888,7 +888,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "memTotalReal{job=~'$job',instance=~'$instance'}",
@@ -904,7 +904,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -969,7 +969,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "memTotalSwap{job=~'$job',instance=~'$instance'}",
@@ -985,7 +985,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -1072,7 +1072,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -1086,7 +1086,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -1100,7 +1100,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -1114,7 +1114,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -1205,7 +1205,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -1419,7 +1419,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -1487,7 +1487,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -1670,7 +1670,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -1684,7 +1684,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -1699,7 +1699,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -1762,7 +1762,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -1901,7 +1901,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -1915,7 +1915,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -1999,7 +1999,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -2051,7 +2051,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -2070,7 +2070,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -2274,7 +2274,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -2288,7 +2288,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -2302,7 +2302,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -2316,7 +2316,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -2391,7 +2391,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -2483,7 +2483,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "ssCpuUser{job=~'$job',instance=~'$instance'}",
@@ -2497,7 +2497,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "ssCpuSystem{job=~'$job',instance=~'$instance'}",
@@ -2509,7 +2509,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "100 - ssCpuIdle{job=~'$job',instance=~'$instance'} - ssCpuUser{job=~'$job',instance=~'$instance'} - ssCpuSystem{job=~'$job',instance=~'$instance'}",
@@ -2525,7 +2525,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -2645,7 +2645,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "laLoadInt{job=~'$job',instance=~'$instance', laNames=\"Load-1\"} / 100",
@@ -2659,7 +2659,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "laLoadInt{job=~'$job',instance=~'$instance', laNames=\"Load-5\"} / 100",
@@ -2672,7 +2672,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "laLoadInt{job=~'$job',instance=~'$instance', laNames=\"Load-15\"} / 100",
@@ -2689,7 +2689,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -2781,7 +2781,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "(100 / memTotalReal{job=~'$job',instance=~'$instance'}) * (memTotalReal{job=~'$job',instance=~'$instance'} - memAvailReal{job=~'$job',instance=~'$instance'} - memCached{job=~'$job',instance=~'$instance'} - memBuffer{job=~'$job',instance=~'$instance'})",
@@ -2800,7 +2800,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -2923,7 +2923,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -2937,7 +2937,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "memTotalReal{job=~'$job',instance=~'$instance'} - (memShared{job=~'$job',instance=~'$instance'} + memCached{job=~'$job',instance=~'$instance'} + memBuffer{job=~'$job',instance=~'$instance'} + memAvailReal{job=~'$job',instance=~'$instance'})",
@@ -2950,7 +2950,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "memBuffer{job=~'$job',instance=~'$instance'}",
@@ -2963,7 +2963,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "memCached{job=~'$job',instance=~'$instance'}",
@@ -2976,7 +2976,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "memShared{job=~'$job',instance=~'$instance'}",
@@ -2989,7 +2989,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -3007,7 +3007,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -3108,7 +3108,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "(memTotalSwap{job=~'$job',instance=~'$instance'} - memAvailSwap{job=~'$job',instance=~'$instance'}) / memTotalSwap{job=~'$job',instance=~'$instance'} * 100",
@@ -3125,7 +3125,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -3259,7 +3259,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "memTotalSwap{job=~'$job',instance=~'$instance'}",
@@ -3271,7 +3271,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "(memTotalSwap{job=~'$job',instance=~'$instance'} - memAvailSwap{job=~'$job',instance=~'$instance'})",
@@ -3284,7 +3284,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "memAvailSwap{job=~'$job',instance=~'$instance'}",
@@ -3313,7 +3313,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -3425,7 +3425,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "100-(100/raidTotalSize{job=~'$job',instance=~'$instance',raidName=\"Volume 1\"}*raidFreeSize{job=~'$job',instance=~'$instance',raidName=\"Volume 1\"})",
@@ -3440,7 +3440,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "100-(100/raidTotalSize{job=~'$job',instance=~'$instance',raidName=\"Volume 2\"}*raidFreeSize{job=~'$job',instance=~'$instance',raidName=\"Volume 2\"})",
@@ -3455,7 +3455,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "100-(100/raidTotalSize{job=~'$job',instance=~'$instance',raidName=\"Volume 3\"}*raidFreeSize{job=~'$job',instance=~'$instance',raidName=\"Volume 3\"})",
@@ -3470,7 +3470,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "100-(100/raidTotalSize{job=~'$job',instance=~'$instance',raidName=\"Volume 4\"}*raidFreeSize{job=~'$job',instance=~'$instance',raidName=\"Volume 4\"})",
@@ -3485,7 +3485,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "100-(100/raidTotalSize{job=~'$job',instance=~'$instance',raidName=\"Volume 5\"}*raidFreeSize{job=~'$job',instance=~'$instance',raidName=\"Volume 5\"})",
@@ -3500,7 +3500,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "100-(100/raidTotalSize{job=~'$job',instance=~'$instance',raidName=\"Volume 6\"}*raidFreeSize{job=~'$job',instance=~'$instance',raidName=\"Volume 6\"})",
@@ -3519,7 +3519,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -3621,7 +3621,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "raidTotalSize{job=~'$job',instance=~'$instance',raidName=\"Volume 1\"} - raidFreeSize{job=~'$job',instance=~'$instance',raidName=\"Volume 1\"}",
@@ -3636,7 +3636,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "raidTotalSize{job=~'$job',instance=~'$instance',raidName=\"Volume 2\"} - raidFreeSize{job=~'$job',instance=~'$instance',raidName=\"Volume 2\"}",
@@ -3651,7 +3651,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "raidTotalSize{job=~'$job',instance=~'$instance',raidName=\"Volume 3\"} - raidFreeSize{job=~'$job',instance=~'$instance',raidName=\"Volume 3\"}",
@@ -3666,7 +3666,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "raidTotalSize{job=~'$job',instance=~'$instance',raidName=\"Volume 4\"} - raidFreeSize{job=~'$job',instance=~'$instance',raidName=\"Volume 4\"}",
@@ -3681,7 +3681,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "raidTotalSize{job=~'$job',instance=~'$instance',raidName=\"Volume 5\"} - raidFreeSize{job=~'$job',instance=~'$instance',raidName=\"Volume 5\"}",
@@ -3696,7 +3696,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "raidTotalSize{job=~'$job',instance=~'$instance',raidName=\"Volume 6\"} - raidFreeSize{job=~'$job',instance=~'$instance',raidName=\"Volume 6\"}",
@@ -3715,7 +3715,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -3798,7 +3798,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "irate(diskIONReadX{job=~'$job',instance=~'$instance'}[$__rate_interval])",
@@ -3823,7 +3823,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -3906,7 +3906,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "irate(diskIONWrittenX{job=~'$job',instance=~'$instance'}[$__rate_interval])",
@@ -3931,7 +3931,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -4014,7 +4014,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "irate(diskIOReads{job=~'$job',instance=~'$instance'}[$__rate_interval])",
@@ -4039,7 +4039,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -4118,7 +4118,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "irate(diskIOWrites{job=~'$job',instance=~'$instance'}[$__rate_interval])",
@@ -4156,7 +4156,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -4242,7 +4242,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -4262,7 +4262,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -4348,7 +4348,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -4369,7 +4369,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -4450,7 +4450,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -4469,7 +4469,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -4565,7 +4565,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "rate(ifInDiscards{job=~'$job',instance=~'$instance',ifName=~'$Interface'}[$__rate_interval])",
@@ -4580,7 +4580,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "rate(ifInErrors{job=~'$job',instance=~'$instance',ifName=~'$Interface'}[$__rate_interval])",
@@ -4595,7 +4595,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "rate(ifOutDiscards{job=~'$job',instance=~'$instance',ifName=~'$Interface'}[$__rate_interval])",
@@ -4610,7 +4610,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "expr": "rate(ifOutErrors{job=~'$job',instance=~'$instance',ifName=~'$Interface'}[$__rate_interval])",
@@ -4642,7 +4642,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${Prometheus}"
+        "uid": "Prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -4728,7 +4728,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${Prometheus}"
+            "uid": "Prometheus"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -4783,7 +4783,7 @@
         "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "${Prometheus}"
+          "uid": "Prometheus"
         },
         "definition": "label_values(modelName, instance)",
         "hide": 0,
@@ -4806,7 +4806,7 @@
         "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "${Prometheus}"
+          "uid": "Prometheus"
         },
         "definition": "label_values(modelName, job)",
         "hide": 0,
@@ -4849,7 +4849,7 @@
         "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "${Prometheus}"
+          "uid": "Prometheus"
         },
         "definition": "label_values(ifName{job=~'$job',instance=~'$instance'},ifName)",
         "hide": 2,

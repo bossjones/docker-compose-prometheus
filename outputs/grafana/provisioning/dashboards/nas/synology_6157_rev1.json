@@ -63,7 +63,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${Prometheus}",
+      "datasource": "Prometheus",
       "editable": true,
       "error": false,
       "fill": 1,
@@ -172,7 +172,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${Prometheus}",
+      "datasource": "Prometheus",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -252,7 +252,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${Prometheus}",
+      "datasource": "Prometheus",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -337,7 +337,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${Prometheus}",
+      "datasource": "Prometheus",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -422,7 +422,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${Prometheus}",
+      "datasource": "Prometheus",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -507,7 +507,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${Prometheus}",
+      "datasource": "Prometheus",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -592,7 +592,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${Prometheus}",
+      "datasource": "Prometheus",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -723,7 +723,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${Prometheus}",
+      "datasource": "Prometheus",
       "fill": 1,
       "gridPos": {
         "h": 8,
@@ -811,7 +811,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${Prometheus}",
+        "datasource": "Prometheus",
         "hide": 0,
         "includeAll": false,
         "label": null,
@@ -831,7 +831,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${Prometheus}",
+        "datasource": "Prometheus",
         "hide": 2,
         "includeAll": true,
         "label": null,
