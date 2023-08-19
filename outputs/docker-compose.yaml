@@ -227,7 +227,7 @@ services:
       - "traefik.http.routers.pihole.entrypoints=web"
       - "traefik.http.routers.pihole.service=pihole"
       - "traefik.http.services.pihole.loadbalancer.server.port=80"
-      - "traefik.port=81"
+      - "traefik.port=80"
     # Volumes store your data between container upgrades
     expose:
     - 81
@@ -969,4 +969,3 @@ services:
     restart: always
     volumes:
     - ./syslog-ng:/syslog-ng:rw
-
