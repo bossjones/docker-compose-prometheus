@@ -16,7 +16,9 @@ metrics:
 ## Static configuration
 entryPoints:
   web:
-    address: ":89"
+    address: ":80"
+  websecure:
+    address: ":443"
   traefik:
     address: ":8989"
   metrics:
@@ -29,6 +31,7 @@ providers:
     exposedByDefault: false
     watch: true
     endpoint: "unix:///var/run/docker.sock"
+    network: loki
 
 # API and dashboard configuration
 api:

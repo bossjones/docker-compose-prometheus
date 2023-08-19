@@ -71,6 +71,7 @@ services:
       - "traefik.http.routers.traefik.service=api@internal"
       - "traefik.http.routers.traefik.entrypoints=web"
       - "traefik.http.services.traefik.loadbalancer.server.port=8989"
+      - "traefik.port=8989"
       - "traefik.docker.network=loki"
     networks:
       loki: null
@@ -100,6 +101,7 @@ services:
       - "traefik.http.routers.loki-gateway-http.entrypoints=web"
       - "traefik.http.routers.loki-gateway-http.service=loki-gateway-http"
       - "traefik.http.services.loki-gateway-http.loadbalancer.server.port=80"
+      - "traefik.port=8080"
     networks:
       - loki
 
@@ -153,6 +155,7 @@ services:
       - "traefik.http.routers.minio-http.entrypoints=web"
       - "traefik.http.routers.minio-http.service=minio-http"
       - "traefik.http.services.minio-http.loadbalancer.server.port=9000"
+      - "traefik.port=9000"
     volumes:
       - ./.data/minio:/data
     networks:
@@ -168,6 +171,7 @@ services:
       - "traefik.http.routers.whoami.entrypoints=web"
       - "traefik.http.routers.whoami.service=whoami"
       - "traefik.http.services.whoami.loadbalancer.server.port=10080"
+      - "traefik.port=10080"
     expose:
       - 10080
     environment:
@@ -223,6 +227,7 @@ services:
       - "traefik.http.routers.pihole.entrypoints=web"
       - "traefik.http.routers.pihole.service=pihole"
       - "traefik.http.services.pihole.loadbalancer.server.port=80"
+      - "traefik.port=81"
     # Volumes store your data between container upgrades
     expose:
     - 81
@@ -273,6 +278,7 @@ services:
       - "traefik.http.routers.pihole-exporter.entrypoints=web"
       - "traefik.http.routers.pihole-exporter.service=pihole-exporter"
       - "traefik.http.services.pihole-exporter.loadbalancer.server.port=9617"
+      - "traefik.port=9617"
       # - "traefik.docker.network=loki"
     # Volumes store your data between container upgrades
     expose:
@@ -304,6 +310,7 @@ services:
     - "traefik.http.routers.influxdb.entrypoints=web"
     - "traefik.http.routers.influxdb.service=influxdb"
     - "traefik.http.services.influxdb.loadbalancer.server.port=8086"
+    - "traefik.port=8086"
     ports:
       - '8086:8086'
     volumes:
@@ -364,6 +371,7 @@ services:
     - "traefik.http.routers.chronograf.entrypoints=web"
     - "traefik.http.routers.chronograf.service=chronograf"
     - "traefik.http.services.chronograf.loadbalancer.server.port=8888"
+    - "traefik.port=8888"
     ports:
       - '8888:8888'
     volumes:
@@ -395,6 +403,7 @@ services:
     # - "traefik.http.routers.prometheus.rule=Host(`prometheus.scarlettlab.home`)"
     # - "traefik.http.routers.prometheus.entrypoints=web"
     # - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+    # - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
     expose:
     - 9090
     tty: true
@@ -419,6 +428,7 @@ services:
       - "traefik.http.routers.prometheus.entrypoints=web"
       - "traefik.http.routers.prometheus.service=prometheus"
       - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+      - "traefik.port=9090"
     links:
       - cadvisor:cadvisor
       - alertmanager:alertmanager
@@ -452,6 +462,7 @@ services:
     - "traefik.http.routers.node-exporter.entrypoints=web"
     - "traefik.http.routers.node-exporter.service=node-exporter"
     - "traefik.http.services.node-exporter.loadbalancer.server.port=9100"
+    - "traefik.port=9100"
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -490,6 +501,7 @@ services:
     - "traefik.http.routers.alertmanager.entrypoints=web"
     - "traefik.http.routers.alertmanager.service=alertmanager"
     - "traefik.http.services.alertmanager.loadbalancer.server.port=9093"
+    - "traefik.port=9093"
     tty: true
     stdin_open: true
     expose:
@@ -527,6 +539,7 @@ services:
     - "traefik.http.routers.cadvisor.entrypoints=web"
     - "traefik.http.routers.cadvisor.service=cadvisor"
     - "traefik.http.services.cadvisor.loadbalancer.server.port=8081"
+    - "traefik.port=8081"
     volumes:
         - /:/rootfs:ro
         - /var/run:/var/run:ro
@@ -588,6 +601,7 @@ services:
     - "traefik.http.routers.blackbox.entrypoints=web"
     - "traefik.http.routers.blackbox.service=blackbox"
     - "traefik.http.services.blackbox.loadbalancer.server.port=9115"
+    - "traefik.port=9115"
     tty: true
     stdin_open: true
     ports:
@@ -637,6 +651,7 @@ services:
     - "traefik.http.routers.unifipoller.entrypoints=web"
     - "traefik.http.routers.unifipoller.service=unifipoller"
     - "traefik.http.services.unifipoller.loadbalancer.server.port=37288"
+    - "traefik.port=37288"
     depends_on:
       - grafana
       - influxdb
@@ -787,6 +802,7 @@ services:
 #     - "traefik.http.routers.loki.rule=Host(`loki.scarlettlab.home`)"
 #     - "traefik.http.routers.loki.entrypoints=web"
 #     - "traefik.http.services.loki.loadbalancer.server.port=3100"
+#     - "traefik.http.services.loki.loadbalancer.server.port=3100"
 #     command: -config.file=/loki/loki-config.yaml
 #     networks:
 #     - loki
@@ -843,6 +859,7 @@ services:
     - "traefik.http.routers.promtail.entrypoints=web"
     - "traefik.http.routers.promtail.service=promtail"
     - "traefik.http.services.promtail.loadbalancer.server.port=9080"
+    - "traefik.port=9080"
     # depends_on:
     # - loki
     networks:
@@ -857,6 +874,7 @@ services:
     - "traefik.http.routers.grafana.entrypoints=web"
     - "traefik.http.routers.grafana.service=grafana"
     - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+    - "traefik.port=3000"
     depends_on:
       - prometheus
       - loki-gateway
