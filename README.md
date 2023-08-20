@@ -424,3 +424,9 @@ stahtd: stahtd[1440]: [STA-TRACKER].stahtd_dump_event():
 
 {job="syslog"} |~ ".*WAN.*" |  pattern `[<firewall_interface>-<firewall_rule_index>-<firewall_rule_action>]` | logfmt
 ```
+
+### logql unifi logs
+
+```
+sum by (src_port, ip_dst) (rate({job="syslog"} |~ "WAN_LOCAL-3002-D" | pattern `[<rule>]IN=<in_interface> OUT= MAC=<mac_src> SRC=<ip_src> DST=<ip_dst> LEN=<len> TOS=<tos> PREC=<prec> TTL=<ttl> ID=<id> DF PROTO=<protocol> SPT=<src_port> DPT=<dst_port> WINDOW=<window> RES=<res> RST URGP=<urgp>` [5m]))
+```
