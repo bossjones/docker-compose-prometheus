@@ -269,7 +269,7 @@ services:
     - WEBPASSWORD=raspberry
     # Use the Pi-hole web UI to change the DNS settings Interface listening behavior to "Listen on all interfaces, permit all origins", if using Docker's default bridge network setting. (This can also be achieved by setting the environment variable DNSMASQ_LISTENING to all)
     - DNSMASQ_LISTENING=all
-    - PIHOLE_DNS_=127.0.0.1#5335;1.1.1.1;1.0.0.1
+    - PIHOLE_DNS_=127.0.0.1#5335;1.1.1.2;1.0.0.2
     - NETWORK_ACCESS=internal
     - VIRTUAL_HOST=pi.hole
     - PROXY_LOCATION=pi.hole
@@ -281,8 +281,8 @@ services:
     - DNSSEC=true
     dns:
       - "127.0.0.1"
-      - "1.1.1.1"
-      - "1.0.0.1"
+      - "1.1.1.2"
+      - "1.0.0.2"
     networks:
     - loki
 {% raw %}
