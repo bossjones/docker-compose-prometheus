@@ -6,6 +6,8 @@ nfs_ip: '192.168.3.111'
 prometheus_pinghosts_targets:
 - http://google.com;google.com;external;internetbox
 - http://github.com;github.com;external;internetbox
+- https://192.168.2.7;securityonion;external;internetbox
+- https://192.168.2.6:8006;pve;external;internetbox
 # - http://192.168.1.91:18000/metrics;cerebrobot;external;internetbox
 
 cadvisor_feature_flag: true
