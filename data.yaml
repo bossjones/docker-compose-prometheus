@@ -18,6 +18,6 @@ weave_scope_feature_flag: true
 pihole_feature_flag: true
 loki_log_level: 'info'
 prometheus_log_level: 'info'
-alertmanager_log_level: 'info'
+alertmanager_log_level: 'debug'
 promtail_log_level: 'info'
 grafana_log_level: 'info'

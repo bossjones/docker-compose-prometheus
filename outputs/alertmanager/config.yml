@@ -12,7 +12,7 @@ route:
   group_by: [ 'alertname', 'service' ]
 
   # A default receiver
-  receiver: 'default-receiver'
+  receiver: 'telegram'
 
   # When a new group of alerts is created by an incoming alert, wait at
   # least 'group_wait' to send the initial notification.
@@ -30,5 +30,5 @@ receivers:
   - name: 'default-receiver'
   - name: "telegram"
     webhook_configs:
-      - url: "http://alertmanager-telegram:8585/alerts"
+      - url: "http://alertmanager-telegram:8080/alerts"
         send_resolved: true

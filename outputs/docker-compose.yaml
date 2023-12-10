@@ -524,7 +524,7 @@ services:
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
-      - '--log.level=info'
+      - '--log.level=debug'
     # environment:
     #- TZ=UTC
     networks:
@@ -1008,3 +1008,4 @@ services:
     restart: always
     volumes:
     - ./syslog-ng:/syslog-ng:rw
+
