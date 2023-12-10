@@ -517,12 +517,44 @@ services:
       - ./alertmanager/:/etc/alertmanager/
       - alertmanager-data:/data
     restart: always
+    depends_on:
+    - alertmanager-telegram
+    links:
+    - alertmanager-telegram:alertmanager-telegram
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
       - '--log.level=info'
     # environment:
     #- TZ=UTC
+    networks:
+    - loki
+
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+
+
+  alertmanager-telegram:
+    image: ghcr.io/janw/alertmanager-telegram
+    container_name: alertmanager-telegram
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.alertmanager-telegram.rule=Host(`alertmanager-telegram.scarlettlab.home`)"
+    - "traefik.http.routers.alertmanager-telegram.entrypoints=web"
+    - "traefik.http.routers.alertmanager-telegram.service=alertmanager-telegram"
+    - "traefik.http.services.alertmanager-telegram.loadbalancer.server.port=8585"
+    - "traefik.port=8585"
+    tty: true
+    stdin_open: true
+    expose:
+    - 8585
+    ports:
+      - "8585:8080"
+    restart: always
+    env_file:
+      - ./env
     networks:
     - loki
 

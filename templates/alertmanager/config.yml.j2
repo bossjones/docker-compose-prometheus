@@ -9,4 +9,8 @@ route:
 receivers:
 # - name: 'slack'
   - name: 'default-receiver'
+  - name: "telegram"
+    webhook_configs:
+      - url: "http://alertmanager-telegram:8585/alerts"
+        send_resolved: true
 {% endraw %}
