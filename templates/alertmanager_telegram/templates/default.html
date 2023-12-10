@@ -1,0 +1,32 @@
+{% if status == 'firing' -%}
+👩‍🚒
+{%- else -%}
+🍻
+{%- endif -%}
+<b> {{ status | title }}: {{commonLabels.alertname}} ({{ alerts | length }})</b>
+{%- if status == 'firing' and commonLabels.severity == "critical" %} ‼️
+{%- endif %}
+
+{{ commonAnnotations.summary|e }}
+{% for label, value in commonAnnotations.items() if label != "summary" %}
+<b>{{ label }}:</b> {{value}}
+{%- endfor %}
+{% for label, value in commonLabels.items() if label != "alertname" %}
+<b>{{ label }}:</b> <code>{{value}}</code>
+{%- endfor %}
+
+{% for alert in alerts %}
+{%- for label, value in alert.annotations.items() %}
+<b>{{ label }}:</b> {{value}}
+{%- endfor %}
+{%- for label, value in alert.labels.items() %}
+<b>{{ label }}:</b> <code>{{value}}</code>
+{%- endfor -%}
+{%- if loop.last -%}
+<a href="{{ alert.generatorURL }}">Go to source</a>
+{% endif %}
+{% endfor -%}
+{% if ellipsis or truncatedAlerts == 1 %}
+… (list truncated)
+{% endif -%}
+<a href="{{ externalURL }}">Go to Alertmanager</a>

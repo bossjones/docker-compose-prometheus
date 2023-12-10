@@ -574,7 +574,9 @@ services:
 
 
   alertmanager-telegram:
-    image: ghcr.io/janw/alertmanager-telegram
+    # build:
+    #   context: ./alertmanager_telegram
+    image: ghcr.io/janw/alertmanager-telegram:latest
     container_name: alertmanager-telegram
     labels:
     - "traefik.enable=true"
