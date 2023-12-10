@@ -644,14 +644,14 @@ groups:
         summary: Container High Memory usage (instance {{ $labels.instance }})
         description: "Container Memory usage is above 80%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
-    - alert: ContainerVolumeUsage
-      expr: '(1 - (sum(container_fs_inodes_free{name!=""}) BY (instance, name) / sum(container_fs_inodes_total) BY (instance, name))) * 100 > 80'
-      for: 2m
-      labels:
-        severity: warning
-      annotations:
-        summary: Container Volume usage (instance {{ $labels.instance }})
-        description: "Container Volume usage is above 80%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+    # - alert: ContainerVolumeUsage
+    #   expr: '(1 - (sum(container_fs_inodes_free{name!=""}) BY (instance, name) / sum(container_fs_inodes_total) BY (instance, name))) * 100 > 80'
+    #   for: 2m
+    #   labels:
+    #     severity: warning
+    #   annotations:
+    #     summary: Container Volume usage (instance {{ $labels.instance }})
+    #     description: "Container Volume usage is above 80%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
     - alert: ContainerHighThrottleRate
       expr: 'rate(container_cpu_cfs_throttled_seconds_total[3m]) > 1'
