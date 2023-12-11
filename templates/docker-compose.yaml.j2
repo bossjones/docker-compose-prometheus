@@ -1084,17 +1084,19 @@ services:
     - "9221:9221/tcp"
     expose:
     - 9221
-    # volumes:
-    # - ./blackbox/config:/config
-    # command:
-    #   - '--config.file=/config/blackbox.yml'
-    #   - '--web.listen-address=:9115'
-
+    volumes:
+      - ./pve_exporter/pve_exporter/pve.yml:/etc/prometheus/pve.yml
     restart: always
     deploy:
       mode: global
     env_file:
       - ./env
+    command:
+    - '--collector.status'
+    - '--collector.version'
+    - '--collector.node'
+    - '--collector.cluster'
+    - '--collector.resources'
     #environment:
     #- TZ=UTC
     networks:
