@@ -61,7 +61,19 @@ scrape_configs:
       - source_labels: [__param_target]
         target_label: instance
       - target_label: __address__
-        replacement: '{{ usg_ip }}:9221'  # PVE exporter.
+        replacement: '{{ prometheus_server_ip }}:9221'  # PVE exporter.
+      - regex: '(.+)'
+        replacement: k3d
+        source_labels:
+        - __name__
+        target_label: cluster
+      metric_relabel_configs:
+      - regex: (.+)
+        replacement: k3d
+        source_labels:
+        - __name__
+        target_label: cluster
+    # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
 
   - job_name: 'unifipoller'
     scrape_interval: 30s
