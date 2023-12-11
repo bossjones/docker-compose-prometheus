@@ -2,6 +2,7 @@ fqdn: 'scarlettlab.home'
 prometheus_server_ip: '192.168.3.16'
 usg_ip: '192.168.3.150'
 nfs_ip: '192.168.3.111'
+pve_ip: '192.168.2.6'
 
 prometheus_pinghosts_targets:
 - http://google.com;google.com;external;internetbox

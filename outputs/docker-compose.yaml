@@ -1009,3 +1009,40 @@ services:
     volumes:
     - ./syslog-ng:/syslog-ng:rw
 
+
+  pve-exporter:
+    image: prompve/prometheus-pve-exporter
+    container_name: pve-exporter
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.pve-exporter.rule=Host(`pve-exporter.scarlettlab.home`)"
+    - "traefik.http.routers.pve-exporter.entrypoints=web"
+    - "traefik.http.routers.pve-exporter.service=pve-exporter"
+    - "traefik.http.services.pve-exporter.loadbalancer.server.port=9221"
+    - "traefik.port=9221"
+    tty: true
+    stdin_open: true
+    ports:
+    - "9221:9221/tcp"
+    expose:
+    - 9221
+    # volumes:
+    # - ./blackbox/config:/config
+    # command:
+    #   - '--config.file=/config/blackbox.yml'
+    #   - '--web.listen-address=:9115'
+
+    restart: always
+    deploy:
+      mode: global
+    env_file:
+      - ./env
+    #environment:
+    #- TZ=UTC
+    networks:
+    - loki
+
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
