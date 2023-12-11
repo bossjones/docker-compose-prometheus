@@ -1,4 +1,0 @@
-default:
-    user: metrics@pve
-    token_name: "metrics@pve!proxmox-exporter"
-    token_value: "3e06458e-e197-479f-a2f7-9ed9323c03ba"

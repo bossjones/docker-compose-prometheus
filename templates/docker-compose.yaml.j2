@@ -1085,7 +1085,7 @@ services:
     expose:
     - 9221
     volumes:
-      - ./pve_exporter/pve_exporter/pve.yml:/etc/prometheus/pve.yml
+      - ./pve_exporter/pve_exporter/pve.yaml:/etc/prometheus/pve.yml
     restart: always
     deploy:
       mode: global
