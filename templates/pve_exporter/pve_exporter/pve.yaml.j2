@@ -1,5 +1,5 @@
 default:
-    user: metrics@pve
-    token_name: "{{ lookup ('env', 'PVE_TOKEN_NAME') }}"
-    token_value: "{{ lookup ('env', 'PVE_TOKEN_VALUE') }}"
+    user: "{{ lookup ('env', 'PVE_USER') }}"
+    password: "{{ lookup ('env', 'PVE_PASSWORD') }}"
+    # Optional: set to false to skip SSL/TLS verification
     verify_ssl: false
