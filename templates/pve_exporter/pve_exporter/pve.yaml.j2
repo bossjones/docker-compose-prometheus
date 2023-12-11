@@ -2,3 +2,4 @@ default:
     user: metrics@pve
     token_name: "{{ lookup ('env', 'PVE_TOKEN_NAME') }}"
     token_value: "{{ lookup ('env', 'PVE_TOKEN_VALUE') }}"
+    verify_ssl: false
