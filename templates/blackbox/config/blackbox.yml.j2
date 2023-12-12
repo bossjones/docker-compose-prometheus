@@ -34,4 +34,8 @@ modules:
       - expect: "^:[^ ]+ 001"
   icmp:
     prober: icmp
+    timeout: 5s
+    icmp:
+      preferred_ip_protocol: "ip4"
+      source_ip_address: "127.0.0.1"
 {% endraw %}
