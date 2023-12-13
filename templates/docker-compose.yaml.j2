@@ -478,12 +478,44 @@ services:
       - alertmanager
       - loki-gateway
       - pihole-exporter
+      - pushgateway
     restart: always
 
     # environment:
     #- TZ=UTC
     # SEE: https://stackoverflow.com/questions/31324981/how-to-access-host-port-from-docker-container/43541732#43541732
     # https://stackoverflow.com/questions/56909896/prometheus-in-docker-container-cannot-scrape-target-on-host/56910057
+    networks:
+    - loki
+{% raw %}
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
+
+
+  # docker pull prom/pushgateway:v2.31.1
+  pushgateway:
+    image: prom/pushgateway:v2.31.1
+    container_name: pushgateway
+    expose:
+    - 9091
+    tty: true
+    stdin_open: true
+    ports:
+      - 9091:9091
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pushgateway.rule=Host(`pushgateway.{{ fqdn }}`)"
+      - "traefik.http.routers.pushgateway.entrypoints=web"
+      - "traefik.http.routers.pushgateway.service=pushgateway"
+      - "traefik.http.services.pushgateway.loadbalancer.server.port=9091"
+      - "traefik.port=9091"
+    # environment:
+    #- TZ=UTC
+    # SEE: https://stackoverflow.com/questions/31324981/how-to-access-host-port-from-docker-container/43541732#43541732
+    # https://stackoverflow.com/questions/56909896/pushgateway-in-docker-container-cannot-scrape-target-on-host/56910057
     networks:
     - loki
 {% raw %}
@@ -694,7 +726,8 @@ services:
     command:
       - '--config.file=/config/blackbox.yml'
       - '--web.listen-address=:9115'
-
+    cap_add:
+      - NET_ADMIN # Required if you are using Pi-hole as your DHCP server, else not needed
     restart: always
     deploy:
       mode: global
@@ -702,6 +735,13 @@ services:
     #- TZ=UTC
     networks:
     - loki
+    depends_on:
+    - pihole
+    dns:
+      - "192.168.3.16"
+      - "1.1.1.2"
+      - "1.0.0.2"
+
 {% raw %}
     logging:
       driver: json-file
