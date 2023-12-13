@@ -460,9 +460,9 @@ services:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
 
-  # docker pull prom/pushgateway:v2.31.1
+  # docker pull prom/pushgateway:v1.6.2
   pushgateway:
-    image: prom/pushgateway:v2.31.1
+    image: prom/pushgateway:v1.6.2
     container_name: pushgateway
     expose:
     - 9091
