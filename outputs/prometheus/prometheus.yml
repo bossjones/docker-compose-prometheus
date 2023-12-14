@@ -252,8 +252,10 @@ scrape_configs:
       - __name__
       target_label: cluster
 
+    # SOURCE: https://github.com/google/cadvisor/issues/2523#issuecomment-785094428
     # Override the global default and scrape targets from this job every 5 seconds.
-    scrape_interval: 5s
+    #scrape_interval: 5s
+    scrape_interval: 15s
 
     #static_configs:
     #  - targets: ['192.168.3.16:8081']

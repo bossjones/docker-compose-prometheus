@@ -657,6 +657,9 @@ services:
         - /var/lib/docker/:/var/lib/docker:ro
         - /dev/disk/:/dev/disk:ro
         - /etc/machine-id/:/etc/machine-id:ro
+        # SOURCE: https://dev.to/cloudx/taming-cadvisors-high-cpu-usage-1nm5
+        - /sys/fs/cgroup:/cgroup:ro
+        - /etc/localtime:/etc/localtime:ro
     devices:
         - /dev/kmsg:/dev/kmsg:ro
     ports:
@@ -674,7 +677,7 @@ services:
       # - '--enable_load_reader=true'
       - '--machine_id_file="/etc/machine-id"'
       - '--enable_metrics=advtcp,app,cpu,cpu_topology,cpuset,disk,diskIO,hugetlb,memory,memory_numa,network,oom_event,percpu,perf_event,process,resctrl,sched,tcp,udp'
-      - '--disable_metrics=referenced_memory,cpuLoad'
+      # - '--disable_metrics=referenced_memory,cpuLoad'
       # - "--housekeeping_interval=30s"
       # - "--max_housekeeping_interval=35s"
       # - "--event_storage_event_limit=default=0"
@@ -687,6 +690,10 @@ services:
       # - "--disable_metrics=percpu,process,sched,tcp,udp,diskIO,disk,network"
       # - "--allow_dynamic_housekeeping=true"
       # - "--storage_duration=1m0s"
+      # SOURCE: https://dev.to/cloudx/taming-cadvisors-high-cpu-usage-1nm5
+      - "--housekeeping_interval=30s"
+      - "--docker_only=true"
+      - "--disable_metrics=percpu,sched,tcp,udp,disk,diskIO,accelerator,hugetlb,referenced_memory,cpu_topology,resctrl,cpuLoad"
     env_file:
       - ./env
     # devices:
