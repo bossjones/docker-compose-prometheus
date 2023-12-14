@@ -12,8 +12,8 @@ restart:
 	docker-compose --env-file env restart traefik
 
 restart-cadvisor:
-  docker-compose --env-file env restart pushgateway && \
-  docker-compose --env-file env restart cadvisor && \
+	docker-compose --env-file env restart pushgateway && \
+	docker-compose --env-file env restart cadvisor && \
 	docker-compose --env-file env restart prometheus && \
 	docker-compose --env-file env restart loki-write && \
 	docker-compose --env-file env restart loki-read && \
