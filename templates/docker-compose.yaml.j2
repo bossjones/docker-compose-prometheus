@@ -24,6 +24,7 @@ volumes:
     chronograf-storage:
     grafana-storage:
     alertmanager-data:
+    pushgateway-data:
     loki:
     pihole_etc:
     pihole_dnsmasq:
@@ -504,7 +505,7 @@ services:
     tty: true
     stdin_open: true
     ports:
-      - 9091:9091
+      - 0.0.0.0:9091:9091
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.pushgateway.rule=Host(`pushgateway.{{ fqdn }}`)"
@@ -512,8 +513,13 @@ services:
       - "traefik.http.routers.pushgateway.service=pushgateway"
       - "traefik.http.services.pushgateway.loadbalancer.server.port=9091"
       - "traefik.port=9091"
+    volumes:
+      - ./alertmanager/:/etc/alertmanager/
+      - pushgateway-data:/data
     command:
     - '--log.level={{ pushgateway_log_level }}'
+    # - '--web.listen-address='
+    - '--web.enable-admin-api'
     # environment:
     #- TZ=UTC
     # SEE: https://stackoverflow.com/questions/31324981/how-to-access-host-port-from-docker-container/43541732#43541732
