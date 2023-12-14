@@ -661,7 +661,7 @@ services:
       # SOURCE: https://dev.to/cloudx/taming-cadvisors-high-cpu-usage-1nm5
       - "--housekeeping_interval=30s"
       - "--docker_only=true"
-      - "--disable_metrics=percpu,sched,tcp,udp,disk,diskIO,accelerator,hugetlb,referenced_memory,cpu_topology,resctrl,cpuLoad"
+      - "--disable_metrics=percpu,sched,tcp,udp,disk,diskIO,hugetlb,referenced_memory,cpu_topology,resctrl,cpuLoad"
     env_file:
       - ./env
     # devices:
