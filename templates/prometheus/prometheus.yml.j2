@@ -532,3 +532,14 @@ scrape_configs:
       source_labels:
       - __name__
       target_label: cluster
+    - source_labels: [exported_job]
+      action: replace
+      replacement: ''
+      target_label: exported_job
+    - source_labels: [exported_instance]
+      action: replace
+      target_label: instance
+    - source_labels: [exported_instance]
+      action: replace
+      replacement: ''
+      target_label: exported_instance
