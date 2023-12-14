@@ -512,6 +512,8 @@ services:
       - "traefik.http.routers.pushgateway.service=pushgateway"
       - "traefik.http.services.pushgateway.loadbalancer.server.port=9091"
       - "traefik.port=9091"
+    command:
+    - '--log.level={{ pushgateway_log_level }}'
     # environment:
     #- TZ=UTC
     # SEE: https://stackoverflow.com/questions/31324981/how-to-access-host-port-from-docker-container/43541732#43541732
