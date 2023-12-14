@@ -514,12 +514,12 @@ services:
       - "traefik.http.services.pushgateway.loadbalancer.server.port=9091"
       - "traefik.port=9091"
     volumes:
-      - ./alertmanager/:/etc/alertmanager/
       - pushgateway-data:/data
     command:
-    - '--log.level={{ pushgateway_log_level }}'
-    # - '--web.listen-address='
-    - '--web.enable-admin-api'
+      - '--log.level={{ pushgateway_log_level }}'
+      - '--web.listen-address=0.0.0.0:9091'
+      # - '--web.listen-address=0.0.0.0:9091'
+      - '--web.enable-admin-api'
     # environment:
     #- TZ=UTC
     # SEE: https://stackoverflow.com/questions/31324981/how-to-access-host-port-from-docker-container/43541732#43541732
