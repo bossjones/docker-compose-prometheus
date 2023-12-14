@@ -501,7 +501,7 @@ scrape_configs:
     scrape_interval: 30s
     static_configs:
       - targets:
-        - http://192.168.2.6:9100
+        - '192.168.2.6:9100'
     metrics_path: /metrics
     relabel_configs:
     - regex: '(.+)'
