@@ -514,4 +514,4 @@ scrape_configs:
       replacement: k3d
       source_labels:
       - __name__
-      target_label: cluster.
+      target_label: cluster
