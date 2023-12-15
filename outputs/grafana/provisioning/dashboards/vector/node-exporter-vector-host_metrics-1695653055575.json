@@ -767,7 +767,7 @@
             "uid": "Prometheus"
           },
           "editorMode": "code",
-          "expr": "node_uptime{host=\"$host\",job=\"$job\"}",
+          "expr": "node_time_seconds{host=\"$host\",job=\"$job\"}",
           "intervalFactor": 1,
           "range": true,
           "refId": "A",
@@ -5887,7 +5887,7 @@
           "type": "prometheus",
           "uid": "Prometheus"
         },
-        "definition": "label_values(node_uptime, job)",
+        "definition": "label_values(node_time_seconds, job)",
         "hide": 0,
         "includeAll": false,
         "label": "Job",
@@ -5895,7 +5895,7 @@
         "name": "job",
         "options": [],
         "query": {
-          "query": "label_values(node_uptime, job)",
+          "query": "label_values(node_time_seconds, job)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -5913,7 +5913,7 @@
           "type": "prometheus",
           "uid": "Prometheus"
         },
-        "definition": "label_values(node_uptime{job=\"$job\"},host)",
+        "definition": "label_values(node_time_seconds{job=\"$job\"},host)",
         "hide": 0,
         "includeAll": false,
         "label": "Host:",
@@ -5921,7 +5921,7 @@
         "name": "host",
         "options": [],
         "query": {
-          "query": "label_values(node_uptime{job=\"$job\"},host)",
+          "query": "label_values(node_time_seconds{job=\"$job\"},host)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
