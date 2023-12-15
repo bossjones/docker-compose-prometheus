@@ -543,3 +543,21 @@ scrape_configs:
     #   action: replace
     #   replacement: ''
     #   target_label: exported_instance
+
+  - job_name: 'pve-vector'
+    static_configs:
+      - targets:
+        - '{{ pve_ip }}:9598'  # Proxmox VE node.
+    metrics_path: /metrics
+    relabel_configs:
+    - regex: '(.+)'
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    metric_relabel_configs:
+    - regex: (.+)
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
