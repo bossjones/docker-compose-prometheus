@@ -41,7 +41,7 @@ groups:
   # Alert for any instance that is unreachable for >2 minutes.
   - alert: service_down
     expr: up == 0
-    for: 2m
+    for: 10m
     labels:
       severity: page
     annotations:
@@ -50,7 +50,7 @@ groups:
 
   - alert: high_load
     expr: node_load1 > 0.5
-    for: 2m
+    for: 10m
     labels:
       severity: page
     annotations:
@@ -819,7 +819,7 @@ groups:
 
     - alert: HostUnusualDiskReadLatency
       expr: '(rate(node_disk_read_time_seconds_total[1m]) / rate(node_disk_reads_completed_total[1m]) > 0.1 and rate(node_disk_reads_completed_total[1m]) > 0) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
-      for: 2m
+      for: 10m
       labels:
         severity: warning
       annotations:
@@ -828,7 +828,7 @@ groups:
 
     - alert: HostUnusualDiskWriteLatency
       expr: '(rate(node_disk_write_time_seconds_total[1m]) / rate(node_disk_writes_completed_total[1m]) > 0.1 and rate(node_disk_writes_completed_total[1m]) > 0) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
-      for: 2m
+      for: 10m
       labels:
         severity: warning
       annotations:
@@ -864,7 +864,7 @@ groups:
 
     - alert: HostCpuHighIowait
       expr: '(avg by (instance) (rate(node_cpu_seconds_total{mode="iowait"}[5m])) * 100 > 10) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
-      for: 0m
+      for: 10m
       labels:
         severity: warning
       annotations:
@@ -909,7 +909,7 @@ groups:
 
     - alert: HostPhysicalComponentTooHot
       expr: '((node_hwmon_temp_celsius * ignoring(label) group_left(instance, job, node, sensor) node_hwmon_sensor_label{label!="tctl"} > 75)) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
-      for: 5m
+      for: 15m
       labels:
         severity: warning
       annotations:
