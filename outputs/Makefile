@@ -56,3 +56,21 @@ start:
 lint:
   promtool check rules prometheus/alerts.yml
   promtool check rules prometheus/rules.yml
+
+logs-loki-backend:
+  docker-compose --env-file env logs -f --tail=50 loki-backend
+
+logs-loki-write:
+  docker-compose --env-file env logs -f --tail=50 loki-write
+
+logs-loki-read:
+  docker-compose --env-file env logs -f --tail=50 loki-read
+
+logs-prometheus:
+  docker-compose --env-file env logs -f --tail=50 prometheus
+
+logs-grafana:
+  docker-compose --env-file env logs -f --tail=50 grafana
+
+logs:
+  docker-compose --env-file env logs -f --tail=50
