@@ -73,4 +73,4 @@ logs-grafana:
 	docker-compose --env-file env logs -f --tail=50 grafana
 
 logs:
-	docker-compose --env-file env logs -f --tail=50
+	docker-compose --env-file env logs -f --tail=50 | grep -v "syslog-ng" | grep -v "pve-exporter"
