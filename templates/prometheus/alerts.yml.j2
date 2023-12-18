@@ -1,0 +1,1794 @@
+{% raw %}
+groups:
+# SOURCE: https://learn.netdata.cloud/docs/exporting/prometheus
+- name: nodes
+  rules:
+    - alert: node_high_cpu_usage_70
+      expr: sum(sum_over_time(netdata_system_cpu_percentage_average{dimension=~"(user|system|softirq|irq|guest)"}[10m])) by (job) / sum(count_over_time(netdata_system_cpu_percentage_average{dimension="idle"}[10m])) by (job) > 70
+      for: 1m
+      annotations:
+        description: '{{ $labels.job }} on ''{{ $labels.job }}'' CPU usage is at {{ humanize $value }}%.'
+        summary: CPU alert for container node '{{ $labels.job }}'
+
+    - alert: node_high_memory_usage_70
+      expr: 100 / sum(netdata_system_ram_MB_average) by (job)
+        * sum(netdata_system_ram_MB_average{dimension=~"free|cached"}) by (job) < 30
+      for: 1m
+      annotations:
+        description: '{{ $labels.job }} memory usage is {{ humanize $value}}%.'
+        summary: Memory alert for container node '{{ $labels.job }}'
+
+    - alert: node_low_root_filesystem_space_20
+      expr: 100 / sum(netdata_disk_space_GB_average{family="/"}) by (job)
+        * sum(netdata_disk_space_GB_average{family="/",dimension=~"avail|cached"}) by (job) < 20
+      for: 1m
+      annotations:
+        description: '{{ $labels.job }} root filesystem space is {{ humanize $value}}%.'
+        summary: Root filesystem alert for container node '{{ $labels.job }}'
+
+    - alert: node_root_filesystem_fill_rate_6h
+      expr: predict_linear(netdata_disk_space_GB_average{family="/",dimension=~"avail|cached"}[1h], 6 * 3600) < 0
+      for: 1h
+      labels:
+        severity: critical
+      annotations:
+        description: Container node {{ $labels.job }} root filesystem is going to fill up in 6h.
+        summary: Disk fill alert for Swarm node '{{ $labels.job }}'
+
+- name: example
+  rules:
+
+  # Alert for any instance that is unreachable for >2 minutes.
+  - alert: service_down
+    expr: up == 0
+    for: 10m
+    labels:
+      severity: page
+    annotations:
+      summary: "Instance {{ $labels.instance }} down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 2 minutes."
+
+  - alert: high_load
+    expr: node_load1 > 0.5
+    for: 10m
+    labels:
+      severity: page
+    annotations:
+      summary: "Instance {{ $labels.instance }} under high load"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} is under high load."
+
+- name: loki_alerts
+  rules:
+  - alert: LokiRequestErrors
+    annotations:
+      message: |
+        {{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}% errors.
+    expr: |
+      100 * sum(rate(loki_request_duration_seconds_count{status_code=~"5.."}[2m])) by (service, job, route)
+        /
+      sum(rate(loki_request_duration_seconds_count[2m])) by (service, job, route)
+        > 10
+    for: 15m
+    labels:
+      severity: critical
+  - alert: LokiRequestPanics
+    annotations:
+      message: |
+        {{ $labels.job }} is experiencing {{ printf "%.2f" $value }}% increase of panics.
+    expr: |
+      sum(increase(loki_panic_total[10m])) by (service, job) > 0
+    labels:
+      severity: critical
+  - alert: LokiRequestLatency
+    annotations:
+      message: |
+        {{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}s 99th percentile latency.
+    expr: |
+      cluster_service_job_route:loki_request_duration_seconds:99quantile{route!~"(?i).*tail.*|/schedulerpb.SchedulerForQuerier/QuerierLoop"} > 1
+    for: 15m
+    labels:
+      severity: critical
+  - alert: LokiTooManyCompactorsRunning
+    annotations:
+      message: |
+        {{ $labels.cluster }} {{ $labels.service }} has had {{ printf "%.0f" $value }} compactors running for more than 5m. Only one compactor should run at a time.
+    expr: |
+      sum(loki_boltdb_shipper_compactor_running) by (service, cluster) > 1
+    for: 5m
+    labels:
+      severity: warning
+
+
+# https://awesome-prometheus-alerts.grep.to/rules.html#prometheus-self-monitoring-1
+# TODO: inhibit during startup?
+# SOURCE: https://github.com/couchbaselabs/observability/blob/81da00be72f739f31d55136e153b645f192d6ba0/microlith/prometheus/alerting/couchbase/prometheus-self-monitoring.yaml
+- name: Prometheus-Monitoring
+  rules:
+# Prometheus job has disappeared:
+      - alert: PrometheusJobMissing
+        expr: absent(up{job="prometheus"})
+        for: 0m
+        labels:
+            severity: warning
+        annotations:
+            summary: Prometheus job missing (instance {{ $labels.instance }})
+            description: "A Prometheus job has disappeared\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+# A Prometheus target has disappeared. An exporter might be crashed.
+      - alert: PrometheusTargetMissing
+        expr: up == 0
+        for: 0m
+        labels:
+            severity: critical
+        annotations:
+            summary: Prometheus target missing (instance {{ $labels.instance }})
+            description: "A Prometheus target has disappeared. An exporter might be crashed.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+# A Prometheus job does not have living target anymore.
+      - alert: PrometheusAllTargetsMissing
+        expr: count by (job) (up) == 0
+        for: 0m
+        labels:
+            severity: critical
+        annotations:
+            summary: Prometheus all targets missing (instance {{ $labels.instance }})
+            description: "A Prometheus job does not have living target anymore.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+# Prometheus configuration reload error
+      - alert: PrometheusConfigurationReloadFailure
+        expr: prometheus_config_last_reload_successful != 1
+        for: 0m
+        labels:
+            severity: warning
+        annotations:
+            summary: Prometheus configuration reload failure (instance {{ $labels.instance }})
+            description: "Prometheus configuration reload error\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+# Prometheus has restarted more than twice in the last 15 minutes. It might be crashlooping.
+      - alert: PrometheusTooManyRestarts
+        expr: changes(process_start_time_seconds{job=~"prometheus|pushgateway|alertmanager"}[15m]) > 2
+        for: 0m
+        labels:
+            severity: warning
+        annotations:
+            summary: Prometheus too many restarts (instance {{ $labels.instance }})
+            description: "Prometheus has restarted more than twice in the last 15 minutes. It might be crashlooping.\n  VALUE = {{ $value }}\n  LABELS\
+                \ = {{ $labels }}"
+
+# AlertManager configuration reload error
+      - alert: PrometheusAlertmanagerConfigurationReloadFailure
+        expr: alertmanager_config_last_reload_successful != 1
+        for: 0m
+        labels:
+            severity: warning
+        annotations:
+            summary: Prometheus AlertManager configuration reload failure (instance {{ $labels.instance }})
+            description: "AlertManager configuration reload error\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+# Configurations of AlertManager cluster instances are out of sync
+      - alert: PrometheusAlertmanagerConfigNotSynced
+        expr: count(count_values("config_hash", alertmanager_config_hash)) > 1
+        for: 0m
+        labels:
+            severity: warning
+        annotations:
+            summary: Prometheus AlertManager config not synced (instance {{ $labels.instance }})
+            description: "Configurations of AlertManager cluster instances are out of sync\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+# Prometheus DeadManSwitch is an always-firing alert. It's used as an end-to-end test of Prometheus through the Alertmanager.
+      - alert: PrometheusAlertmanagerE2eDeadManSwitch
+        expr: vector(1)
+        for: 0m
+        labels:
+            severity: critical
+        annotations:
+            summary: Prometheus AlertManager E2E dead man switch (instance {{ $labels.instance }})
+            description: "Prometheus DeadManSwitch is an always-firing alert. It's used as an end-to-end test of Prometheus through the Alertmanager.\n\
+                \  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+# Prometheus cannot connect the alertmanager
+      - alert: PrometheusNotConnectedToAlertmanager
+        expr: prometheus_notifications_alertmanagers_discovered < 1
+        for: 0m
+        labels:
+            severity: critical
+        annotations:
+            summary: Prometheus not connected to alertmanager (instance {{ $labels.instance }})
+            description: "Prometheus cannot connect the alertmanager\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+# Prometheus encountered {{ $value }} rule evaluation failures, leading to potentially ignored alerts.
+      - alert: PrometheusRuleEvaluationFailures
+        expr: increase(prometheus_rule_evaluation_failures_total[3m]) > 0
+        for: 0m
+        labels:
+            severity: critical
+        annotations:
+            summary: Prometheus rule evaluation failures (instance {{ $labels.instance }})
+            description: "Prometheus encountered {{ $value }} rule evaluation failures, leading to potentially ignored alerts.\n  VALUE = {{ $value\
+                \ }}\n  LABELS = {{ $labels }}"
+
+# Prometheus encountered {{ $value }} template text expansion failures
+      - alert: PrometheusTemplateTextExpansionFailures
+        expr: increase(prometheus_template_text_expansion_failures_total[3m]) > 0
+        for: 0m
+        labels:
+            severity: critical
+        annotations:
+            summary: Prometheus template text expansion failures (instance {{ $labels.instance }})
+            description: "Prometheus encountered {{ $value }} template text expansion failures\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+# Prometheus rule evaluation took more time than the scheduled interval. It indicates a slower storage backend access or too complex query.
+      - alert: PrometheusRuleEvaluationSlow
+        expr: prometheus_rule_group_last_duration_seconds > prometheus_rule_group_interval_seconds
+        for: 5m
+        labels:
+            severity: warning
+        annotations:
+            summary: Prometheus rule evaluation slow (instance {{ $labels.instance }})
+            description: "Prometheus rule evaluation took more time than the scheduled interval. It indicates a slower storage backend access or too\
+                \ complex query.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+# The Prometheus notification queue has not been empty for 10 minutes
+      - alert: PrometheusNotificationsBacklog
+        expr: min_over_time(prometheus_notifications_queue_length[10m]) > 0
+        for: 0m
+        labels:
+            severity: warning
+        annotations:
+            summary: Prometheus notifications backlog (instance {{ $labels.instance }})
+            description: "The Prometheus notification queue has not been empty for 10 minutes\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+# Alertmanager is failing sending notifications
+      - alert: PrometheusAlertmanagerNotificationFailing
+        expr: rate(alertmanager_notifications_failed_total[1m]) > 0
+        for: 0m
+        labels:
+            severity: critical
+        annotations:
+            summary: Prometheus AlertManager notification failing (instance {{ $labels.instance }})
+            description: "Alertmanager is failing sending notifications\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+# Prometheus has no target in service discovery
+      - alert: PrometheusTargetEmpty
+        # Exclude couchbase-server (add cluster form uses couchbase-server-managed-N instead, so this is often empty)
+        expr: prometheus_sd_discovered_targets{config!="couchbase-server"} == 0
+        for: 0m
+        labels:
+            severity: critical
+        annotations:
+            summary: Prometheus target empty (instance {{ $labels.instance }})
+            description: "Prometheus has no target in service discovery\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+# Prometheus is scraping exporters slowly
+      - alert: PrometheusTargetScrapingSlow
+        expr: prometheus_target_interval_length_seconds{quantile="0.9"} > 60
+        for: 5m
+        labels:
+            severity: warning
+        annotations:
+            summary: Prometheus target scraping slow (instance {{ $labels.instance }})
+            description: "Prometheus is scraping exporters slowly\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+# Prometheus has many scrapes that exceed the sample limit
+      - alert: PrometheusLargeScrape
+        expr: increase(prometheus_target_scrapes_exceeded_sample_limit_total[10m]) > 10
+        for: 5m
+        labels:
+            severity: warning
+        annotations:
+            summary: Prometheus large scrape (instance {{ $labels.instance }})
+            description: "Prometheus has many scrapes that exceed the sample limit\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+# Prometheus has many samples rejected due to duplicate timestamps but different values
+      - alert: PrometheusTargetScrapeDuplicate
+        expr: increase(prometheus_target_scrapes_sample_duplicate_timestamp_total[5m]) > 0
+        for: 0m
+        labels:
+            severity: warning
+        annotations:
+            summary: Prometheus target scrape duplicate (instance {{ $labels.instance }})
+            description: "Prometheus has many samples rejected due to duplicate timestamps but different values\n  VALUE = {{ $value }}\n  LABELS =\
+                \ {{ $labels }}"
+
+# Prometheus encountered {{ $value }} checkpoint creation failures
+      - alert: PrometheusTsdbCheckpointCreationFailures
+        expr: increase(prometheus_tsdb_checkpoint_creations_failed_total[1m]) > 0
+        for: 0m
+        labels:
+            severity: critical
+        annotations:
+            summary: Prometheus TSDB checkpoint creation failures (instance {{ $labels.instance }})
+            description: "Prometheus encountered {{ $value }} checkpoint creation failures\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+# Prometheus encountered {{ $value }} checkpoint deletion failures
+      - alert: PrometheusTsdbCheckpointDeletionFailures
+        expr: increase(prometheus_tsdb_checkpoint_deletions_failed_total[1m]) > 0
+        for: 0m
+        labels:
+            severity: critical
+        annotations:
+            summary: Prometheus TSDB checkpoint deletion failures (instance {{ $labels.instance }})
+            description: "Prometheus encountered {{ $value }} checkpoint deletion failures\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+# Prometheus encountered {{ $value }} TSDB compactions failures
+      - alert: PrometheusTsdbCompactionsFailed
+        expr: increase(prometheus_tsdb_compactions_failed_total[1m]) > 0
+        for: 0m
+        labels:
+            severity: critical
+        annotations:
+            summary: Prometheus TSDB compactions failed (instance {{ $labels.instance }})
+            description: "Prometheus encountered {{ $value }} TSDB compactions failures\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+# Prometheus encountered {{ $value }} TSDB head truncation failures
+      - alert: PrometheusTsdbHeadTruncationsFailed
+        expr: increase(prometheus_tsdb_head_truncations_failed_total[1m]) > 0
+        for: 0m
+        labels:
+            severity: critical
+        annotations:
+            summary: Prometheus TSDB head truncations failed (instance {{ $labels.instance }})
+            description: "Prometheus encountered {{ $value }} TSDB head truncation failures\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+# Prometheus encountered {{ $value }} TSDB reload failures
+      - alert: PrometheusTsdbReloadFailures
+        expr: increase(prometheus_tsdb_reloads_failures_total[1m]) > 0
+        for: 0m
+        labels:
+            severity: critical
+        annotations:
+            summary: Prometheus TSDB reload failures (instance {{ $labels.instance }})
+            description: "Prometheus encountered {{ $value }} TSDB reload failures\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+# Prometheus encountered {{ $value }} TSDB WAL corruptions
+      - alert: PrometheusTsdbWalCorruptions
+        expr: increase(prometheus_tsdb_wal_corruptions_total[1m]) > 0
+        for: 0m
+        labels:
+            severity: critical
+        annotations:
+            summary: Prometheus TSDB WAL corruptions (instance {{ $labels.instance }})
+            description: "Prometheus encountered {{ $value }} TSDB WAL corruptions\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+# Prometheus encountered {{ $value }} TSDB WAL truncation failures
+      - alert: PrometheusTsdbWalTruncationsFailed
+        expr: increase(prometheus_tsdb_wal_truncations_failed_total[1m]) > 0
+        for: 0m
+        labels:
+            severity: critical
+        annotations:
+            summary: Prometheus TSDB WAL truncations failed (instance {{ $labels.instance }})
+            description: "Prometheus encountered {{ $value }} TSDB WAL truncation failures\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+- name: LokiEmbeddedExporter
+
+  rules:
+
+    - alert: LokiProcessTooManyRestarts
+      expr: 'changes(process_start_time_seconds{job=~"loki"}[15m]) > 2'
+      for: 0m
+      labels:
+        severity: warning
+      annotations:
+        summary: Loki process too many restarts (instance {{ $labels.instance }})
+        description: "A loki process had too many restarts (target {{ $labels.instance }})\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: LokiRequestErrors
+      expr: '100 * sum(rate(loki_request_duration_seconds_count{status_code=~"5.."}[1m])) by (service, job, route) / sum(rate(loki_request_duration_seconds_count[1m])) by (service, job, route) > 10'
+      for: 15m
+      labels:
+        severity: critical
+      annotations:
+        summary: Loki request errors (instance {{ $labels.instance }})
+        description: "The {{ $labels.job }} and {{ $labels.route }} are experiencing errors\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: LokiRequestPanic
+      expr: 'sum(increase(loki_panic_total[10m])) by (service, job) > 0'
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: Loki request panic (instance {{ $labels.instance }})
+        description: "The {{ $labels.job }} is experiencing {{ printf \"%.2f\" $value }}% increase of panics\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: LokiRequestLatency
+      expr: '(histogram_quantile(0.99, sum(rate(loki_request_duration_seconds_bucket{route!~"(?i).*tail.*"}[5m])) by (le)))  > 1'
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: Loki request latency (instance {{ $labels.instance }})
+        description: "The {{ $labels.job }} {{ $labels.route }} is experiencing {{ printf \"%.2f\" $value }}s 99th percentile latency\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+- name: PromtailEmbeddedExporter
+
+  rules:
+
+    - alert: PromtailRequestErrors
+      expr: '100 * sum(rate(promtail_request_duration_seconds_count{status_code=~"5..|failed"}[1m])) by (service, job, route, instance) / sum(rate(promtail_request_duration_seconds_count[1m])) by (service, job, route, instance) > 10'
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: Promtail request errors (instance {{ $labels.instance }})
+        description: "The {{ $labels.job }} {{ $labels.route }} is experiencing {{ printf \"%.2f\" $value }}% errors.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: PromtailRequestLatency
+      expr: 'histogram_quantile(0.99, sum(rate(promtail_request_duration_seconds_bucket[5m])) by (le)) > 1'
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: Promtail request latency (instance {{ $labels.instance }})
+        description: "The {{ $labels.job }} {{ $labels.route }} is experiencing {{ printf \"%.2f\" $value }}s 99th percentile latency.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+- name: MinioEmbeddedExporter
+
+  rules:
+
+    - alert: MinioClusterDiskOffline
+      expr: 'minio_cluster_disk_offline_total > 0'
+      for: 0m
+      labels:
+        severity: critical
+      annotations:
+        summary: Minio cluster disk offline (instance {{ $labels.instance }})
+        description: "Minio cluster disk is offline\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: MinioNodeDiskOffline
+      expr: 'minio_cluster_nodes_offline_total > 0'
+      for: 0m
+      labels:
+        severity: critical
+      annotations:
+        summary: Minio node disk offline (instance {{ $labels.instance }})
+        description: "Minio cluster node disk is offline\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: MinioDiskSpaceUsage
+      expr: 'disk_storage_available / disk_storage_total * 100 < 10'
+      for: 0m
+      labels:
+        severity: warning
+      annotations:
+        summary: Minio disk space usage (instance {{ $labels.instance }})
+        description: "Minio available free space is low (< 10%)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+- name: TraefikEmbeddedExporterV2
+  rules:
+    - alert: TraefikServiceDown
+      expr: 'count(traefik_service_server_up) by (service) == 0'
+      for: 0m
+      labels:
+        severity: critical
+      annotations:
+        summary: Traefik service down (instance {{ $labels.instance }})
+        description: "All Traefik services are down\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: TraefikHighHttp4xxErrorRateService
+      expr: 'sum(rate(traefik_service_requests_total{code=~"4.*"}[3m])) by (service) / sum(rate(traefik_service_requests_total[3m])) by (service) * 100 > 5'
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: Traefik high HTTP 4xx error rate service (instance {{ $labels.instance }})
+        description: "Traefik service 4xx error rate is above 5%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: TraefikHighHttp5xxErrorRateService
+      expr: 'sum(rate(traefik_service_requests_total{code=~"5.*"}[3m])) by (service) / sum(rate(traefik_service_requests_total[3m])) by (service) * 100 > 5'
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: Traefik high HTTP 5xx error rate service (instance {{ $labels.instance }})
+        description: "Traefik service 5xx error rate is above 5%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+- name: NetdataEmbeddedExporter
+
+  rules:
+
+    - alert: NetdataHighCpuUsage
+      expr: 'rate(netdata_cpu_cpu_percentage_average{dimension="idle"}[1m]) > 80'
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: Netdata high cpu usage (instance {{ $labels.instance }})
+        description: "Netdata high CPU usage (> 80%)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostCpuStealNoisyNeighbor
+      expr: 'rate(netdata_cpu_cpu_percentage_average{dimension="steal"}[1m]) > 10'
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host CPU steal noisy neighbor (instance {{ $labels.instance }})
+        description: "CPU steal is > 10%. A noisy neighbor is killing VM performances or a spot instance may be out of credit.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: NetdataHighMemoryUsage
+      expr: '100 / netdata_system_ram_MB_average * netdata_system_ram_MB_average{dimension=~"free|cached"} < 20'
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: Netdata high memory usage (instance {{ $labels.instance }})
+        description: "Netdata high memory usage (> 80%)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: NetdataLowDiskSpace
+      expr: '100 / netdata_disk_space_GB_average * netdata_disk_space_GB_average{dimension=~"avail|cached"} < 20'
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: Netdata low disk space (instance {{ $labels.instance }})
+        description: "Netdata low disk space (> 80%)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: NetdataPredictedDiskFull
+      expr: 'predict_linear(netdata_disk_space_GB_average{dimension=~"avail|cached"}[3h], 24 * 3600) < 0'
+      for: 0m
+      labels:
+        severity: warning
+      annotations:
+        summary: Netdata predicted disk full (instance {{ $labels.instance }})
+        description: "Netdata predicted disk full in 24 hours\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: NetdataMdMismatchCntUnsynchronizedBlocks
+      expr: 'netdata_md_mismatch_cnt_unsynchronized_blocks_average > 1024'
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Netdata MD mismatch cnt unsynchronized blocks (instance {{ $labels.instance }})
+        description: "RAID Array have unsynchronized blocks\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: NetdataDiskReallocatedSectors
+      expr: 'increase(netdata_smartd_log_reallocated_sectors_count_sectors_average[1m]) > 0'
+      for: 0m
+      labels:
+        severity: info
+      annotations:
+        summary: Netdata disk reallocated sectors (instance {{ $labels.instance }})
+        description: "Reallocated sectors on disk\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: NetdataDiskCurrentPendingSector
+      expr: 'netdata_smartd_log_current_pending_sector_count_sectors_average > 0'
+      for: 0m
+      labels:
+        severity: warning
+      annotations:
+        summary: Netdata disk current pending sector (instance {{ $labels.instance }})
+        description: "Disk current pending sector\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: NetdataReportedUncorrectableDiskSectors
+      expr: 'increase(netdata_smartd_log_offline_uncorrectable_sector_count_sectors_average[2m]) > 0'
+      for: 0m
+      labels:
+        severity: warning
+      annotations:
+        summary: Netdata reported uncorrectable disk sectors (instance {{ $labels.instance }})
+        description: "Reported uncorrectable disk sectors\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+- name: GoogleCadvisor
+
+  rules:
+
+    - alert: ContainerKilled
+      expr: 'time() - container_last_seen > 60'
+      for: 0m
+      labels:
+        severity: warning
+      annotations:
+        summary: Container killed (instance {{ $labels.instance }})
+        description: "A container has disappeared\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: ContainerAbsent
+      expr: 'absent(container_last_seen)'
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: Container absent (instance {{ $labels.instance }})
+        description: "A container is absent for 5 min\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: ContainerHighCpuUtilization
+      expr: '(sum(rate(container_cpu_usage_seconds_total{name!=""}[3m])) BY (instance, name) * 100) > 80'
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Container High CPU utilization (instance {{ $labels.instance }})
+        description: "Container CPU utilization is above 80%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: ContainerHighMemoryUsage
+      expr: '(sum(container_memory_working_set_bytes{name!=""}) BY (instance, name) / sum(container_spec_memory_limit_bytes > 0) BY (instance, name) * 100) > 80'
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Container High Memory usage (instance {{ $labels.instance }})
+        description: "Container Memory usage is above 80%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    # - alert: ContainerVolumeUsage
+    #   expr: '(1 - (sum(container_fs_inodes_free{name!=""}) BY (instance, name) / sum(container_fs_inodes_total) BY (instance, name))) * 100 > 80'
+    #   for: 2m
+    #   labels:
+    #     severity: warning
+    #   annotations:
+    #     summary: Container Volume usage (instance {{ $labels.instance }})
+    #     description: "Container Volume usage is above 80%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: ContainerHighThrottleRate
+      expr: 'rate(container_cpu_cfs_throttled_seconds_total[3m]) > 1'
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Container high throttle rate (instance {{ $labels.instance }})
+        description: "Container is being throttled\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: ContainerLowCpuUtilization
+      expr: '(sum(rate(container_cpu_usage_seconds_total{name!=""}[3m])) BY (instance, name) * 100) < 20'
+      for: 7d
+      labels:
+        severity: info
+      annotations:
+        summary: Container Low CPU utilization (instance {{ $labels.instance }})
+        description: "Container CPU utilization is under 20% for 1 week. Consider reducing the allocated CPU.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: ContainerLowMemoryUsage
+      expr: '(sum(container_memory_working_set_bytes{name!=""}) BY (instance, name) / sum(container_spec_memory_limit_bytes > 0) BY (instance, name) * 100) < 20'
+      for: 7d
+      labels:
+        severity: info
+      annotations:
+        summary: Container Low Memory usage (instance {{ $labels.instance }})
+        description: "Container Memory usage is under 20% for 1 week. Consider reducing the allocated memory.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+- name: NodeExporter
+  rules:
+
+    - alert: HostOutOfMemory
+      expr: '(node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 10) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host out of memory (instance {{ $labels.instance }})
+        description: "Node memory is filling up (< 10% left)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostMemoryUnderMemoryPressure
+      expr: '(rate(node_vmstat_pgmajfault[1m]) > 1000) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host memory under memory pressure (instance {{ $labels.instance }})
+        description: "The node is under heavy memory pressure. High rate of major page faults\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostMemoryIsUnderutilized
+      expr: '(100 - (rate(node_memory_MemAvailable_bytes[30m]) / node_memory_MemTotal_bytes * 100) < 20) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 1w
+      labels:
+        severity: info
+      annotations:
+        summary: Host Memory is underutilized (instance {{ $labels.instance }})
+        description: "Node memory is < 20% for 1 week. Consider reducing memory space. (instance {{ $labels.instance }})\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostUnusualNetworkThroughputIn
+      expr: '(sum by (instance) (rate(node_network_receive_bytes_total[2m])) / 1024 / 1024 > 100) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host unusual network throughput in (instance {{ $labels.instance }})
+        description: "Host network interfaces are probably receiving too much data (> 100 MB/s)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostUnusualNetworkThroughputOut
+      expr: '(sum by (instance) (rate(node_network_transmit_bytes_total[2m])) / 1024 / 1024 > 100) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host unusual network throughput out (instance {{ $labels.instance }})
+        description: "Host network interfaces are probably sending too much data (> 100 MB/s)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostUnusualDiskReadRate
+      expr: '(sum by (instance) (rate(node_disk_read_bytes_total[2m])) / 1024 / 1024 > 50) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host unusual disk read rate (instance {{ $labels.instance }})
+        description: "Disk is probably reading too much data (> 50 MB/s)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostUnusualDiskWriteRate
+      expr: '(sum by (instance) (rate(node_disk_written_bytes_total[2m])) / 1024 / 1024 > 50) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host unusual disk write rate (instance {{ $labels.instance }})
+        description: "Disk is probably writing too much data (> 50 MB/s)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostOutOfDiskSpace
+      expr: '((node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes < 10 and ON (instance, device, mountpoint) node_filesystem_readonly == 0) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host out of disk space (instance {{ $labels.instance }})
+        description: "Disk is almost full (< 10% left)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostDiskWillFillIn24Hours
+      expr: '((node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes < 10 and ON (instance, device, mountpoint) predict_linear(node_filesystem_avail_bytes{fstype!~"tmpfs"}[1h], 24 * 3600) < 0 and ON (instance, device, mountpoint) node_filesystem_readonly == 0) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host disk will fill in 24 hours (instance {{ $labels.instance }})
+        description: "Filesystem is predicted to run out of space within the next 24 hours at current write rate\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostOutOfInodes
+      expr: '(node_filesystem_files_free / node_filesystem_files * 100 < 10 and ON (instance, device, mountpoint) node_filesystem_readonly == 0) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host out of inodes (instance {{ $labels.instance }})
+        description: "Disk is almost running out of available inodes (< 10% left)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostInodesWillFillIn24Hours
+      expr: '(node_filesystem_files_free / node_filesystem_files * 100 < 10 and predict_linear(node_filesystem_files_free[1h], 24 * 3600) < 0 and ON (instance, device, mountpoint) node_filesystem_readonly == 0) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host inodes will fill in 24 hours (instance {{ $labels.instance }})
+        description: "Filesystem is predicted to run out of inodes within the next 24 hours at current write rate\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostUnusualDiskReadLatency
+      expr: '(rate(node_disk_read_time_seconds_total[1m]) / rate(node_disk_reads_completed_total[1m]) > 0.1 and rate(node_disk_reads_completed_total[1m]) > 0) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host unusual disk read latency (instance {{ $labels.instance }})
+        description: "Disk latency is growing (read operations > 100ms)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostUnusualDiskWriteLatency
+      expr: '(rate(node_disk_write_time_seconds_total[1m]) / rate(node_disk_writes_completed_total[1m]) > 0.1 and rate(node_disk_writes_completed_total[1m]) > 0) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host unusual disk write latency (instance {{ $labels.instance }})
+        description: "Disk latency is growing (write operations > 100ms)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostHighCpuLoad
+      expr: '(sum by (instance) (avg by (mode, instance) (rate(node_cpu_seconds_total{mode!="idle"}[2m]))) > 0.8) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host high CPU load (instance {{ $labels.instance }})
+        description: "CPU load is > 80%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostCpuIsUnderutilized
+      expr: '(100 - (rate(node_cpu_seconds_total{mode="idle"}[30m]) * 100) < 20) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 1w
+      labels:
+        severity: info
+      annotations:
+        summary: Host CPU is underutilized (instance {{ $labels.instance }})
+        description: "CPU load is < 20% for 1 week. Consider reducing the number of CPUs.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostCpuStealNoisyNeighbor
+      expr: '(avg by(instance) (rate(node_cpu_seconds_total{mode="steal"}[5m])) * 100 > 10) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 0m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host CPU steal noisy neighbor (instance {{ $labels.instance }})
+        description: "CPU steal is > 10%. A noisy neighbor is killing VM performances or a spot instance may be out of credit.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostCpuHighIowait
+      expr: '(avg by (instance) (rate(node_cpu_seconds_total{mode="iowait"}[5m])) * 100 > 10) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host CPU high iowait (instance {{ $labels.instance }})
+        description: "CPU iowait > 10%. A high iowait means that you are disk or network bound.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostUnusualDiskIo
+      expr: '(rate(node_disk_io_time_seconds_total[1m]) > 0.5) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host unusual disk IO (instance {{ $labels.instance }})
+        description: "Time spent in IO is too high on {{ $labels.instance }}. Check storage for issues.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostContextSwitching
+      expr: '((rate(node_context_switches_total[5m])) / (count without(cpu, mode) (node_cpu_seconds_total{mode="idle"})) > 10000) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 0m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host context switching (instance {{ $labels.instance }})
+        description: "Context switching is growing on the node (> 10000 / s)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostSwapIsFillingUp
+      expr: '((1 - (node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes)) * 100 > 80) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host swap is filling up (instance {{ $labels.instance }})
+        description: "Swap is filling up (>80%)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostSystemdServiceCrashed
+      expr: '(node_systemd_unit_state{state="failed"} == 1) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 0m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host systemd service crashed (instance {{ $labels.instance }})
+        description: "systemd service crashed\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostPhysicalComponentTooHot
+      expr: '((node_hwmon_temp_celsius * ignoring(label) group_left(instance, job, node, sensor) node_hwmon_sensor_label{label!="tctl"} > 75)) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 25m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host physical component too hot (instance {{ $labels.instance }})
+        description: "Physical hardware component too hot\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostNodeOvertemperatureAlarm
+      expr: '(node_hwmon_temp_crit_alarm_celsius == 1) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 0m
+      labels:
+        severity: critical
+      annotations:
+        summary: Host node overtemperature alarm (instance {{ $labels.instance }})
+        description: "Physical node temperature alarm triggered\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostRaidArrayGotInactive
+      expr: '(node_md_state{state="inactive"} > 0) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 0m
+      labels:
+        severity: critical
+      annotations:
+        summary: Host RAID array got inactive (instance {{ $labels.instance }})
+        description: "RAID array {{ $labels.device }} is in a degraded state due to one or more disk failures. The number of spare drives is insufficient to fix the issue automatically.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostRaidDiskFailure
+      expr: '(node_md_disks{state="failed"} > 0) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host RAID disk failure (instance {{ $labels.instance }})
+        description: "At least one device in RAID array on {{ $labels.instance }} failed. Array {{ $labels.md_device }} needs attention and possibly a disk swap\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostKernelVersionDeviations
+      expr: '(count(sum(label_replace(node_uname_info, "kernel", "$1", "release", "([0-9]+.[0-9]+.[0-9]+).*")) by (kernel)) > 1) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 6h
+      labels:
+        severity: warning
+      annotations:
+        summary: Host kernel version deviations (instance {{ $labels.instance }})
+        description: "Different kernel versions are running\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostOomKillDetected
+      expr: '(increase(node_vmstat_oom_kill[1m]) > 0) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 0m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host OOM kill detected (instance {{ $labels.instance }})
+        description: "OOM kill detected\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostEdacCorrectableErrorsDetected
+      expr: '(increase(node_edac_correctable_errors_total[1m]) > 0) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 0m
+      labels:
+        severity: info
+      annotations:
+        summary: Host EDAC Correctable Errors detected (instance {{ $labels.instance }})
+        description: "Host {{ $labels.instance }} has had {{ printf \"%.0f\" $value }} correctable memory errors reported by EDAC in the last 5 minutes.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostEdacUncorrectableErrorsDetected
+      expr: '(node_edac_uncorrectable_errors_total > 0) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 0m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host EDAC Uncorrectable Errors detected (instance {{ $labels.instance }})
+        description: "Host {{ $labels.instance }} has had {{ printf \"%.0f\" $value }} uncorrectable memory errors reported by EDAC in the last 5 minutes.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostNetworkReceiveErrors
+      expr: '(rate(node_network_receive_errs_total[2m]) / rate(node_network_receive_packets_total[2m]) > 0.01) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host Network Receive Errors (instance {{ $labels.instance }})
+        description: "Host {{ $labels.instance }} interface {{ $labels.device }} has encountered {{ printf \"%.0f\" $value }} receive errors in the last two minutes.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostNetworkTransmitErrors
+      expr: '(rate(node_network_transmit_errs_total[2m]) / rate(node_network_transmit_packets_total[2m]) > 0.01) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host Network Transmit Errors (instance {{ $labels.instance }})
+        description: "Host {{ $labels.instance }} interface {{ $labels.device }} has encountered {{ printf \"%.0f\" $value }} transmit errors in the last two minutes.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostNetworkInterfaceSaturated
+      expr: '((rate(node_network_receive_bytes_total{device!~"^tap.*|^vnet.*|^veth.*|^tun.*"}[1m]) + rate(node_network_transmit_bytes_total{device!~"^tap.*|^vnet.*|^veth.*|^tun.*"}[1m])) / node_network_speed_bytes{device!~"^tap.*|^vnet.*|^veth.*|^tun.*"} > 0.8 < 10000) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host Network Interface Saturated (instance {{ $labels.instance }})
+        description: "The network interface \"{{ $labels.device }}\" on \"{{ $labels.instance }}\" is getting overloaded.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostNetworkBondDegraded
+      expr: '((node_bonding_active - node_bonding_slaves) != 0) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host Network Bond Degraded (instance {{ $labels.instance }})
+        description: "Bond \"{{ $labels.device }}\" degraded on \"{{ $labels.instance }}\".\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostConntrackLimit
+      expr: '(node_nf_conntrack_entries / node_nf_conntrack_entries_limit > 0.8) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host conntrack limit (instance {{ $labels.instance }})
+        description: "The number of conntrack is approaching limit\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostClockSkew
+      expr: '((node_timex_offset_seconds > 0.05 and deriv(node_timex_offset_seconds[5m]) >= 0) or (node_timex_offset_seconds < -0.05 and deriv(node_timex_offset_seconds[5m]) <= 0)) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host clock skew (instance {{ $labels.instance }})
+        description: "Clock skew detected. Clock is out of sync. Ensure NTP is configured correctly on this host.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostClockNotSynchronising
+      expr: '(min_over_time(node_timex_sync_status[1m]) == 0 and node_timex_maxerror_seconds >= 16) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host clock not synchronising (instance {{ $labels.instance }})
+        description: "Clock not synchronising. Ensure NTP is configured on this host.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: HostRequiresReboot
+      expr: '(node_reboot_required > 0) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      for: 4h
+      labels:
+        severity: info
+      annotations:
+        summary: Host requires reboot (instance {{ $labels.instance }})
+        description: "{{ $labels.instance }} requires a reboot.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+# SOURCE: https://github.com/monitoring-mixins/website/blob/master/assets/node-exporter/alerts.yaml
+- name: node-exporter
+  rules:
+  - alert: NodeFilesystemSpaceFillingUp
+    annotations:
+      description: Filesystem on {{ $labels.device }}, mounted on {{ $labels.mountpoint
+        }}, at {{ $labels.instance }} has only {{ printf "%.2f" $value }}% available
+        space left and is filling up.
+      summary: Filesystem is predicted to run out of space within the next 24 hours.
+    expr: |
+      (
+        node_filesystem_avail_bytes{job="node-exporter",fstype!="",mountpoint!=""} / node_filesystem_size_bytes{job="node-exporter",fstype!="",mountpoint!=""} * 100 < 40
+      and
+        predict_linear(node_filesystem_avail_bytes{job="node-exporter",fstype!="",mountpoint!=""}[6h], 24*60*60) < 0
+      and
+        node_filesystem_readonly{job="node-exporter",fstype!="",mountpoint!=""} == 0
+      )
+    for: 1h
+    labels:
+      severity: warning
+  - alert: NodeFilesystemSpaceFillingUp
+    annotations:
+      description: Filesystem on {{ $labels.device }}, mounted on {{ $labels.mountpoint
+        }}, at {{ $labels.instance }} has only {{ printf "%.2f" $value }}% available
+        space left and is filling up fast.
+      summary: Filesystem is predicted to run out of space within the next 4 hours.
+    expr: |
+      (
+        node_filesystem_avail_bytes{job="node-exporter",fstype!="",mountpoint!=""} / node_filesystem_size_bytes{job="node-exporter",fstype!="",mountpoint!=""} * 100 < 20
+      and
+        predict_linear(node_filesystem_avail_bytes{job="node-exporter",fstype!="",mountpoint!=""}[6h], 4*60*60) < 0
+      and
+        node_filesystem_readonly{job="node-exporter",fstype!="",mountpoint!=""} == 0
+      )
+    for: 1h
+    labels:
+      severity: critical
+  - alert: NodeFilesystemAlmostOutOfSpace
+    annotations:
+      description: Filesystem on {{ $labels.device }}, mounted on {{ $labels.mountpoint
+        }}, at {{ $labels.instance }} has only {{ printf "%.2f" $value }}% available
+        space left.
+      summary: Filesystem has less than 5% space left.
+    expr: |
+      (
+        node_filesystem_avail_bytes{job="node-exporter",fstype!="",mountpoint!=""} / node_filesystem_size_bytes{job="node-exporter",fstype!="",mountpoint!=""} * 100 < 5
+      and
+        node_filesystem_readonly{job="node-exporter",fstype!="",mountpoint!=""} == 0
+      )
+    for: 30m
+    labels:
+      severity: warning
+  - alert: NodeFilesystemAlmostOutOfSpace
+    annotations:
+      description: Filesystem on {{ $labels.device }}, mounted on {{ $labels.mountpoint
+        }}, at {{ $labels.instance }} has only {{ printf "%.2f" $value }}% available
+        space left.
+      summary: Filesystem has less than 3% space left.
+    expr: |
+      (
+        node_filesystem_avail_bytes{job="node-exporter",fstype!="",mountpoint!=""} / node_filesystem_size_bytes{job="node-exporter",fstype!="",mountpoint!=""} * 100 < 3
+      and
+        node_filesystem_readonly{job="node-exporter",fstype!="",mountpoint!=""} == 0
+      )
+    for: 30m
+    labels:
+      severity: critical
+  - alert: NodeFilesystemFilesFillingUp
+    annotations:
+      description: Filesystem on {{ $labels.device }}, mounted on {{ $labels.mountpoint
+        }}, at {{ $labels.instance }} has only {{ printf "%.2f" $value }}% available
+        inodes left and is filling up.
+      summary: Filesystem is predicted to run out of inodes within the next 24 hours.
+    expr: |
+      (
+        node_filesystem_files_free{job="node-exporter",fstype!="",mountpoint!=""} / node_filesystem_files{job="node-exporter",fstype!="",mountpoint!=""} * 100 < 40
+      and
+        predict_linear(node_filesystem_files_free{job="node-exporter",fstype!="",mountpoint!=""}[6h], 24*60*60) < 0
+      and
+        node_filesystem_readonly{job="node-exporter",fstype!="",mountpoint!=""} == 0
+      )
+    for: 1h
+    labels:
+      severity: warning
+  - alert: NodeFilesystemFilesFillingUp
+    annotations:
+      description: Filesystem on {{ $labels.device }}, mounted on {{ $labels.mountpoint
+        }}, at {{ $labels.instance }} has only {{ printf "%.2f" $value }}% available
+        inodes left and is filling up fast.
+      summary: Filesystem is predicted to run out of inodes within the next 4 hours.
+    expr: |
+      (
+        node_filesystem_files_free{job="node-exporter",fstype!="",mountpoint!=""} / node_filesystem_files{job="node-exporter",fstype!="",mountpoint!=""} * 100 < 20
+      and
+        predict_linear(node_filesystem_files_free{job="node-exporter",fstype!="",mountpoint!=""}[6h], 4*60*60) < 0
+      and
+        node_filesystem_readonly{job="node-exporter",fstype!="",mountpoint!=""} == 0
+      )
+    for: 1h
+    labels:
+      severity: critical
+  - alert: NodeFilesystemAlmostOutOfFiles
+    annotations:
+      description: Filesystem on {{ $labels.device }}, mounted on {{ $labels.mountpoint
+        }}, at {{ $labels.instance }} has only {{ printf "%.2f" $value }}% available
+        inodes left.
+      summary: Filesystem has less than 5% inodes left.
+    expr: |
+      (
+        node_filesystem_files_free{job="node-exporter",fstype!="",mountpoint!=""} / node_filesystem_files{job="node-exporter",fstype!="",mountpoint!=""} * 100 < 5
+      and
+        node_filesystem_readonly{job="node-exporter",fstype!="",mountpoint!=""} == 0
+      )
+    for: 1h
+    labels:
+      severity: warning
+  - alert: NodeFilesystemAlmostOutOfFiles
+    annotations:
+      description: Filesystem on {{ $labels.device }}, mounted on {{ $labels.mountpoint
+        }}, at {{ $labels.instance }} has only {{ printf "%.2f" $value }}% available
+        inodes left.
+      summary: Filesystem has less than 3% inodes left.
+    expr: |
+      (
+        node_filesystem_files_free{job="node-exporter",fstype!="",mountpoint!=""} / node_filesystem_files{job="node-exporter",fstype!="",mountpoint!=""} * 100 < 3
+      and
+        node_filesystem_readonly{job="node-exporter",fstype!="",mountpoint!=""} == 0
+      )
+    for: 1h
+    labels:
+      severity: critical
+  - alert: NodeNetworkReceiveErrs
+    annotations:
+      description: '{{ $labels.instance }} interface {{ $labels.device }} has encountered
+        {{ printf "%.0f" $value }} receive errors in the last two minutes.'
+      summary: Network interface is reporting many receive errors.
+    expr: |
+      rate(node_network_receive_errs_total{job="node-exporter"}[2m]) / rate(node_network_receive_packets_total{job="node-exporter"}[2m]) > 0.01
+    for: 1h
+    labels:
+      severity: warning
+  - alert: NodeNetworkTransmitErrs
+    annotations:
+      description: '{{ $labels.instance }} interface {{ $labels.device }} has encountered
+        {{ printf "%.0f" $value }} transmit errors in the last two minutes.'
+      summary: Network interface is reporting many transmit errors.
+    expr: |
+      rate(node_network_transmit_errs_total{job="node-exporter"}[2m]) / rate(node_network_transmit_packets_total{job="node-exporter"}[2m]) > 0.01
+    for: 1h
+    labels:
+      severity: warning
+  - alert: NodeHighNumberConntrackEntriesUsed
+    annotations:
+      description: '{{ $value | humanizePercentage }} of conntrack entries are used.'
+      summary: Number of conntrack are getting close to the limit.
+    expr: |
+      (node_nf_conntrack_entries{job="node-exporter"} / node_nf_conntrack_entries_limit) > 0.75
+    labels:
+      severity: warning
+  - alert: NodeTextFileCollectorScrapeError
+    annotations:
+      description: Node Exporter text file collector on {{ $labels.instance }} failed
+        to scrape.
+      summary: Node Exporter text file collector failed to scrape.
+    expr: |
+      node_textfile_scrape_error{job="node-exporter"} == 1
+    labels:
+      severity: warning
+  - alert: NodeClockSkewDetected
+    annotations:
+      description: Clock at {{ $labels.instance }} is out of sync by more than 0.05s.
+        Ensure NTP is configured correctly on this host.
+      summary: Clock skew detected.
+    expr: |
+      (
+        node_timex_offset_seconds{job="node-exporter"} > 0.05
+      and
+        deriv(node_timex_offset_seconds{job="node-exporter"}[5m]) >= 0
+      )
+      or
+      (
+        node_timex_offset_seconds{job="node-exporter"} < -0.05
+      and
+        deriv(node_timex_offset_seconds{job="node-exporter"}[5m]) <= 0
+      )
+    for: 10m
+    labels:
+      severity: warning
+  - alert: NodeClockNotSynchronising
+    annotations:
+      description: Clock at {{ $labels.instance }} is not synchronising. Ensure NTP
+        is configured on this host.
+      summary: Clock not synchronising.
+    expr: |
+      min_over_time(node_timex_sync_status{job="node-exporter"}[5m]) == 0
+      and
+      node_timex_maxerror_seconds{job="node-exporter"} >= 16
+    for: 10m
+    labels:
+      severity: warning
+  - alert: NodeRAIDDegraded
+    annotations:
+      description: RAID array '{{ $labels.device }}' at {{ $labels.instance }} is
+        in degraded state due to one or more disks failures. Number of spare drives
+        is insufficient to fix issue automatically.
+      summary: RAID Array is degraded.
+    expr: |
+      node_md_disks_required{job="node-exporter",device!=""} - ignoring (state) (node_md_disks{state="active",job="node-exporter",device!=""}) > 0
+    for: 15m
+    labels:
+      severity: critical
+  - alert: NodeRAIDDiskFailure
+    annotations:
+      description: At least one device in RAID array at {{ $labels.instance }} failed.
+        Array '{{ $labels.device }}' needs attention and possibly a disk swap.
+      summary: Failed device in RAID array.
+    expr: |
+      node_md_disks{state="failed",job="node-exporter",device!=""} > 0
+    labels:
+      severity: warning
+  - alert: NodeFileDescriptorLimit
+    annotations:
+      description: File descriptors limit at {{ $labels.instance }} is currently at
+        {{ printf "%.2f" $value }}%.
+      summary: Kernel is predicted to exhaust file descriptors limit soon.
+    expr: |
+      (
+        node_filefd_allocated{job="node-exporter"} * 100 / node_filefd_maximum{job="node-exporter"} > 70
+      )
+    for: 15m
+    labels:
+      severity: warning
+  - alert: NodeFileDescriptorLimit
+    annotations:
+      description: File descriptors limit at {{ $labels.instance }} is currently at
+        {{ printf "%.2f" $value }}%.
+      summary: Kernel is predicted to exhaust file descriptors limit soon.
+    expr: |
+      (
+        node_filefd_allocated{job="node-exporter"} * 100 / node_filefd_maximum{job="node-exporter"} > 90
+      )
+    for: 15m
+    labels:
+      severity: critical
+  - alert: NodeCPUHighUsage
+    annotations:
+      description: |
+        CPU usage at {{ $labels.instance }} has been above 90% for the last 15 minutes, is currently at {{ printf "%.2f" $value }}%.
+      summary: High CPU usage.
+    expr: |
+      sum without(mode) (avg without (cpu) (rate(node_cpu_seconds_total{job="node-exporter", mode!="idle"}[2m]))) * 100 > 90
+    for: 15m
+    labels:
+      severity: info
+  - alert: NodeSystemSaturation
+    annotations:
+      description: |
+        System load per core at {{ $labels.instance }} has been above 2 for the last 15 minutes, is currently at {{ printf "%.2f" $value }}.
+        This might indicate this instance resources saturation and can cause it becoming unresponsive.
+      summary: System saturated, load per core is very high.
+    expr: |
+      node_load1{job="node-exporter"}
+      / count without (cpu, mode) (node_cpu_seconds_total{job="node-exporter", mode="idle"}) > 2
+    for: 15m
+    labels:
+      severity: warning
+  - alert: NodeMemoryMajorPagesFaults
+    annotations:
+      description: |
+        Memory major pages are occurring at very high rate at {{ $labels.instance }}, 500 major page faults per second for the last 15 minutes, is currently at {{ printf "%.2f" $value }}.
+        Please check that there is enough memory available at this instance.
+      summary: Memory major page faults are occurring at very high rate.
+    expr: |
+      rate(node_vmstat_pgmajfault{job="node-exporter"}[5m]) > 500
+    for: 15m
+    labels:
+      severity: warning
+  - alert: NodeMemoryHighUtilization
+    annotations:
+      description: |
+        Memory is filling up at {{ $labels.instance }}, has been above 90% for the last 15 minutes, is currently at {{ printf "%.2f" $value }}%.
+      summary: Host is running out of memory.
+    expr: |
+      100 - (node_memory_MemAvailable_bytes{job="node-exporter"} / node_memory_MemTotal_bytes{job="node-exporter"} * 100) > 90
+    for: 15m
+    labels:
+      severity: warning
+  - alert: NodeDiskIOSaturation
+    annotations:
+      description: |
+        Disk IO queue (aqu-sq) is high on {{ $labels.device }} at {{ $labels.instance }}, has been above 10 for the last 15 minutes, is currently at {{ printf "%.2f" $value }}.
+        This symptom might indicate disk saturation.
+      summary: Disk IO queue is high.
+    expr: |
+      rate(node_disk_io_time_weighted_seconds_total{job="node-exporter", device!=""}[5m]) > 10
+    for: 30m
+    labels:
+      severity: warning
+  - alert: NodeSystemdServiceFailed
+    annotations:
+      description: Systemd service {{ $labels.name }} has entered failed state at
+        {{ $labels.instance }}
+      summary: Systemd service has entered failed state.
+    expr: |
+      node_systemd_unit_state{job="node-exporter", state="failed"} == 1
+    for: 5m
+    labels:
+      severity: warning
+
+- name: alertmanager.rules
+  rules:
+  - alert: AlertmanagerFailedReload
+    annotations:
+      description: Configuration has failed to load for {{$labels.instance}}.
+      summary: Reloading an Alertmanager configuration has failed.
+    expr: |
+      # Without max_over_time, failed scrapes could create false negatives, see
+      # https://www.robustperception.io/alerting-on-gauges-in-prometheus-2-0 for details.
+      max_over_time(alertmanager_config_last_reload_successful{job="alertmanager"}[5m]) == 0
+    for: 10m
+    labels:
+      severity: critical
+  - alert: AlertmanagerMembersInconsistent
+    annotations:
+      description: Alertmanager {{$labels.instance}} has only found {{ $value }} members
+        of the {{$labels.job}} cluster.
+      summary: A member of an Alertmanager cluster has not found all other cluster
+        members.
+    expr: |
+      # Without max_over_time, failed scrapes could create false negatives, see
+      # https://www.robustperception.io/alerting-on-gauges-in-prometheus-2-0 for details.
+        max_over_time(alertmanager_cluster_members{job="alertmanager"}[5m])
+      < on (job) group_left
+        count by (job) (max_over_time(alertmanager_cluster_members{job="alertmanager"}[5m]))
+    for: 15m
+    labels:
+      severity: critical
+  - alert: AlertmanagerFailedToSendAlerts
+    annotations:
+      description: Alertmanager {{$labels.instance}} failed to send {{ $value | humanizePercentage
+        }} of notifications to {{ $labels.integration }}.
+      summary: An Alertmanager instance failed to send notifications.
+    expr: |
+      (
+        rate(alertmanager_notifications_failed_total{job="alertmanager"}[5m])
+      /
+        rate(alertmanager_notifications_total{job="alertmanager"}[5m])
+      )
+      > 0.01
+    for: 5m
+    labels:
+      severity: warning
+  - alert: AlertmanagerClusterFailedToSendAlerts
+    annotations:
+      description: The minimum notification failure rate to {{ $labels.integration
+        }} sent from any instance in the {{$labels.job}} cluster is {{ $value | humanizePercentage
+        }}.
+      summary: All Alertmanager instances in a cluster failed to send notifications
+        to a critical integration.
+    expr: |
+      min by (job, integration) (
+        rate(alertmanager_notifications_failed_total{job="alertmanager", integration=~`.*`}[5m])
+      /
+        rate(alertmanager_notifications_total{job="alertmanager", integration=~`.*`}[5m])
+      )
+      > 0.01
+    for: 5m
+    labels:
+      severity: critical
+  - alert: AlertmanagerClusterFailedToSendAlerts
+    annotations:
+      description: The minimum notification failure rate to {{ $labels.integration
+        }} sent from any instance in the {{$labels.job}} cluster is {{ $value | humanizePercentage
+        }}.
+      summary: All Alertmanager instances in a cluster failed to send notifications
+        to a non-critical integration.
+    expr: |
+      min by (job, integration) (
+        rate(alertmanager_notifications_failed_total{job="alertmanager", integration!~`.*`}[5m])
+      /
+        rate(alertmanager_notifications_total{job="alertmanager", integration!~`.*`}[5m])
+      )
+      > 0.01
+    for: 5m
+    labels:
+      severity: warning
+  - alert: AlertmanagerConfigInconsistent
+    annotations:
+      description: Alertmanager instances within the {{$labels.job}} cluster have
+        different configurations.
+      summary: Alertmanager instances within the same cluster have different configurations.
+    expr: |
+      count by (job) (
+        count_values by (job) ("config_hash", alertmanager_config_hash{job="alertmanager"})
+      )
+      != 1
+    for: 20m
+    labels:
+      severity: critical
+  - alert: AlertmanagerClusterDown
+    annotations:
+      description: '{{ $value | humanizePercentage }} of Alertmanager instances within
+        the {{$labels.job}} cluster have been up for less than half of the last 5m.'
+      summary: Half or more of the Alertmanager instances within the same cluster
+        are down.
+    expr: |
+      (
+        count by (job) (
+          avg_over_time(up{job="alertmanager"}[5m]) < 0.5
+        )
+      /
+        count by (job) (
+          up{job="alertmanager"}
+        )
+      )
+      >= 0.5
+    for: 5m
+    labels:
+      severity: critical
+  - alert: AlertmanagerClusterCrashlooping
+    annotations:
+      description: '{{ $value | humanizePercentage }} of Alertmanager instances within
+        the {{$labels.job}} cluster have restarted at least 5 times in the last 10m.'
+      summary: Half or more of the Alertmanager instances within the same cluster
+        are crashlooping.
+    expr: |
+      (
+        count by (job) (
+          changes(process_start_time_seconds{job="alertmanager"}[10m]) > 4
+        )
+      /
+        count by (job) (
+          up{job="alertmanager"}
+        )
+      )
+      >= 0.5
+    for: 5m
+    labels:
+      severity: critical
+
+- name: promtail_alerts
+  rules:
+  - alert: PromtailRequestsErrors
+    annotations:
+      message: |
+        {{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}% errors.
+    expr: |
+      100 * sum(rate(promtail_request_duration_seconds_count{status_code=~"5..|failed"}[1m])) by (job, route, instance)
+        /
+      sum(rate(promtail_request_duration_seconds_count[1m])) by (job, route, instance)
+        > 10
+    for: 15m
+    labels:
+      severity: critical
+  - alert: PromtailRequestLatency
+    annotations:
+      message: |
+        {{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}s 99th percentile latency.
+    expr: |
+      job_status_code_namespace:promtail_request_duration_seconds:99quantile > 1
+    for: 15m
+    labels:
+      severity: critical
+  - alert: PromtailFileMissing
+    annotations:
+      message: |
+        {{ $labels.instance }} {{ $labels.job }} {{ $labels.path }} matches the glob but is not being tailed.
+    expr: |
+      promtail_file_bytes_total unless promtail_read_bytes_total
+    for: 15m
+    labels:
+      severity: warning
+
+- name: loki_alerts
+  rules:
+  - alert: LokiRequestErrors
+    annotations:
+      message: |
+        {{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}% errors.
+    expr: |
+      100 * sum(rate(loki_request_duration_seconds_count{status_code=~"5.."}[2m])) by (instance, job, route)
+        /
+      sum(rate(loki_request_duration_seconds_count[2m])) by (instance, job, route)
+        > 10
+    for: 15m
+    labels:
+      severity: critical
+  - alert: LokiRequestPanics
+    annotations:
+      message: |
+        {{ $labels.job }} is experiencing {{ printf "%.2f" $value }}% increase of panics.
+    expr: |
+      sum(increase(loki_panic_total[10m])) by (instance, job) > 0
+    labels:
+      severity: critical
+  - alert: LokiRequestLatency
+    annotations:
+      message: |
+        {{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}s 99th percentile latency.
+    expr: |
+      cluster_instance_job_route:loki_request_duration_seconds:99quantile{route!~"(?i).*tail.*|/schedulerpb.SchedulerForQuerier/QuerierLoop"} > 1
+    for: 15m
+    labels:
+      severity: critical
+  - alert: LokiTooManyCompactorsRunning
+    annotations:
+      message: |
+        {{ $labels.cluster }} {{ $labels.instance }} has had {{ printf "%.0f" $value }} compactors running for more than 5m. Only one compactor should run at a time.
+    expr: |
+      sum(loki_boltdb_shipper_compactor_running) by (instance, cluster) > 1
+    for: 5m
+    labels:
+      severity: warning
+
+- name: GrafanaAlerts
+  rules:
+  - alert: GrafanaRequestsFailing
+    annotations:
+      message: '{{ $labels.namespace }}/{{ $labels.job }}/{{ $labels.handler }} is
+        experiencing {{ $value | humanize }}% errors'
+    expr: |
+      100 * namespace_job_handler_statuscode:grafana_http_request_duration_seconds_count:rate5m{handler!~"/api/datasources/proxy/:id.*|/api/ds/query|/api/tsdb/query", status_code=~"5.."}
+      / ignoring (status_code)
+      sum without (status_code) (namespace_job_handler_statuscode:grafana_http_request_duration_seconds_count:rate5m{handler!~"/api/datasources/proxy/:id.*|/api/ds/query|/api/tsdb/query"})
+      > 50
+    for: 5m
+    labels:
+      severity: warning
+
+- name: prometheus
+  rules:
+  - alert: PrometheusBadConfig
+    annotations:
+      description: Prometheus {{$labels.instance}} has failed to reload its configuration.
+      summary: Failed Prometheus configuration reload.
+    expr: |
+      # Without max_over_time, failed scrapes could create false negatives, see
+      # https://www.robustperception.io/alerting-on-gauges-in-prometheus-2-0 for details.
+      max_over_time(prometheus_config_last_reload_successful{job="prometheus"}[5m]) == 0
+    for: 10m
+    labels:
+      severity: critical
+  - alert: PrometheusSDRefreshFailure
+    annotations:
+      description: Prometheus {{$labels.instance}} has failed to refresh SD with mechanism
+        {{$labels.mechanism}}.
+      summary: Failed Prometheus SD refresh.
+    expr: |
+      increase(prometheus_sd_refresh_failures_total{job="prometheus"}[10m]) > 0
+    for: 20m
+    labels:
+      severity: warning
+  - alert: PrometheusNotificationQueueRunningFull
+    annotations:
+      description: Alert notification queue of Prometheus {{$labels.instance}} is
+        running full.
+      summary: Prometheus alert notification queue predicted to run full in less than
+        30m.
+    expr: |
+      # Without min_over_time, failed scrapes could create false negatives, see
+      # https://www.robustperception.io/alerting-on-gauges-in-prometheus-2-0 for details.
+      (
+        predict_linear(prometheus_notifications_queue_length{job="prometheus"}[5m], 60 * 30)
+      >
+        min_over_time(prometheus_notifications_queue_capacity{job="prometheus"}[5m])
+      )
+    for: 15m
+    labels:
+      severity: warning
+  - alert: PrometheusErrorSendingAlertsToSomeAlertmanagers
+    annotations:
+      description: '{{ printf "%.1f" $value }}% errors while sending alerts from Prometheus
+        {{$labels.instance}} to Alertmanager {{$labels.alertmanager}}.'
+      summary: Prometheus has encountered more than 1% errors sending alerts to a
+        specific Alertmanager.
+    expr: |
+      (
+        rate(prometheus_notifications_errors_total{job="prometheus"}[5m])
+      /
+        rate(prometheus_notifications_sent_total{job="prometheus"}[5m])
+      )
+      * 100
+      > 1
+    for: 15m
+    labels:
+      severity: warning
+  - alert: PrometheusNotConnectedToAlertmanagers
+    annotations:
+      description: Prometheus {{$labels.instance}} is not connected to any Alertmanagers.
+      summary: Prometheus is not connected to any Alertmanagers.
+    expr: |
+      # Without max_over_time, failed scrapes could create false negatives, see
+      # https://www.robustperception.io/alerting-on-gauges-in-prometheus-2-0 for details.
+      max_over_time(prometheus_notifications_alertmanagers_discovered{job="prometheus"}[5m]) < 1
+    for: 10m
+    labels:
+      severity: warning
+  - alert: PrometheusTSDBReloadsFailing
+    annotations:
+      description: Prometheus {{$labels.instance}} has detected {{$value | humanize}}
+        reload failures over the last 3h.
+      summary: Prometheus has issues reloading blocks from disk.
+    expr: |
+      increase(prometheus_tsdb_reloads_failures_total{job="prometheus"}[3h]) > 0
+    for: 4h
+    labels:
+      severity: warning
+  - alert: PrometheusTSDBCompactionsFailing
+    annotations:
+      description: Prometheus {{$labels.instance}} has detected {{$value | humanize}}
+        compaction failures over the last 3h.
+      summary: Prometheus has issues compacting blocks.
+    expr: |
+      increase(prometheus_tsdb_compactions_failed_total{job="prometheus"}[3h]) > 0
+    for: 4h
+    labels:
+      severity: warning
+  - alert: PrometheusNotIngestingSamples
+    annotations:
+      description: Prometheus {{$labels.instance}} is not ingesting samples.
+      summary: Prometheus is not ingesting samples.
+    expr: |
+      (
+        rate(prometheus_tsdb_head_samples_appended_total{job="prometheus"}[5m]) <= 0
+      and
+        (
+          sum without(scrape_job) (prometheus_target_metadata_cache_entries{job="prometheus"}) > 0
+        or
+          sum without(rule_group) (prometheus_rule_group_rules{job="prometheus"}) > 0
+        )
+      )
+    for: 10m
+    labels:
+      severity: warning
+  - alert: PrometheusDuplicateTimestamps
+    annotations:
+      description: Prometheus {{$labels.instance}} is dropping {{ printf "%.4g" $value  }}
+        samples/s with different values but duplicated timestamp.
+      summary: Prometheus is dropping samples with duplicate timestamps.
+    expr: |
+      rate(prometheus_target_scrapes_sample_duplicate_timestamp_total{job="prometheus"}[5m]) > 0
+    for: 10m
+    labels:
+      severity: warning
+  - alert: PrometheusOutOfOrderTimestamps
+    annotations:
+      description: Prometheus {{$labels.instance}} is dropping {{ printf "%.4g" $value  }}
+        samples/s with timestamps arriving out of order.
+      summary: Prometheus drops samples with out-of-order timestamps.
+    expr: |
+      rate(prometheus_target_scrapes_sample_out_of_order_total{job="prometheus"}[5m]) > 0
+    for: 10m
+    labels:
+      severity: warning
+  - alert: PrometheusRemoteStorageFailures
+    annotations:
+      description: Prometheus {{$labels.instance}} failed to send {{ printf "%.1f"
+        $value }}% of the samples to {{ $labels.remote_name}}:{{ $labels.url }}
+      summary: Prometheus fails to send samples to remote storage.
+    expr: |
+      (
+        (rate(prometheus_remote_storage_failed_samples_total{job="prometheus"}[5m]) or rate(prometheus_remote_storage_samples_failed_total{job="prometheus"}[5m]))
+      /
+        (
+          (rate(prometheus_remote_storage_failed_samples_total{job="prometheus"}[5m]) or rate(prometheus_remote_storage_samples_failed_total{job="prometheus"}[5m]))
+        +
+          (rate(prometheus_remote_storage_succeeded_samples_total{job="prometheus"}[5m]) or rate(prometheus_remote_storage_samples_total{job="prometheus"}[5m]))
+        )
+      )
+      * 100
+      > 1
+    for: 15m
+    labels:
+      severity: critical
+  - alert: PrometheusRemoteWriteBehind
+    annotations:
+      description: Prometheus {{$labels.instance}} remote write is {{ printf "%.1f"
+        $value }}s behind for {{ $labels.remote_name}}:{{ $labels.url }}.
+      summary: Prometheus remote write is behind.
+    expr: |
+      # Without max_over_time, failed scrapes could create false negatives, see
+      # https://www.robustperception.io/alerting-on-gauges-in-prometheus-2-0 for details.
+      (
+        max_over_time(prometheus_remote_storage_highest_timestamp_in_seconds{job="prometheus"}[5m])
+      - ignoring(remote_name, url) group_right
+        max_over_time(prometheus_remote_storage_queue_highest_sent_timestamp_seconds{job="prometheus"}[5m])
+      )
+      > 120
+    for: 15m
+    labels:
+      severity: critical
+  - alert: PrometheusRemoteWriteDesiredShards
+    annotations:
+      description: Prometheus {{$labels.instance}} remote write desired shards calculation
+        wants to run {{ $value }} shards for queue {{ $labels.remote_name}}:{{ $labels.url
+        }}, which is more than the max of {{ printf `prometheus_remote_storage_shards_max{instance="%s",job="prometheus"}`
+        $labels.instance | query | first | value }}.
+      summary: Prometheus remote write desired shards calculation wants to run more
+        than configured max shards.
+    expr: |
+      # Without max_over_time, failed scrapes could create false negatives, see
+      # https://www.robustperception.io/alerting-on-gauges-in-prometheus-2-0 for details.
+      (
+        max_over_time(prometheus_remote_storage_shards_desired{job="prometheus"}[5m])
+      >
+        max_over_time(prometheus_remote_storage_shards_max{job="prometheus"}[5m])
+      )
+    for: 15m
+    labels:
+      severity: warning
+  - alert: PrometheusRuleFailures
+    annotations:
+      description: Prometheus {{$labels.instance}} has failed to evaluate {{ printf
+        "%.0f" $value }} rules in the last 5m.
+      summary: Prometheus is failing rule evaluations.
+    expr: |
+      increase(prometheus_rule_evaluation_failures_total{job="prometheus"}[5m]) > 0
+    for: 15m
+    labels:
+      severity: critical
+  - alert: PrometheusMissingRuleEvaluations
+    annotations:
+      description: Prometheus {{$labels.instance}} has missed {{ printf "%.0f" $value
+        }} rule group evaluations in the last 5m.
+      summary: Prometheus is missing rule evaluations due to slow rule group evaluation.
+    expr: |
+      increase(prometheus_rule_group_iterations_missed_total{job="prometheus"}[5m]) > 0
+    for: 15m
+    labels:
+      severity: warning
+  - alert: PrometheusTargetLimitHit
+    annotations:
+      description: Prometheus {{$labels.instance}} has dropped {{ printf "%.0f" $value
+        }} targets because the number of targets exceeded the configured target_limit.
+      summary: Prometheus has dropped targets because some scrape configs have exceeded
+        the targets limit.
+    expr: |
+      increase(prometheus_target_scrape_pool_exceeded_target_limit_total{job="prometheus"}[5m]) > 0
+    for: 15m
+    labels:
+      severity: warning
+  - alert: PrometheusLabelLimitHit
+    annotations:
+      description: Prometheus {{$labels.instance}} has dropped {{ printf "%.0f" $value
+        }} targets because some samples exceeded the configured label_limit, label_name_length_limit
+        or label_value_length_limit.
+      summary: Prometheus has dropped targets because some scrape configs have exceeded
+        the labels limit.
+    expr: |
+      increase(prometheus_target_scrape_pool_exceeded_label_limits_total{job="prometheus"}[5m]) > 0
+    for: 15m
+    labels:
+      severity: warning
+  - alert: PrometheusScrapeBodySizeLimitHit
+    annotations:
+      description: Prometheus {{$labels.instance}} has failed {{ printf "%.0f" $value
+        }} scrapes in the last 5m because some targets exceeded the configured body_size_limit.
+      summary: Prometheus has dropped some targets that exceeded body size limit.
+    expr: |
+      increase(prometheus_target_scrapes_exceeded_body_size_limit_total{job="prometheus"}[5m]) > 0
+    for: 15m
+    labels:
+      severity: warning
+  - alert: PrometheusScrapeSampleLimitHit
+    annotations:
+      description: Prometheus {{$labels.instance}} has failed {{ printf "%.0f" $value
+        }} scrapes in the last 5m because some targets exceeded the configured sample_limit.
+      summary: Prometheus has failed scrapes that have exceeded the configured sample
+        limit.
+    expr: |
+      increase(prometheus_target_scrapes_exceeded_sample_limit_total{job="prometheus"}[5m]) > 0
+    for: 15m
+    labels:
+      severity: warning
+  - alert: PrometheusTargetSyncFailure
+    annotations:
+      description: '{{ printf "%.0f" $value }} targets in Prometheus {{$labels.instance}}
+        have failed to sync because invalid configuration was supplied.'
+      summary: Prometheus has failed to sync targets.
+    expr: |
+      increase(prometheus_target_sync_failed_total{job="prometheus"}[30m]) > 0
+    for: 5m
+    labels:
+      severity: critical
+  - alert: PrometheusHighQueryLoad
+    annotations:
+      description: Prometheus {{$labels.instance}} query API has less than 20% available
+        capacity in its query engine for the last 15 minutes.
+      summary: Prometheus is reaching its maximum capacity serving concurrent requests.
+    expr: |
+      avg_over_time(prometheus_engine_queries{job="prometheus"}[5m]) / max_over_time(prometheus_engine_queries_concurrent_max{job="prometheus"}[5m]) > 0.8
+    for: 15m
+    labels:
+      severity: warning
+  - alert: PrometheusErrorSendingAlertsToAnyAlertmanager
+    annotations:
+      description: '{{ printf "%.1f" $value }}% minimum errors while sending alerts
+        from Prometheus {{$labels.instance}} to any Alertmanager.'
+      summary: Prometheus encounters more than 3% errors sending alerts to any Alertmanager.
+    expr: |
+      min without (alertmanager) (
+        rate(prometheus_notifications_errors_total{job="prometheus",alertmanager!~``}[5m])
+      /
+        rate(prometheus_notifications_sent_total{job="prometheus",alertmanager!~``}[5m])
+      )
+      * 100
+      > 3
+    for: 15m
+    labels:
+      severity: critical
+
+
+{% endraw %}

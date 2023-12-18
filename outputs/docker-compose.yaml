@@ -404,12 +404,6 @@ services:
   prometheus:
     image: prom/prometheus:v2.31.1
     container_name: prometheus
-    # labels:
-    # - "traefik.enable=true"
-    # - "traefik.http.routers.prometheus.rule=Host(`prometheus.scarlettlab.home`)"
-    # - "traefik.http.routers.prometheus.entrypoints=web"
-    # - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
-    # - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
     expose:
     - 9090
     tty: true

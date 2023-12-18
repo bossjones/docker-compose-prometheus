@@ -14,7 +14,7 @@ global:
 
 # Load and evaluate rules in this file every 'evaluation_interval' seconds.
 rule_files:
-  - 'alert.rules'
+  - 'alerts.yml'
   - rules.yml
 
 # alert
