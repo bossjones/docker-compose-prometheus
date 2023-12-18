@@ -52,3 +52,7 @@ start:
 	docker-compose --env-file env start minio
 	docker-compose --env-file env start loki-gateway
 	docker-compose --env-file env start traefik
+
+lint:
+  promtool check rules prometheus/alerts.yml
+  promtool check rules prometheus/rules.yml
