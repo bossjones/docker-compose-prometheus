@@ -909,7 +909,7 @@ groups:
 
     - alert: HostPhysicalComponentTooHot
       expr: '((node_hwmon_temp_celsius * ignoring(label) group_left(instance, job, node, sensor) node_hwmon_sensor_label{label!="tctl"} > 75)) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
-      for: 15m
+      for: 25m
       labels:
         severity: warning
       annotations:
