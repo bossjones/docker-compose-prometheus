@@ -46,7 +46,7 @@ groups:
       severity: page
     annotations:
       summary: "Instance {{ $labels.instance }} down"
-      description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 2 minutes.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}""
+      description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 2 minutes.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
   - alert: high_load
     expr: 'node_load15 > 3.5 group_left (nodename) node_uname_info{nodename=~".+"}'
