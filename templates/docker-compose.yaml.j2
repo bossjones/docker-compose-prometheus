@@ -119,6 +119,33 @@ services:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
 
+  # SOURCE: https://github.com/robozmey/roomkn-sre/blob/179ec407ae7e6ddf2135af8d2d3811950448ec85/docker-compose.yml#L82
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:1.0.0
+    container_name: "nginx-exporter"
+    depends_on:
+      - 'loki-gateway'
+    restart: unless-stopped
+    command:
+      - '--nginx.scrape-uri=http://loki-gateway/nginx_status'
+    ports:
+      - "9113:9113"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx-exporter-http.rule=Host(`nginx-exporter.{{ fqdn }}`)"
+      - "traefik.http.routers.nginx-exporter-http.entrypoints=web"
+      - "traefik.http.routers.nginx-exporter-http.service=nginx-exporter-http"
+      - "traefik.http.services.nginx-exporter-http.loadbalancer.server.port=9113"
+      - "traefik.port=9113"
+    networks:
+      - loki
+{% raw %}
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
+
   # Since the Loki containers are running as user 10001 and the mounted data volume is owned by root,
   # Loki would not have permissions to create the directories.
   # Therefore the init container changes permissions of the mounted directory.

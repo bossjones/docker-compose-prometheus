@@ -401,6 +401,33 @@ scrape_configs:
       - __name__
       target_label: cluster
 
+  - job_name: 'nginx-exporter'
+    dns_sd_configs:
+      - names:
+          - nginx-exporter
+        type: A
+        port: 9113
+    relabel_configs:
+    - source_labels: [__meta_dns_name]
+      target_label: service
+    - source_labels: [__meta_dns_srv_record_target]
+      target_label: dns_srv_record_target
+    - source_labels: [__meta_dns_srv_record_port]
+      target_label: dns_srv_record_port
+    - source_labels: [__meta_dns_mx_record_target]
+      target_label: dns_mx_record_target
+    - regex: '(.+)'
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    metric_relabel_configs:
+    - regex: (.+)
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+
   - job_name: 'promtail'
     dns_sd_configs:
       - names:

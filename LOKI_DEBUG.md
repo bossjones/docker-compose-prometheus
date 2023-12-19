@@ -1,3 +1,21 @@
+# Simple Scalable
+The simple scalable deployment mode, is the preferred way to deploy Loki for most installations. The simple scalable deployment is the default configuration installed by the Loki Helm Chart. This deployment mode is the easiest way to deploy Loki at scale. It strikes a balance between deploying in monolithic mode or deploying each component as a separate microservice.
+
+Note: This deployment mode is sometimes referred to by the acronym SSD for simple scalable deployment, not to be confused with solid state drives. Loki uses an object store.
+Loki's simple scalable deployment mode separates execution paths into read, write, and backend targets. These targets can be scaled independently, letting you customize your Loki deployment to meet your business needs for log ingestion and log query so that your infrastructure costs better match how you use Loki.
+
+The simple scalable deployment mode can scale up to a few TBs of logs per day, however if you go much beyond this, the microservices mode will be a better choice for most users.
+
+Simple scalable mode diagram
+
+The three execution paths in simple scalable mode are each activated by appending the following arguments to Loki on startup:
+
+-target=write - The write target is stateful and is controlled by a Kubernetes StatefulSet. It contains the following components: – Distributor – Ingester
+-target=read - The read target is stateless and can be run as a Kubernetes Deployment that can be scaled automatically. It contains the following components: – Query front end – Queriers
+-target=backend - The backend target is stateful, and is controlled by a Kubernetes StatefulSet. Contains the following components: – Compactor – Index gateways – Query scheduler – Ruler
+The simple scalable deployment mode requires a reverse proxy to be deployed in front of Loki, to direct client API requests to either the read or write nodes. The Loki Helm chart includes a default reverse proxy configuration, using Nginx.
+
+
 via https://github.com/grafana/loki/issues/1045
 
 For reference, the following metrics are currently defined:
