@@ -472,6 +472,25 @@ scrape_configs:
       - __name__
       target_label: cluster
 
+  - job_name: speedtest-exporter
+    scheme: http
+    scrape_interval: 1h
+    scrape_timeout: 1m
+    static_configs:
+    - targets: [speedtest-exporter:9798]
+    relabel_configs:
+    - regex: '(.+)'
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    metric_relabel_configs:
+    - regex: (.+)
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+
   - job_name: syslog_ng_exporter
     scheme: http
     static_configs:
