@@ -11,7 +11,7 @@ ROOT_DIR = $(shell pwd)
 MAKE := make
 
 gpr:
-  git pull --rebase
+    git pull --rebase
 
 restart:
 	docker-compose --env-file env restart pushgateway
@@ -27,7 +27,7 @@ restart:
 	docker-compose --env-file env restart traefik
 
 restart-cadvisor:
-  $(MAKE) gpr;
+    $(MAKE) gpr;
 	docker-compose --env-file env restart pushgateway && \
 	docker-compose --env-file env restart cadvisor && \
 	docker-compose --env-file env restart prometheus && \
@@ -40,7 +40,7 @@ restart-cadvisor:
 	docker-compose --env-file env restart minio && \
 	docker-compose --env-file env restart loki-gateway && \
 	docker-compose --env-file env restart traefik
-  $(MAKE) logs;
+    $(MAKE) logs;
 
 stop:
 	docker-compose --env-file env stop pushgateway
