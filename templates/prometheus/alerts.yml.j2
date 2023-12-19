@@ -40,16 +40,16 @@ groups:
 
   # Alert for any instance that is unreachable for >2 minutes.
   - alert: service_down
-    expr: up == 0
+    expr: 'up == 0 group_left (nodename) node_uname_info{nodename=~".+"}'
     for: 10m
     labels:
       severity: page
     annotations:
       summary: "Instance {{ $labels.instance }} down"
-      description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 2 minutes."
+      description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 2 minutes.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}""
 
   - alert: high_load
-    expr: node_load15 > 3.5
+    expr: 'node_load15 > 3.5 group_left (nodename) node_uname_info{nodename=~".+"}'
     for: 10m
     labels:
       severity: page
