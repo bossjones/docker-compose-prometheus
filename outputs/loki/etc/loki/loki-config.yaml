@@ -67,6 +67,7 @@ distributor:
     ingester_request_timeout: 500ms
 
 ruler:
+  query_stats_enabled: true
   storage:
     type: local
     local:

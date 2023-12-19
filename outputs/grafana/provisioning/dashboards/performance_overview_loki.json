@@ -459,10 +459,10 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "sum by (instance) (loki_store_series_total)",
+          "expr": "sum by (instance, service) (loki_internal_log_messages_total)",
           "instant": false,
           "interval": "",
-          "legendFormat": "{{instance}}",
+          "legendFormat": "{{service}}-{{instance}}",
           "refId": "A"
         }
       ],
@@ -517,7 +517,7 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "sum(loki_store_series_total)",
+          "expr": "sum(loki_internal_log_messages_total)",
           "instant": false,
           "interval": "",
           "legendFormat": "{{instance}}",
@@ -636,7 +636,7 @@
           "expr": "loki_panic_total",
           "instant": false,
           "interval": "",
-          "legendFormat": "{{instance}}",
+          "legendFormat": "{{service}}-{{instance}}",
           "refId": "A"
         }
       ],
@@ -806,7 +806,7 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(cortex_s3_request_duration_seconds_bucket[5m])) by (le,operation))",
+          "expr": "histogram_quantile(0.95, sum(rate(loki_s3_request_duration_seconds_bucket[5m])) by (le,operation))",
           "interval": "",
           "legendFormat": "{{operation}}",
           "refId": "A"
@@ -2425,7 +2425,7 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "sum by (status) (rate(loki_store_series_total[5m]))",
+          "expr": "sum by (status) (rate(loki_internal_log_messages_total[5m]))",
           "instant": false,
           "interval": "",
           "legendFormat": "{{status}}",
