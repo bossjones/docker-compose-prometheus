@@ -1,3 +1,18 @@
+# -*- coding: utf-8 -*-
+# SOURCE: https://github.com/autopilotpattern/jenkins/blob/master/makefile
+MAKEFLAGS += --warn-undefined-variables
+# .SHELLFLAGS := -eu -o pipefail
+
+# SOURCE: https://github.com/luismayta/zsh-servers-functions/blob/b68f34e486d6c4a465703472e499b1c39fe4a26c/Makefile
+# Configuration.
+SHELL = /bin/bash
+ROOT_DIR = $(shell pwd)
+
+MAKE := make
+
+gpr:
+  git pull --rebase
+
 restart:
 	docker-compose --env-file env restart pushgateway
 	docker-compose --env-file env restart prometheus && \
@@ -11,7 +26,8 @@ restart:
 	docker-compose --env-file env restart loki-gateway && \
 	docker-compose --env-file env restart traefik
 
-restart-cadvisor: logs
+restart-cadvisor:
+  $(MAKE) gpr;
 	docker-compose --env-file env restart pushgateway && \
 	docker-compose --env-file env restart cadvisor && \
 	docker-compose --env-file env restart prometheus && \
@@ -24,6 +40,7 @@ restart-cadvisor: logs
 	docker-compose --env-file env restart minio && \
 	docker-compose --env-file env restart loki-gateway && \
 	docker-compose --env-file env restart traefik
+  $(MAKE) logs;
 
 stop:
 	docker-compose --env-file env stop pushgateway
