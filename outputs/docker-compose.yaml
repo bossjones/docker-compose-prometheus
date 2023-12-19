@@ -88,7 +88,7 @@ services:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
   loki-gateway:
-    image: nginx:1.19
+    image: nginx:1.25.3-perl
     container_name: "loki-gateway"
     depends_on:
       - 'loki-read'
