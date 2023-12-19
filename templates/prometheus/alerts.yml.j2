@@ -54,8 +54,8 @@ groups:
     labels:
       severity: page
     annotations:
-      summary: "Instance {{ $labels.instance }} under high load"
-      description: "{{ $labels.instance }} of job {{ $labels.job }} is under high load."
+      summary: Instance {{ $labels.instance }} under high load
+      description: "{{ $labels.instance }} of job {{ $labels.job }} is under high load.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
 - name: loki_alerts
   rules:
