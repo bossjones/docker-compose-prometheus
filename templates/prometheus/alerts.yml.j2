@@ -261,15 +261,15 @@ groups:
             summary: Prometheus target empty (instance {{ $labels.instance }})
             description: "Prometheus has no target in service discovery\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
-# Prometheus is scraping exporters slowly
-      - alert: PrometheusTargetScrapingSlow
-        expr: prometheus_target_interval_length_seconds{quantile="0.9"} > 60
-        for: 5m
-        labels:
-            severity: warning
-        annotations:
-            summary: Prometheus target scraping slow (instance {{ $labels.instance }})
-            description: "Prometheus is scraping exporters slowly\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+# # Prometheus is scraping exporters slowly
+#       - alert: PrometheusTargetScrapingSlow
+#         expr: prometheus_target_interval_length_seconds{quantile="0.9"} > 60
+#         for: 5m
+#         labels:
+#             severity: warning
+#         annotations:
+#             summary: Prometheus target scraping slow (instance {{ $labels.instance }})
+#             description: "Prometheus is scraping exporters slowly\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
 # Prometheus has many scrapes that exceed the sample limit
       - alert: PrometheusLargeScrape
@@ -774,14 +774,14 @@ groups:
         summary: Host high CPU load (instance {{ $labels.instance }})
         description: "CPU load is > 80%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
-    - alert: HostCpuIsUnderutilized
-      expr: '(100 - (rate(node_cpu_seconds_total{mode="idle"}[30m]) * 100) < 20) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
-      for: 1w
-      labels:
-        severity: info
-      annotations:
-        summary: Host CPU is underutilized (instance {{ $labels.instance }})
-        description: "CPU load is < 20% for 1 week. Consider reducing the number of CPUs.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+#    - alert: HostCpuIsUnderutilized
+#      expr: '(100 - (rate(node_cpu_seconds_total{mode="idle"}[30m]) * 100) < 20) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+#      for: 1w
+#      labels:
+#        severity: info
+#      annotations:
+#        summary: Host CPU is underutilized (instance {{ $labels.instance }})
+#        description: "CPU load is < 20% for 1 week. Consider reducing the number of CPUs.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
     - alert: HostCpuStealNoisyNeighbor
       expr: '(avg by(instance) (rate(node_cpu_seconds_total{mode="steal"}[5m])) * 100 > 10) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
