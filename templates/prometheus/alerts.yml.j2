@@ -838,7 +838,7 @@ groups:
         description: "systemd service crashed\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
     - alert: HostPhysicalComponentTooHot
-      expr: '((node_hwmon_temp_celsius * ignoring(label) group_left(instance, job, node, sensor) node_hwmon_sensor_label{label!="tctl"} > 75)) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      expr: '((node_hwmon_temp_celsius * ignoring(label) group_left(instance, job, node, sensor) node_hwmon_sensor_label{label!="tctl"} > 85)) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
       for: 25m
       labels:
         severity: warning

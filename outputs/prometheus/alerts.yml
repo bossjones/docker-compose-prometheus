@@ -627,14 +627,14 @@ groups:
         summary: Container high throttle rate (instance {{ $labels.instance }})
         description: "Container is being throttled\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
-    # - alert: ContainerLowCpuUtilization
-    #   expr: '(sum(rate(container_cpu_usage_seconds_total{name!=""}[3m])) BY (instance, name) * 100) < 20'
-    #   for: 7d
-    #   labels:
-    #     severity: info
-    #   annotations:
-    #     summary: Container Low CPU utilization (instance {{ $labels.instance }})
-    #     description: "Container CPU utilization is under 20% for 1 week. Consider reducing the allocated CPU.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+    - alert: ContainerLowCpuUtilization
+      expr: '(sum(rate(container_cpu_usage_seconds_total{name!=""}[3m])) BY (instance, name) * 100) < 20'
+      for: 7d
+      labels:
+        severity: info
+      annotations:
+        summary: Container Low CPU utilization (instance {{ $labels.instance }})
+        description: "Container CPU utilization is under 20% for 1 week. Consider reducing the allocated CPU.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
     - alert: ContainerLowMemoryUsage
       expr: '(sum(container_memory_working_set_bytes{name!=""}) BY (instance, name) / sum(container_spec_memory_limit_bytes > 0) BY (instance, name) * 100) < 20'
@@ -838,7 +838,7 @@ groups:
         description: "systemd service crashed\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
     - alert: HostPhysicalComponentTooHot
-      expr: '((node_hwmon_temp_celsius * ignoring(label) group_left(instance, job, node, sensor) node_hwmon_sensor_label{label!="tctl"} > 75)) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
+      expr: '((node_hwmon_temp_celsius * ignoring(label) group_left(instance, job, node, sensor) node_hwmon_sensor_label{label!="tctl"} > 85)) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}'
       for: 25m
       labels:
         severity: warning
@@ -1750,3 +1750,5 @@ groups:
     for: 15m
     labels:
       severity: critical
+
+
