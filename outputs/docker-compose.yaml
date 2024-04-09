@@ -291,13 +291,16 @@ services:
     #   https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
     cap_add:
       - NET_ADMIN # Required if you are using Pi-hole as your DHCP server, else not needed
-      - CAP_NET_BIND_SERVICE
-      - CAP_NET_RAW
-      - CAP_NET_ADMIN
-      - CAP_SYS_NICE
-      - CAP_CHOWN
+      # - CAP_NET_BIND_SERVICE
+      # - CAP_NET_RAW
+      # - CAP_NET_ADMIN
+      # - CAP_SYS_NICE
+      # - CAP_CHOWN
     restart: unless-stopped
     environment:
+    # SOURCE: https://github.com/ElPoshoX/pihole-dns-stack/blob/89e05bf357b56132ff7a93ea7c4aeb742aa026aa/docker-compose.yml#L45
+    - FTL_CMD="no-daemon -- --dns-forward-max 5096 --min-cache-ttl 300"
+    - QUERY_LOGGING=true
     - TZ=America/New_York
     - WEBPASSWORD=raspberry
     # Use the Pi-hole web UI to change the DNS settings Interface listening behavior to "Listen on all interfaces, permit all origins", if using Docker's default bridge network setting. (This can also be achieved by setting the environment variable DNSMASQ_LISTENING to all)
@@ -308,6 +311,9 @@ services:
     - PROXY_LOCATION=pi.hole
     # Set to your server's LAN IP, used by web block modes.
     - FTLCONF_LOCAL_IPV4=192.168.3.16
+    # - FTLCONF_RATE_LIMIT=0/0
+    # SOURCE: https://docs.pi-hole.net/ftldns/configfile/#rate_limit
+    - FTLCONF_RATE_LIMIT=5000/60
     # - LOCAL_IPV4=192.168.3.16
     - WEBLOGS_STDOUT=1
     - DHCP_ACTIVE=false
