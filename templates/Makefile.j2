@@ -42,6 +42,11 @@ restart-cadvisor:
 	docker-compose --env-file env restart traefik
 	$(MAKE) logs;
 
+restart-pihole:
+	$(MAKE) gpr;
+	docker-compose --env-file env restart pihole
+	$(MAKE) logs;
+
 stop:
 	docker-compose --env-file env stop pushgateway
 	docker-compose --env-file env stop cadvisor
