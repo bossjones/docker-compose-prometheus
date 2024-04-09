@@ -318,6 +318,11 @@ services:
     #   https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
     cap_add:
       - NET_ADMIN # Required if you are using Pi-hole as your DHCP server, else not needed
+      - CAP_NET_BIND_SERVICE
+      - CAP_NET_RAW
+      - CAP_NET_ADMIN
+      - CAP_SYS_NICE
+      - CAP_CHOWN
     restart: unless-stopped
     environment:
     - TZ=America/New_York
