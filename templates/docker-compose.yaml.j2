@@ -551,14 +551,15 @@ services:
 {% endraw %}
 
 
-  # docker pull prom/pushgateway:v1.6.2
+  # docker pull prom/pushgateway:v1.8.0
   pushgateway:
-    image: prom/pushgateway:v1.6.2
+    image: prom/pushgateway:v1.8.0
     container_name: pushgateway
     expose:
     - 9091
     tty: true
     stdin_open: true
+    restart: always
     ports:
       - 0.0.0.0:9091:9091
     labels:
