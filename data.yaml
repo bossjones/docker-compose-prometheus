@@ -25,4 +25,4 @@ grafana_log_level: 'info'
 pushgateway_log_level: 'debug'
 logging_feature_flag: false
 vector_feature_flag: false
-promtail_feature_flag: true
+promtail_feature_flag: false
