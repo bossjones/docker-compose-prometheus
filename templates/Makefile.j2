@@ -98,3 +98,6 @@ logs:
 
 restart-all:
 	docker compose stop; docker compose -d up --env-file env
+
+port-53:
+	sudo ss -tlnp|grep :53
