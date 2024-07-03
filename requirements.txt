@@ -3,3 +3,5 @@ jinja2-tools
 better_exceptions
 bpython
 yamlfix
+yamllint
+rich
