@@ -14,36 +14,36 @@ gpr:
 	git pull --rebase
 
 restart:
-	docker compose --env-file env -d restart pushgateway
-	docker compose --env-file env -d restart prometheus && \
-	docker compose --env-file env -d restart loki-write && \
-	docker compose --env-file env -d restart loki-read && \
-	docker compose --env-file env -d restart loki-backend && \
-	docker compose --env-file env -d restart grafana && \
-	docker compose --env-file env -d restart promtail && \
-	docker compose --env-file env -d restart grafana && \
-	docker compose --env-file env -d restart minio && \
-	docker compose --env-file env -d restart loki-gateway && \
-	docker compose --env-file env -d restart traefik
+	docker compose --env-file env restart pushgateway
+	docker compose --env-file env restart prometheus && \
+	docker compose --env-file env restart loki-write && \
+	docker compose --env-file env restart loki-read && \
+	docker compose --env-file env restart loki-backend && \
+	docker compose --env-file env restart grafana && \
+	docker compose --env-file env restart promtail && \
+	docker compose --env-file env restart grafana && \
+	docker compose --env-file env restart minio && \
+	docker compose --env-file env restart loki-gateway && \
+	docker compose --env-file env restart traefik
 
 restart-cadvisor:
 	$(MAKE) gpr;
-	docker compose --env-file env -d restart pushgateway && \
-	docker compose --env-file env -d restart cadvisor && \
-	docker compose --env-file env -d restart prometheus && \
-	docker compose --env-file env -d restart loki-write && \
-	docker compose --env-file env -d restart loki-read && \
-	docker compose --env-file env -d restart loki-backend && \
-	docker compose --env-file env -d restart grafana && \
-	docker compose --env-file env -d restart grafana && \
-	docker compose --env-file env -d restart minio && \
-	docker compose --env-file env -d restart loki-gateway && \
-	docker compose --env-file env -d restart traefik
+	docker compose --env-file env restart pushgateway && \
+	docker compose --env-file env restart cadvisor && \
+	docker compose --env-file env restart prometheus && \
+	docker compose --env-file env restart loki-write && \
+	docker compose --env-file env restart loki-read && \
+	docker compose --env-file env restart loki-backend && \
+	docker compose --env-file env restart grafana && \
+	docker compose --env-file env restart grafana && \
+	docker compose --env-file env restart minio && \
+	docker compose --env-file env restart loki-gateway && \
+	docker compose --env-file env restart traefik
 	$(MAKE) logs;
 
 restart-pihole:
 	$(MAKE) gpr;
-	docker compose --env-file env -d restart pihole
+	docker compose --env-file env restart pihole
 	$(MAKE) logs;
 
 stop:
@@ -61,18 +61,18 @@ stop:
 
 
 start:
-	docker compose --env-file env -d start pushgateway
-	docker compose --env-file env -d start cadvisor
-	docker compose --env-file env -d start prometheus
-	docker compose --env-file env -d start loki-write
-	docker compose --env-file env -d start loki-read
-	docker compose --env-file env -d start loki-backend
-	docker compose --env-file env -d start grafana
-	docker compose --env-file env -d start promtail
-	docker compose --env-file env -d restart grafana
-	docker compose --env-file env -d start minio
-	docker compose --env-file env -d start loki-gateway
-	docker compose --env-file env -d start traefik
+	docker compose -d --env-file env start pushgateway
+	docker compose -d --env-file env start cadvisor
+	docker compose -d --env-file env start prometheus
+	docker compose -d --env-file env start loki-write
+	docker compose -d --env-file env start loki-read
+	docker compose -d --env-file env start loki-backend
+	docker compose -d --env-file env start grafana
+	docker compose -d --env-file env start promtail
+	docker compose -d --env-file env restart grafana
+	docker compose -d --env-file env start minio
+	docker compose -d --env-file env start loki-gateway
+	docker compose -d --env-file env start traefik
 
 lint:
 	promtool check rules prometheus/alerts.yml
