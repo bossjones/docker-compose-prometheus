@@ -244,10 +244,11 @@ services:
 
 
 # SEE: https://github.com/pi-hole/pi-hole/issues/4816#issuecomment-1883994394
+# SEE: https://github.com/pi-hole/pi-hole/issues/5635
   pihole:
-    build:
-      context: ./pihole
-    # image: "pihole/pihole:latest"
+    # build:
+    #   context: ./pihole
+    image: "pihole/pihole:2023.11.0"
     # For DHCP it is recommended to remove these ports and instead add: network_mode: "host"
     ports:
       - "53:53/tcp"
@@ -285,10 +286,9 @@ services:
     - TZ=America/New_York
     - WEBPASSWORD=raspberry
     # Use the Pi-hole web UI to change the DNS settings Interface listening behavior to "Listen on all interfaces, permit all origins", if using Docker's default bridge network setting. (This can also be achieved by setting the environment variable DNSMASQ_LISTENING to all)
-    - DNSMASQ_USER=root
+    # - DNSMASQ_USER=root
     - DNSMASQ_LISTENING=all
-    - FTLCONF_dns_listeningMode=all
-    - PIHOLE_UID=0
+    # - PIHOLE_UID=0
     # Set the cache size for dnsmasq. Useful for increasing the default cache size or to set it to 0. Note that when DNSSEC is "true", then this setting is ignored.
     - CUSTOM_CACHE_SIZE=10000
     - PIHOLE_DNS_=127.0.0.1#5335;1.1.1.2;1.0.0.2
@@ -306,7 +306,12 @@ services:
     - DHCP_ACTIVE=false
     - DNSSEC=true
     # Set a password to access the web interface. Not setting one will result in a random password being assigned
+    - FTLCONF_dns_upstreams=127.0.0.1#5335;1.1.1.2;1.0.0.2
     - FTLCONF_webserver_api_password=raspberry
+    - FTLCONF_dns_dnssec=true
+    - TAIL_FTL_LOG=1
+    - FTLCONF_dns_listeningMode=all
+    - ADDITIONAL_PACKAGES="systemd vim curl"
 
     dns:
       - "127.0.0.1"
