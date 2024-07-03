@@ -327,6 +327,7 @@ services:
       # - CAP_SYS_NICE
       # - CAP_CHOWN
     restart: unless-stopped
+    # NOTE: https://github.com/pi-hole/docs/blob/release/v6.0/docs/ftldns/configfile.md#local_ipv4-unset-by-default-pr-1293-local_ipv4-data-toc-labelforce-local-a-reply
     environment:
     # SOURCE: https://github.com/ElPoshoX/pihole-dns-stack/blob/89e05bf357b56132ff7a93ea7c4aeb742aa026aa/docker-compose.yml#L45
     # Customize the options with which dnsmasq gets started. e.g. no-daemon -- --dns-forward-max 300 to increase max. number of concurrent dns queries on high load setups.
@@ -361,6 +362,11 @@ services:
     - TAIL_FTL_LOG=1
     - FTLCONF_dns_listeningMode=all
     - ADDITIONAL_PACKAGES="systemd vim curl"
+    - DEBUG_ALL=true
+    # SOCKET_LISTENING=localonly|all {#socket_listening data-toc-label='Socket Listening'}
+    # Listen only for local socket connections or permit all connections
+    - SOCKET_LISTENING=all
+    - PH_VERBOSE=4
 
     dns:
       - "127.0.0.1"
