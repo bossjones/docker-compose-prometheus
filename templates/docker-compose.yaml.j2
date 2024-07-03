@@ -103,7 +103,6 @@ services:
       # - "8000:8000/tcp"
       - "0.0.0.0:49443:9443"
       - "0.0.0.0:49000:9000"
-    container_name: portainer
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.portainer.rule=Host(`portainer.{{ fqdn }}`)"
