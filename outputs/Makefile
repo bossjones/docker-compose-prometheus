@@ -95,3 +95,6 @@ logs-grafana:
 
 logs:
 	docker compose --env-file env logs -f --tail=50 | grep -v "syslog-ng" | grep -v "pve-exporter" | ccze -A
+
+restart-all:
+	docker compose stop; docker compose -d up --env-file env
