@@ -363,6 +363,10 @@ services:
     - FTLCONF_dns_listeningMode=all
     - ADDITIONAL_PACKAGES="systemd vim curl"
     - DEBUG_ALL=true
+    - DEBUG_DATABASE=true
+    - DEBUG_NETWORKING=true
+    - DEBUG_EDNS0=true
+    - DEBUG_QUERIES=true
     # SOCKET_LISTENING=localonly|all socket_listening data-toc-label='Socket Listening'
     # Listen only for local socket connections or permit all connections
     - SOCKET_LISTENING=all
