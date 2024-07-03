@@ -7,6 +7,6 @@
 # ekofr/pihole-exporter                     <none>                                     e62f0f1cd144   11 months ago       9.15MB
 # pihole/pihole                             <none>                                     566a5a3d4773   13 months ago       301MB
 
-FROM pihole/pihole:566a5a3d4773
+FROM pihole/pihole:2024.06.0
 
 RUN apt update && apt install -y systemd

@@ -287,6 +287,7 @@ services:
     # Use the Pi-hole web UI to change the DNS settings Interface listening behavior to "Listen on all interfaces, permit all origins", if using Docker's default bridge network setting. (This can also be achieved by setting the environment variable DNSMASQ_LISTENING to all)
     - DNSMASQ_USER=root
     - DNSMASQ_LISTENING=all
+    - FTLCONF_dns_listeningMode=all
     - PIHOLE_UID=0
     # Set the cache size for dnsmasq. Useful for increasing the default cache size or to set it to 0. Note that when DNSSEC is "true", then this setting is ignored.
     - CUSTOM_CACHE_SIZE=10000
@@ -304,6 +305,8 @@ services:
     - WEBLOGS_STDOUT=1
     - DHCP_ACTIVE=false
     - DNSSEC=true
+    # Set a password to access the web interface. Not setting one will result in a random password being assigned
+    - FTLCONF_webserver_api_password=raspberry
 
     dns:
       - "127.0.0.1"
