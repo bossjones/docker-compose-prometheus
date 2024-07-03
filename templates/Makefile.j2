@@ -114,3 +114,6 @@ cp-dnsmaq-conf:
 
 network-manager-show:
 	sudo nmcli c show
+
+restart-quick:
+	docker compose --env-file env stop && sleep 100 && docker compose --env-file env up --build -d
