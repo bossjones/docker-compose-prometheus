@@ -523,14 +523,14 @@ services:
     links:
 {% if cadvisor_feature_flag %}
       - cadvisor:cadvisor
-{% endif -%}
+{% endif %}
       - alertmanager:alertmanager
       - loki-gateway:loki-gateway
       - pihole-exporter:pihole-exporter
     depends_on:
 {% if cadvisor_feature_flag %}
       - cadvisor
-{% endif -%}
+{% endif %}
       - alertmanager
       - loki-gateway
       - pihole-exporter
@@ -1060,7 +1060,7 @@ services:
     # - loki
     networks:
     - loki
-{% endif -%}
+{% endif %}
 
   grafana:
     image: grafana/grafana:10.0.1
@@ -1132,7 +1132,7 @@ services:
 {% if promtail_feature_flag %}
     depends_on:
     - promtail
-{% endif -%}
+{% endif %}
     networks:
       loki: null
     ports:

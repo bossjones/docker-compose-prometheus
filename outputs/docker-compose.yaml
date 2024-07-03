@@ -468,12 +468,12 @@ services:
       - "traefik.port=9090"
     links:
       - cadvisor:cadvisor
-- alertmanager:alertmanager
+      - alertmanager:alertmanager
       - loki-gateway:loki-gateway
       - pihole-exporter:pihole-exporter
     depends_on:
       - cadvisor
-- alertmanager
+      - alertmanager
       - loki-gateway
       - pihole-exporter
       - pushgateway
@@ -937,7 +937,8 @@ services:
 #       options:
 #         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
-grafana:
+
+  grafana:
     image: grafana/grafana:10.0.1
     container_name: grafana
     labels:
@@ -1004,7 +1005,7 @@ grafana:
     image: balabit/syslog-ng:latest
     container_name: syslog-ng
     command: -edv --control /syslog-ng/syslog-ng.ctl
-networks:
+    networks:
       loki: null
     ports:
     - protocol: udp
