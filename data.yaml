@@ -15,7 +15,7 @@ cadvisor_feature_flag: true
 traefik_feature_flag: true
 log_generator_feature_flag: false
 syslog_ng_exporter_feature_flag: true
-weave_scope_feature_flag: true
+weave_scope_feature_flag: false
 pihole_feature_flag: true
 loki_log_level: 'info'
 prometheus_log_level: 'info'
@@ -23,3 +23,6 @@ alertmanager_log_level: 'debug'
 promtail_log_level: 'info'
 grafana_log_level: 'info'
 pushgateway_log_level: 'debug'
+logging_feature_flag: false
+vector_feature_flag: false
+promtail_feature_flag: false

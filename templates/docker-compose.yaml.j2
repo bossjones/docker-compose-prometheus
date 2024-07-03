@@ -523,14 +523,14 @@ services:
     links:
 {% if cadvisor_feature_flag %}
       - cadvisor:cadvisor
-{% endif %}
+{% endif -%}
       - alertmanager:alertmanager
       - loki-gateway:loki-gateway
       - pihole-exporter:pihole-exporter
     depends_on:
 {% if cadvisor_feature_flag %}
       - cadvisor
-{% endif %}
+{% endif -%}
       - alertmanager
       - loki-gateway
       - pihole-exporter
@@ -1008,7 +1008,7 @@ services:
 #         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
 
-
+{% if promtail_feature_flag %}
   promtail:
     # SOURCE: https://github.com/gilmrt/docker-compose/blob/5d8d7b3746fba48ba5f559f9913e56ae3d881eee/metrics/docker-compose.yml
     container_name: promtail
@@ -1060,6 +1060,7 @@ services:
     # - loki
     networks:
     - loki
+{% endif -%}
 
   grafana:
     image: grafana/grafana:10.0.1
@@ -1128,8 +1129,10 @@ services:
     image: balabit/syslog-ng:latest
     container_name: syslog-ng
     command: -edv --control /syslog-ng/syslog-ng.ctl
+{% if promtail_feature_flag %}
     depends_on:
     - promtail
+{% endif -%}
     networks:
       loki: null
     ports:
