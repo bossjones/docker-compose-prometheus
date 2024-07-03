@@ -101,3 +101,6 @@ restart-all:
 
 port-53:
 	sudo ss -tlnp|grep :53
+
+stop-start:
+  docker compose --env-file env stop && docker compose --env-file env up -d
