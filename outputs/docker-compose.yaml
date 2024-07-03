@@ -296,8 +296,8 @@ services:
     - FTLCONF_LOCAL_IPV4=192.168.3.16
     # - FTLCONF_RATE_LIMIT=0/0
     # SOURCE: https://docs.pi-hole.net/ftldns/configfile/#rate_limit
-    # - FTLCONF_RATE_LIMIT=5000/60
-    - FTLCONF_RATE_LIMIT=0/0
+    - FTLCONF_RATE_LIMIT=5000/60
+    # - FTLCONF_RATE_LIMIT=0/0
     # - LOCAL_IPV4=192.168.3.16
     - WEBLOGS_STDOUT=1
     - DHCP_ACTIVE=false
