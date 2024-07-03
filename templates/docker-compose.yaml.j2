@@ -295,9 +295,9 @@ services:
 # SEE: https://github.com/pi-hole/pi-hole/issues/5635
 {% if pihole_feature_flag %}
   pihole:
-    # build:
-    #   context: ./pihole
-    image: "pihole/pihole:2023.11.0"
+    build:
+      context: ./pihole
+    # image: "pihole/pihole:2023.11.0"
     # For DHCP it is recommended to remove these ports and instead add: network_mode: "host"
     ports:
       - "53:53/tcp"
