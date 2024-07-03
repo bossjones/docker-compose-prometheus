@@ -104,3 +104,6 @@ port-53:
 
 stop-start:
   docker compose --env-file env stop && docker compose --env-file env up -d
+
+cp-dnsmaq-conf:
+  docker cp pihole/dnsmasq.d/02-systemd-override.conf pihole_dnsmasq:/etc/dnsmasq.d/02-systemd-override.conf

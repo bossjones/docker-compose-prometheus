@@ -243,7 +243,7 @@ services:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
 
-
+# SEE: https://github.com/pi-hole/pi-hole/issues/4816#issuecomment-1883994394
   pihole:
     build:
       context: ./pihole
