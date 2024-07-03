@@ -101,9 +101,16 @@ restart-all:
 
 port-53:
 	sudo ss -tlnp|grep :53
+get-ports:
+	sudo ss -upln
+	echo "lsof"
+	sudo lsof -nP -iUDP
 
 stop-start:
-  docker compose --env-file env stop && docker compose --env-file env up -d
+	docker compose --env-file env stop && docker compose --env-file env up -d
 
 cp-dnsmaq-conf:
-  docker cp pihole/dnsmasq.d/02-systemd-override.conf pihole_dnsmasq:/etc/dnsmasq.d/02-systemd-override.conf
+	docker cp pihole/dnsmasq.d/02-systemd-override.conf pihole_dnsmasq:/etc/dnsmasq.d/02-systemd-override.conf
+
+network-manager-show:
+	sudo nmcli c show
