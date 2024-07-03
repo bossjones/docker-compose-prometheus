@@ -316,7 +316,9 @@ services:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
   pihole-exporter:
-    image: "ekofr/pihole-exporter:latest"
+    build:
+      context: ./pihole
+    # image: "ekofr/pihole-exporter:latest"
     # For DHCP it is recommended to remove these ports and instead add: network_mode: "host"
     hostname: 'pihole-exporter'
     ports:
@@ -340,6 +342,7 @@ services:
     - PIHOLE_PASSWORD=raspberry
     - PIHOLE_HOSTNAME=pihole
     - PIHOLE_PORT=80
+    - PIHOLE_PROTOCOL="http"
     networks:
     - loki
     depends_on:
