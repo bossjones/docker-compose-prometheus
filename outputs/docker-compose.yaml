@@ -277,12 +277,16 @@ services:
     restart: unless-stopped
     environment:
     # SOURCE: https://github.com/ElPoshoX/pihole-dns-stack/blob/89e05bf357b56132ff7a93ea7c4aeb742aa026aa/docker-compose.yml#L45
+    # Customize the options with which dnsmasq gets started. e.g. no-daemon -- --dns-forward-max 300 to increase max. number of concurrent dns queries on high load setups.
     - FTL_CMD="no-daemon -- --dns-forward-max 5096 --min-cache-ttl 300"
     - QUERY_LOGGING=true
     - TZ=America/New_York
     - WEBPASSWORD=raspberry
     # Use the Pi-hole web UI to change the DNS settings Interface listening behavior to "Listen on all interfaces, permit all origins", if using Docker's default bridge network setting. (This can also be achieved by setting the environment variable DNSMASQ_LISTENING to all)
+    - DNSMASQ_USER=root
     - DNSMASQ_LISTENING=all
+    # Set the cache size for dnsmasq. Useful for increasing the default cache size or to set it to 0. Note that when DNSSEC is "true", then this setting is ignored.
+    - CUSTOM_CACHE_SIZE=10000
     - PIHOLE_DNS_=127.0.0.1#5335;1.1.1.2;1.0.0.2
     - NETWORK_ACCESS=internal
     - VIRTUAL_HOST=pi.hole
@@ -291,7 +295,8 @@ services:
     - FTLCONF_LOCAL_IPV4=192.168.3.16
     # - FTLCONF_RATE_LIMIT=0/0
     # SOURCE: https://docs.pi-hole.net/ftldns/configfile/#rate_limit
-    - FTLCONF_RATE_LIMIT=5000/60
+    # - FTLCONF_RATE_LIMIT=5000/60
+    - FTLCONF_RATE_LIMIT=0/0
     # - LOCAL_IPV4=192.168.3.16
     - WEBLOGS_STDOUT=1
     - DHCP_ACTIVE=false
