@@ -937,6 +937,57 @@ services:
 #       options:
 #         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
+  promtail:
+    # SOURCE: https://github.com/gilmrt/docker-compose/blob/5d8d7b3746fba48ba5f559f9913e56ae3d881eee/metrics/docker-compose.yml
+    container_name: promtail
+    image: grafana/promtail:2.8.3
+    restart: always
+    depends_on:
+      - 'loki-gateway'
+      - 'loki-read'
+      - 'loki-write'
+      - 'loki-backend'
+    volumes:
+      # - /var/log:/var/log:ro
+      - ./promtail/promtail-gateway.yaml:/etc/promtail/promtail-gateway.yaml:ro
+      # - ./promtail/promtail-debug.yaml:/etc/promtail/promtail-debug.yaml:rw
+      # - /var/log/journal/:/var/log/journal/:ro
+      # - /run/log/journal/:/run/log/journal/:ro
+      - /etc/machine-id:/etc/machine-id:ro
+      - ./promtail/var/run/promtail:/var/run/promtail
+      # to read container labels and logs
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      # - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      # - /home/pi/dev/bossjones/elk-docker/rsyslog-conf/log:/log
+      # so we can get generated logs
+      - ./loki/:/var/log/:ro
+    ports:
+      - "9080:9080"
+    expose:
+    - 9080
+    command:
+    - '-config.file=/etc/promtail/promtail-gateway.yaml'
+    # - '-print-config-stderr'
+    # - '-log-config-reverse-order'
+    - '--inspect'
+    # environment:
+    #- TZ=UTC
+    tty: true
+    stdin_open: true
+    env_file:
+      - ./env
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.promtail.rule=Host(`promtail.scarlettlab.home`)"
+    - "traefik.http.routers.promtail.entrypoints=web"
+    - "traefik.http.routers.promtail.service=promtail"
+    - "traefik.http.services.promtail.loadbalancer.server.port=9080"
+    - "traefik.port=9080"
+    # depends_on:
+    # - loki
+    networks:
+    - loki
 
   grafana:
     image: grafana/grafana:10.0.1
@@ -1005,6 +1056,8 @@ services:
     image: balabit/syslog-ng:latest
     container_name: syslog-ng
     command: -edv --control /syslog-ng/syslog-ng.ctl
+    depends_on:
+    - promtail
     networks:
       loki: null
     ports:
