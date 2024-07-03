@@ -383,6 +383,8 @@ services:
       - "traefik.port=9617"
       # - "traefik.docker.network=loki"
     # Volumes store your data between container upgrades
+    tty: true
+    stdin_open: true
     expose:
     - 9617
     restart: unless-stopped
