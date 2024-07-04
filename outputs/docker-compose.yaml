@@ -384,11 +384,11 @@ services:
     - FTLCONF_TAIL_FTL_LOG=1
     - FTLCONF_dns_listeningMode=all
     - ADDITIONAL_PACKAGES="systemd vim curl"
-    -  FTLCONF_DEBUG_ALL=true
-    -  FTLCONF_DEBUG_DATABASE=true
-    -  FTLCONF_DEBUG_NETWORKING=true
-    -  FTLCONF_DEBUG_EDNS0=true
-    -  FTLCONF_DEBUG_QUERIES=true
+    - FTLCONF_DEBUG_ALL=true
+    - FTLCONF_DEBUG_DATABASE=true
+    - FTLCONF_DEBUG_NETWORKING=true
+    - FTLCONF_DEBUG_EDNS0=true
+    - FTLCONF_DEBUG_QUERIES=true
     # SOCKET_LISTENING=localonly|all socket_listening data-toc-label='Socket Listening'
     # Listen only for local socket connections or permit all connections
     - FTLCONF_SOCKET_LISTENING=all
