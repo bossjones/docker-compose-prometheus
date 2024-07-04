@@ -1227,6 +1227,7 @@ services:
     networks:
     - loki
 
+{% if syslog_ng_feature_flag %}
   # https://github.com/lux4rd0/grafana-loki-syslog-aio/blob/main/docker-compose-with-generator.yml
   syslog-ng:
     image: balabit/syslog-ng:latest
@@ -1249,6 +1250,7 @@ services:
     volumes:
     - ./syslog-ng/syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf:ro
     - ./syslog-ng:/syslog-ng:rw
+{% endif %}
 
 {% if syslog_ng_exporter_feature_flag %}
   syslog_ng_exporter:

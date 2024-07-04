@@ -491,22 +491,6 @@ scrape_configs:
       - __name__
       target_label: cluster
 
-  - job_name: syslog_ng_exporter
-    scheme: http
-    static_configs:
-    - targets: [syslog_ng_exporter:9577]
-    relabel_configs:
-    - regex: '(.+)'
-      replacement: k3d
-      source_labels:
-      - __name__
-      target_label: cluster
-    metric_relabel_configs:
-    - regex: (.+)
-      replacement: k3d
-      source_labels:
-      - __name__
-      target_label: cluster
 
   - job_name: minio-cluster
     metrics_path: /minio/v2/metrics/cluster
