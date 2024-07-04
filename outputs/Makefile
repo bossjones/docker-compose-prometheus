@@ -133,6 +133,17 @@ litecli:
 	docker exec -it pihole bash -c litecli --help
 
 netplan-apply:
+  sudo mkdir -p /etc/systemd/resolved.conf.d
+  sudo sh -c 'echo "[Resolve]" > /etc/systemd/resolved.conf.d/disable-stub.conf'
+  sudo sh -c 'echo "DNSStubListener=no" >> /etc/systemd/resolved.conf.d/disable-stub.conf'
+  sudo sh -c 'echo "DNS=127.0.0.1" >> /etc/systemd/resolved.conf.d/disable-stub.conf'
+  sudo sh -c 'echo "FallbackDNS=1.1.1.2" >> /etc/systemd/resolved.conf.d/disable-stub.conf'
+  sudo sh -c 'echo "Domains=~." >> /etc/systemd/resolved.conf.d/disable-stub.conf'
+  sudo sh -c 'echo "DNSSEC=no" >> /etc/systemd/resolved.conf.d/disable-stub.conf'
+  echo -e "\n\n"
+  cat '/etc/systemd/resolved.conf.d/disable-stub.conf'
+  sudo systemctl daemon-reload
+  sudo systemctl restart systemd-resolved
 	docker cp pihole/dnsmasq.d/02-systemd-override.conf pihole:/etc/dnsmasq.d/02-systemd-override.conf
 	sudo ss -tlnp|grep :53
 	@echo ""
