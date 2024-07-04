@@ -8,7 +8,8 @@
 # pihole/pihole                             <none>                                     566a5a3d4773   13 months ago       301MB
 
 # FROM pihole/pihole:2023.11.0
-FROM pihole/pihole:2024.06.0
+# FROM pihole/pihole:2024.06.0
+FROM pihole/pihole:development-v6
 
 ENV PYTHONUNBUFFERED 1
 ENV DNSMASQ_USER root
@@ -21,3 +22,4 @@ RUN apt update && apt install -y systemd vim ccze python3-pip python3-dev screen
 
 
 LABEL description="bossjones version of pihole"
+LABEL base="pihole/pihole:development-v6"

@@ -376,7 +376,7 @@ services:
     - INSTALL_WEB_INTERFACE=true
     # SOURCE: https://github.com/ElPoshoX/pihole-dns-stack/blob/89e05bf357b56132ff7a93ea7c4aeb742aa026aa/docker-compose.yml#L45
     # Customize the options with which dnsmasq gets started. e.g. no-daemon -- --dns-forward-max 300 to increase max. number of concurrent dns queries on high load setups.
-    - FTL_CMD="no-daemon -- --dns-forward-max 5096 --min-cache-ttl 300"
+    - FTL_CMD='no-daemon -- --dns-forward-max 5096 --min-cache-ttl 300'
     - QUERY_LOGGING=true
     - TZ=America/New_York
     - WEBPASSWORD=raspberry
