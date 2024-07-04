@@ -133,14 +133,14 @@ litecli:
 	docker exec -it pihole bash -c litecli --help
 
 netplan-apply:
-  docker cp pihole/dnsmasq.d/02-systemd-override.conf pihole_dnsmasq:/etc/dnsmasq.d/02-systemd-override.conf
-  sudo ss -tlnp|grep :53
-  @echo ""
+	docker cp pihole/dnsmasq.d/02-systemd-override.conf pihole_dnsmasq:/etc/dnsmasq.d/02-systemd-override.conf
+	sudo ss -tlnp|grep :53
+	@echo ""
 	sudo cp -av pihole/etc/netplan/02-pihole.yaml /etc/netplan/01-network-manager-all.yaml
 	sudo systemctl restart systemd-resolved
 	sleep 60
 	sudo netplan apply
 	sleep 30
-  sudo ss -tlnp|grep :53
-  @echo ""
+	sudo ss -tlnp|grep :53
+	@echo ""
 	sudo journalctl -f | grep -v unbound_exporter | ccze -A
