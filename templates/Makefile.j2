@@ -121,3 +121,13 @@ restart-quick:
 get-docker-logs:
 	sudo systemctl status --full --no-pager pihole-FTL.service
 	sudo -u pihole pihole-FTL -f | ccze -A
+
+# SOURCE: https://ubuntu.com/core/docs/networkmanager/exploring-network-status
+network-status:
+	echo -e "Show the status of devices known to NetworkManager:\n\n"
+	sudo nmcli d
+	echo -e "To show the current status of each of NetworkManager's connections:\n\n"
+	sudo nmcli c
+
+litecli:
+  docker exec -it pihole bash -c litecli --help

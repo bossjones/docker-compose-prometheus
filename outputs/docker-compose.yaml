@@ -92,7 +92,7 @@ services:
 # SEE: https://github.com/pi-hole/pi-hole/issues/5635
   portainer:
     image: "portainer/portainer-ce:2.20.3"
-    command: -H unix:///var/run/docker.sock --admin-password $$2y$$05$$cQ4zB2SEdP4U3kkNhUV.Gu/xPdE4wSKEo1ncBFfKeERMI6IiXbg8y --http-enabled true
+    command: -H unix:///var/run/docker.sock --admin-password $$2y$$05$$cQ4zB2SEdP4U3kkNhUV.Gu/xPdE4wSKEo1ncBFfKeERMI6IiXbg8y --http-enabled
     container_name: "portainer"
     ports:
       # - "8000:8000/tcp"
@@ -329,7 +329,7 @@ services:
     - TZ=America/New_York
     - WEBPASSWORD=raspberry
     # Use the Pi-hole web UI to change the DNS settings Interface listening behavior to "Listen on all interfaces, permit all origins", if using Docker's default bridge network setting. (This can also be achieved by setting the environment variable DNSMASQ_LISTENING to all)
-    # - DNSMASQ_USER=root
+    - DNSMASQ_USER=root
     - DNSMASQ_LISTENING=all
     # - PIHOLE_UID=0
     # Set the cache size for dnsmasq. Useful for increasing the default cache size or to set it to 0. Note that when DNSSEC is "true", then this setting is ignored.
