@@ -144,3 +144,7 @@ netplan-apply:
 	sudo ss -tlnp|grep :53
 	@echo ""
 	sudo journalctl -f | grep -v unbound_exporter | ccze -A
+
+# SOURCE: https://gist.github.com/deviantony/62c009b41bde5e078b1a7de9f11f5e55
+generate-pass:
+	docker run --rm httpd:2.4-alpine htpasswd -nbB admin password | cut -d ":" -f 2 | sed 's/\$/\$\$/g'
