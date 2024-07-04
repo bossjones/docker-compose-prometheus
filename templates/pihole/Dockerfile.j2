@@ -13,6 +13,7 @@ FROM pihole/pihole:2024.06.0
 
 ENV PYTHONUNBUFFERED 1
 ENV DNSMASQ_USER root
+ENV FTL_CMD "no-daemon -- --dns-forward-max 5096 --min-cache-ttl 300"
 
 COPY ./var/www/html/user.ini /var/www/html/.user.ini
 COPY ./screenrc /root/.screenrc
