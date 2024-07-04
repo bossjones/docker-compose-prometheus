@@ -90,6 +90,35 @@ services:
 
 # SEE: https://github.com/pi-hole/pi-hole/issues/4816#issuecomment-1883994394
 # SEE: https://github.com/pi-hole/pi-hole/issues/5635
+  portainer:
+    image: "portainer/portainer-ce:2.20.3"
+    command: -H unix:///var/run/docker.sock --admin-password '$$2y$$05$$cRSKE60ksnVWUXwsvXu1HO/dQVXEZ0W.ImbTSokLdQ58ASu.gG7j2' --http-enabled
+    container_name: "portainer"
+    ports:
+      # - "8000:8000/tcp"
+      - "0.0.0.0:49443:9443"
+      - "0.0.0.0:49000:9000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.scarlettlab.home`)"
+      - "traefik.http.routers.portainer.entrypoints=web"
+      - "traefik.http.routers.portainer.service=portainer"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9443"
+      - "traefik.port=49443"
+    expose:
+    - 49443
+    - 49000
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - 'portainer_data:/data'
+    restart: always
+    networks:
+    - loki
+
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
   loki-gateway:
     image: nginx:1.25.3-perl
