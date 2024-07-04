@@ -92,7 +92,8 @@ services:
 # SEE: https://github.com/pi-hole/pi-hole/issues/5635
   portainer:
     image: "portainer/portainer-ce:2.20.3"
-    command: -H unix:///var/run/docker.sock --admin-password '$$2y$$05$$cRSKE60ksnVWUXwsvXu1HO/dQVXEZ0W.ImbTSokLdQ58ASu.gG7j2' --http-enabled
+    # command: -H unix:///var/run/docker.sock --admin-password '$$2y$$05$$cRSKE60ksnVWUXwsvXu1HO/dQVXEZ0W.ImbTSokLdQ58ASu.gG7j2' --http-enabled --log-level "DEBUG"
+    command: ['--host', 'unix:///var/run/docker.sock','--admin-password', '$$$$2y$$$$05$$$$bsb.XmF.r2DU6/9oVUaDxu3.Lxhmg1R8M0NMLK6JJKUiqUcaNjvdu', '--http-enabled ', '--log-level', "DEBUG"]
     container_name: "portainer"
     ports:
       # - "8000:8000/tcp"
