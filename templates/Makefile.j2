@@ -117,3 +117,7 @@ network-manager-show:
 
 restart-quick:
 	docker compose --env-file env stop && sleep 100 && docker compose --env-file env up --build -d
+
+get-docker-logs:
+	sudo systemctl status --full --no-pager pihole-FTL.service
+	sudo -u pihole pihole-FTL -f | ccze -A
