@@ -15,7 +15,7 @@ ENV PYTHONUNBUFFERED 1
 ENV DNSMASQ_USER root
 
 COPY ./pihole/var/www/html/.user.ini /var/www/html/.user.ini
-COPY ./pihole/.screenrc /root/.screenrc
+COPY ./pihole/screenrc /root/.screenrc
 
 RUN apt update && apt install -y systemd vim ccze python3-pip python3-dev screen gdb man && \
     pip install -U litecli

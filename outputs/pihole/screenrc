@@ -1,0 +1,117 @@
+# # Disable the startup message
+# startup_message off
+#
+# # Set a large scrollback buffer
+# defscrollback 32000
+#
+# # Always start `screen` with UTF-8 enabled (`screen -U`)
+# defutf8 on
+
+# NOTE: Allows you to view python REPL and more
+#Turn off Start Message
+startup_message off
+
+#Automatically Detach Session
+autodetach on
+
+#Use utf8
+defutf8 on
+
+#Status Bar and Info Bar
+
+backtick 1 60 60 /usr/bin/whoami
+
+caption always "%{-b gk}%-w%{+b kg}%50>%n %t%{-b gk}%+w%< %= %{y}%1`%{c}@%{m}%H %{w}%D %M %d %{w}%C:%s%a"
+hardstatus on
+hardstatus alwayslastline "shortcuts: [C-a] c = new <space> = next <backspace> = previous <shift> a = rename d/r = detach, retach :quit = end session"
+
+## set the default shell
+#shell bash
+defshell -bash      # dash makes it a login shell
+
+defscrollback 50000
+# bind k
+# bind ^k
+# bind .
+# bind ^\
+# bind \\
+# bind ^h
+# bind h
+# bind 'K' kill
+# bind 'I' login on
+# bind 'O' login off
+# bind '}' history
+#
+# bind ^] paste [.]
+
+# # layouts
+# layout autosave on
+# layout new one
+# select 1
+# layout new two
+# select 1
+# split
+# resize -v +8
+# focus down
+# select 4
+# focus up
+# layout new three
+# select 1
+# split
+# resize -v +7
+# focus down
+# select 3
+# split -v
+# resize -h +10
+# focus right
+# select 4
+# focus up
+#
+# layout attach one
+# layout select one
+
+# navigating regions with Ctrl-arrows
+bindkey "^[[1;5D" focus left
+bindkey "^[[1;5C" focus right
+bindkey "^[[1;5A" focus up
+bindkey "^[[1;5B" focus down
+
+# Sets or toggles the visual bell setting for the current window
+vbell                 on
+
+# Define the time that all windows monitored for silence should wait before displaying a message. Default is 30 seconds.
+silencewait           15              # default: 30
+
+# Defines a directory where hardcopy files will be placed. If unset, hardcopys are dumped in screen's current working directory.
+hardcopydir           $HOME/.hardcopy
+
+# Allow mouse scrollback
+# termcapinfo xterm* ti@:te@
+termcapinfo xterm-256color|xterm-color|xterm|xterms|xs|rxvt ti@:te@
+
+# mouse tracking allows to switch region focus by clicking
+mousetrack
+
+# terminfo and termcap for nice 256 color terminal
+# allow bold colors - necessary for some reason
+attrcolor b ".I"
+
+# Change background-color-erase setting. If 'bce' is set to on, all characters cleared by an erase/insert/scroll/clear operation will be displayed in the current background color. Otherwise the default background color is used.
+defbce on
+
+term xterm
+
+; bind ( eval "writebuf" "exec sh -c 'pbcopy < /tmp/screen-exchange'"
+; bind ")" eval "exec sh -c 'pbpaste > /tmp/screen-exchange'"
+
+#Use the alternate screen - helps with quiting vim and not messing up current window
+altscreen on
+
+# To make underlined text show in color add this to your ~/.screenrc file
+attrcolor u "-u R"
+
+# To stop the extraneous underlining, add this to your ~/.screenrc file:
+attrcolor d -d
+
+# screens
+screen -t 'zsh'
