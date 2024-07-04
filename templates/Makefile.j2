@@ -139,6 +139,7 @@ netplan-apply:
 	sudo cp -av pihole/etc/netplan/02-pihole.yaml /etc/netplan/01-network-manager-all.yaml
 	sudo systemctl restart systemd-resolved
 	sleep 60
+	sudo netplan generate
 	sudo netplan apply
 	sleep 30
 	sudo ss -tlnp|grep :53
