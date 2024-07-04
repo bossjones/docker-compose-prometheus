@@ -134,6 +134,7 @@ litecli:
 
 # NOTE: https://github.com/systemd/systemd/issues/13432
 netplan-apply:
+	sudo resolvectl log-level debug
 	sudo systemctl status NetworkManager.service
 	sudo mkdir -p /etc/systemd/resolved.conf.d
 	sudo sh -c 'echo "[Resolve]" > /etc/systemd/resolved.conf.d/disable-stub.conf'
@@ -175,3 +176,8 @@ journal-networkd:
 
 journal-resolved:
 	sudo journalctl -b -u systemd-resolved | ccze -A
+
+# SOURCE: https://github.com/draios/sysdig/wiki/Sysdig-Examples
+# Show the network data exchanged with the host 192.168.0.1
+sysdig-network-localhost:
+	sudo sysdig -s2000 -A -c echo_fds fd.cip=127.0.0.1
