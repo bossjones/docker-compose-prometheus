@@ -195,7 +195,9 @@ sysdig-view-container-cpu-pihole:
 	sudo sysdig -pc -c topprocs_cpu container.name=pihole
 
 
-# made by chatgpt
+###########################################################################################
+# made by chatgpt: via https://github.com/draios/sysdig/wiki/Sysdig-Examples
+###########################################################################################
 
 # This task displays the network bandwidth usage of the processes running inside the pihole container.
 view-network-bandwidth:
@@ -216,3 +218,53 @@ view-top-network-connections:
 # This task shows all the interactive commands executed inside the pihole container.
 view-interactive-commands:
 	sudo sysdig -pc -c spy_users container.name=pihole
+
+# Application
+# This task displays all the GET HTTP requests made by the machine.
+see-http-get-requests:
+	sudo sysdig -s 2000 -A -c echo_fds fd.port=80 and evt.buffer contains GET
+
+# This task displays all the SQL SELECT queries made by the machine.
+see-sql-select-queries:
+	sudo sysdig -s 2000 -A -c echo_fds evt.buffer contains SELECT
+
+# This task displays the queries made via Apache to an external MySQL server in real-time.
+see-apache-mysql-queries:
+	sysdig -s 2000 -A -c echo_fds fd.sip=192.168.30.5 and proc.name=apache2 and evt.buffer contains SELECT
+
+# Disk I/O
+# This task displays the top processes in terms of disk bandwidth usage.
+see-top-disk-bandwidth-processes:
+	sysdig -c topprocs_file
+
+# This task lists the processes that are using a high number of files.
+list-high-file-usage-processes:
+	sysdig -c fdcount_by proc.name "fd.type=file"
+
+# This task displays the top files in terms of read+write bytes.
+see-top-read-write-files:
+	sysdig -c topfiles_bytes
+
+# This task displays the top files that Apache has been reading from or writing to.
+see-apache-read-write-files:
+	sysdig -c topfiles_bytes proc.name=httpd
+
+# This task provides a basic opensnoop, snooping file opens as they occur.
+snoop-file-opens:
+	sysdig -p "%12user.name %6proc.pid %12proc.name %3fd.num %fd.typechar %fd.name" evt.type=open
+
+# This task displays the top directories in terms of read+write disk activity.
+see-top-rw-directories:
+	sysdig -c fdbytes_by fd.directory "fd.type=file"
+
+# This task displays the top files in terms of read+write disk activity in the /tmp directory.
+see-tmp-directory-rw-files:
+	sysdig -c fdbytes_by fd.filename "fd.directory=/tmp/"
+
+# This task observes the I/O activity on all the files named 'passwd'.
+observe-passwd-io-activity:
+	sysdig -A -c echo_fds "fd.filename=passwd"
+
+# This task displays I/O activity by FD type.
+display-io-by-fd-type:
+	sysdig -c fdbytes_by fd.type
