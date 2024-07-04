@@ -1,9 +1,46 @@
+# Let NetworkManager manage all devices on this system
 network:
+  version: 2
+  renderer: "NetworkManager"
     ethernets:
         enp0s25:
+            addresses:
+            - "192.168.1.0/24"
+            - "192.168.2.0/24"
+            - "192.168.3.0/24"
+            # This setting enables DHCP for IPv4 on the ens160 interface, allowing it to automatically obtain an IP address, subnet mask, gateway, and DNS settings from a DHCP server.
             dhcp4: true
+            # This key allows for overriding specific DHCP settings.
             dhcp4-overrides:
+                # This setting within dhcp4-overrides disables the use of DNS settings provided by the DHCP server. Instead, it will use the DNS settings specified in the nameservers section.
                 use-dns: false
             nameservers:
-                addresses: [127.0.0.1]
-    version: 2
+                addresses:
+                - 127.0.0.1
+                # - 127.0.0.53
+                - 1.1.1.2
+                - 1.0.0.2
+                search:
+                - scarlettlab.home
+
+
+# network:
+#   version: 2
+#   ethernets:
+#     enp5s0:
+#       addresses:
+#       - "192.168.0.9/24"
+#       nameservers:
+#         addresses:
+#         - 192.168.0.9 # This is Pihole Server
+#         - 8.8.8.8     # This what I add to solve the issue.
+#         search:
+#         - fritz.box
+#       gateway4: 192.168.0.1
+
+# pi@boss-monitor ~/dev/bossjones/docker-compose-prometheus/outputs feature-perf* ⇣
+# ❯ cat /etc/netplan/01-network-manager-all.yaml
+# # Let NetworkManager manage all devices on this system
+# network:
+#   version: 2
+#   renderer: NetworkManager

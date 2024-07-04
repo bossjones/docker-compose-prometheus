@@ -130,4 +130,12 @@ network-status:
 	sudo nmcli c
 
 litecli:
-  docker exec -it pihole bash -c litecli --help
+	docker exec -it pihole bash -c litecli --help
+
+netplan-apply:
+	sudo cp -av outputs/pihole/etc/netplan/02-pihole.yaml /etc/netplan/01-network-manager-all.yaml
+	sudo systemctl restart systemd-resolved
+	sleep 60
+	sudo netplan apply
+	sleep 30
+	sudo journalctl -f | grep -v unbound_exporter | ccze -A

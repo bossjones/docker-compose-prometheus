@@ -17,3 +17,5 @@ COPY ./pihole/.screenrc /root/.screenrc
 
 RUN apt update && apt install -y systemd vim ccze python3-pip python3-dev screen gdb && \
     pip install -U litecli
+
+LABEL description="bossjones version of pihole"
