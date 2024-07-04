@@ -116,7 +116,7 @@ network-manager-show:
 	sudo nmcli c show
 
 restart-quick:
-	docker compose --env-file env stop && sleep 100 && docker compose --env-file env up --build -d
+	git pull --rebase; docker compose --env-file env stop && sleep 100 && docker compose --env-file env up --build -d
 
 get-docker-logs:
 	sudo systemctl status --full --no-pager pihole-FTL.service
