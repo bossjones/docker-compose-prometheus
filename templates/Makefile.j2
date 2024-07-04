@@ -132,7 +132,9 @@ network-status:
 litecli:
 	docker exec -it pihole bash -c litecli --help
 
+# NOTE: https://github.com/systemd/systemd/issues/13432
 netplan-apply:
+	sudo systemctl status NetworkManager.service
 	sudo mkdir -p /etc/systemd/resolved.conf.d
 	sudo sh -c 'echo "[Resolve]" > /etc/systemd/resolved.conf.d/disable-stub.conf'
 	sudo sh -c 'echo "DNSStubListener=no" >> /etc/systemd/resolved.conf.d/disable-stub.conf'
@@ -149,12 +151,19 @@ netplan-apply:
 	@echo ""
 	sudo cp -av pihole/etc/netplan/02-pihole.yaml /etc/netplan/01-network-manager-all.yaml
 	sudo systemctl restart systemd-resolved
+	# sudo service systemd-resolved restart
+	sudo systemctl restart NetworkManager
+	sudo resolvectl flush-caches
+	sudo resolvectl status
 	sleep 60
 	sudo netplan generate
 	sudo netplan apply
 	sleep 30
 	sudo ss -tlnp|grep :53
 	@echo ""
+	sudo resolvectl statistics
+	sudo resolvectl status
+	ping -c 1 google.com
 	sudo journalctl -f | grep -v unbound_exporter | ccze -A
 
 # SOURCE: https://gist.github.com/deviantony/62c009b41bde5e078b1a7de9f11f5e55
