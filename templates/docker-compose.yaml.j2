@@ -359,6 +359,10 @@ services:
     #   https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
     cap_add:
       - NET_ADMIN # Required if you are using Pi-hole as your DHCP server, else not needed
+      - SYS_NICE  # CAP_SYS_NICE
+      - CHOWN
+      - NET_RAW
+      - NET_BIND_SERVICE
       # - CAP_NET_BIND_SERVICE
       # - CAP_NET_RAW
       # - CAP_NET_ADMIN
