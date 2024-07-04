@@ -22,6 +22,8 @@ network:
             - 1.0.0.2
             search:
             - scarlettlab.home
+            - lan
+            - hole
 
 
 # network:

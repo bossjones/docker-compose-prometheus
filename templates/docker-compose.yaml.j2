@@ -405,7 +405,7 @@ services:
     # But now, the WebUI of pihole is not reachable by Traefik container anymore, as these containers are connected via docker bridge network, # and     the lighttpd listens only on the primary host and loopback interface.
     #
     # When setting FTLCONF_LOCAL_IPV4 to 0.0.0.0, proxy is working, but name resolution of docker host not.
-    # LOCAL_IPV4= (unset by default, PR #1293)¶
+    # LOCAL_IPV4= (unset by default, PR #1293)
     # By default, FTL determines the address of the interface a query arrived on and uses this address for replying to A queries with the most suitable address for the requesting client. This setting can be used to use a fixed, rather than the dynamically obtained, address when Pi-hole responds to the following names:
 
     # pi.hole
@@ -422,7 +422,7 @@ services:
     - WEBLOGS_STDOUT=1
     - DHCP_ACTIVE=false
     - DNSSEC=true
-    - IPv6=false
+    # - IPv6=false
     - TEMPERATUREUNIT=f
     # ************************************************************************************
     # Set a password to access the web interface. Not setting one will result in a random password being assigned
