@@ -28,6 +28,14 @@ sudo mkdir -p /var/run/unbound
 sudo chown unbound:unbound /var/run/unbound
 sudo chmod 777 /var/run/unbound
 
+sudo mkdir -p  /usr/local/etc/unbound/ || true
+sudo chown unbound:unbound /usr/local/etc/unbound/
+# Setup or update of the root trust anchor for DNSSEC validation
+# sudo chown unbound:unbound /etc/unbound/unbound_control.key
+# unbound-anchor -a /etc/unbound/unbound_control.key
+unbound-anchor -a /var/lib/unbound/root.key
+sudo chown unbound:unbound /var/lib/unbound/root.key
+
 sudo service unbound restart
 sudo systemctl enable unbound
 
@@ -46,6 +54,8 @@ sudo cp -a unbound_exporter.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable unbound_exporter
 sudo systemctl restart unbound_exporter
+
+unbound-control status
 
 # pi@boss-monitor ~/dev/bossjones/docker-compose-prometheus/outputs/unbound feature-perf* 41s
 # ❯ unbound_exporter -h

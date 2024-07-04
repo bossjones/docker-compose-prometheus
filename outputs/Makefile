@@ -137,6 +137,25 @@ netplan-apply:
 	sudo resolvectl log-level debug
 	sudo systemctl status NetworkManager.service
 
+
+	sudo mkdir -p /etc/systemd/resolved.conf.d
+	sudo sh -c 'echo "[Resolve]" > /etc/systemd/resolved.conf.d/disable-stub.conf'
+	sudo sh -c 'echo "DNSStubListener=no" >> /etc/systemd/resolved.conf.d/disable-stub.conf'
+	sudo sh -c 'echo "DNS=192.168.3.16" >> /etc/systemd/resolved.conf.d/disable-stub.conf'
+	sudo sh -c 'echo "FallbackDNS=" >> /etc/systemd/resolved.conf.d/disable-stub.conf'
+	sudo sh -c 'echo "Domains=~." >> /etc/systemd/resolved.conf.d/disable-stub.conf'
+	sudo sh -c 'echo "DNSSEC=no" >> /etc/systemd/resolved.conf.d/disable-stub.conf'
+	echo -e "cmd: cat '/etc/systemd/resolved.conf.d/disable-stub.conf' \n\n"
+	cat '/etc/systemd/resolved.conf.d/disable-stub.conf'
+	sudo systemctl daemon-reload
+	sudo systemctl restart systemd-resolved
+
+
+	docker cp pihole/dnsmasq.d/02-systemd-override.conf pihole:/etc/dnsmasq.d/02-systemd-override.conf
+	sudo ss -tlnp|grep :53
+	@echo ""
+	sudo cp -av pihole/etc/netplan/02-pihole.yaml /etc/netplan/01-network-manager-all.yaml
+
 	# Setting custom DNS servers in a connection (nmcli / connection file)
 	To setup DNS Servers per connection, you can use the dns field (and the associated dns-search and dns-options) in the connection settings.
 	# If method is set to auto (when you use DHCP), you need to set ignore-auto-dns to yes.
@@ -150,32 +169,17 @@ netplan-apply:
 	sudo nmcli connection modify 'netplan-enp0s25' ipv6.ignore-auto-dns yes
 	sudo nmcli general reload
 	sudo systemctl restart NetworkManager.service
+	sudo netplan generate
+	sudo netplan apply
 	sleep 10
 
-	sudo mkdir -p /etc/systemd/resolved.conf.d
-	sudo sh -c 'echo "[Resolve]" > /etc/systemd/resolved.conf.d/disable-stub.conf'
-	sudo sh -c 'echo "DNSStubListener=no" >> /etc/systemd/resolved.conf.d/disable-stub.conf'
-	sudo sh -c 'echo "DNS=192.168.3.16" >> /etc/systemd/resolved.conf.d/disable-stub.conf'
-	sudo sh -c 'echo "FallbackDNS=" >> /etc/systemd/resolved.conf.d/disable-stub.conf'
-	sudo sh -c 'echo "Domains=~." >> /etc/systemd/resolved.conf.d/disable-stub.conf'
-	sudo sh -c 'echo "DNSSEC=yes" >> /etc/systemd/resolved.conf.d/disable-stub.conf'
-	echo -e "\n\n"
-	cat '/etc/systemd/resolved.conf.d/disable-stub.conf'
 	sudo systemctl daemon-reload
+
 	sudo systemctl restart systemd-resolved
-	docker cp pihole/dnsmasq.d/02-systemd-override.conf pihole:/etc/dnsmasq.d/02-systemd-override.conf
-	sudo ss -tlnp|grep :53
-	@echo ""
-	sudo cp -av pihole/etc/netplan/02-pihole.yaml /etc/netplan/01-network-manager-all.yaml
-	sudo systemctl restart systemd-resolved
-	# sudo service systemd-resolved restart
 	sudo systemctl restart NetworkManager
 	sudo resolvectl flush-caches
 	sudo resolvectl status
 	sleep 60
-	sudo netplan generate
-	sudo netplan apply
-	sleep 30
 	sudo ss -tlnp|grep :53
 	@echo ""
 	sudo resolvectl statistics
