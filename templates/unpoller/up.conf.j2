@@ -56,13 +56,13 @@
 # Pick which logs you want per-controller in the [unifi.controller] section.
 # This is a new feature. Feedback welcome!
 [loki]
-  disable = true
-  url = ""
+  disable = false
+  url = "http://loki-gateway:80/loki/api/v1/push"
   # The rest of this is advanced & optional. See wiki.
   user       = ""
   pass       = ""
   verify_ssl = false
-  tenant_id  = ""
+  tenant_id  = "docker"
   interval   = "2m"
   timeout    = "10s"
 

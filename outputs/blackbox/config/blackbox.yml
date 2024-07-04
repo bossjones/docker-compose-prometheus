@@ -8,6 +8,26 @@ modules:
     prober: http
     http:
       method: POST
+  # A module that requires HTTPS and HTTP 2xx codes on its targets.
+  # SOURCE: https://github.com/kubermatic/kubermatic/blob/517aa8d059b2f8d023a5e4156e907aa48a425691/charts/monitoring/blackbox-exporter/values.yaml
+  https_get_2xx:
+    prober: http
+    timeout: 5s
+    http:
+      method: GET
+      valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+      fail_if_not_ssl: false
+      preferred_ip_protocol: "ip4"
+  # A module that requires HTTPS and HTTP 2xx codes on its targets but will skip tls verify.
+  https_2xx_skip_tls_verify:
+    prober: http
+    timeout: 5s
+    http:
+      method: GET
+      preferred_ip_protocol: "ip4"
+      valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+      tls_config:
+        insecure_skip_verify: true
   tcp_connect:
     prober: tcp
   pop3s_banner:
@@ -34,3 +54,7 @@ modules:
       - expect: "^:[^ ]+ 001"
   icmp:
     prober: icmp
+    timeout: 5s
+    icmp:
+      preferred_ip_protocol: "ip4"
+      source_ip_address: "127.0.0.1"

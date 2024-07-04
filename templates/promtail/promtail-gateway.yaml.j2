@@ -8,6 +8,8 @@ positions:
 
 clients:
   - url: http://loki-gateway:80/loki/api/v1/push
+    external_labels:
+      cluster: k3d
     tenant_id: docker
     backoff_config:
       min_period: 100ms
@@ -39,6 +41,10 @@ scrape_configs:
       # - action: labelmap
       #   regex: __syslog_message_(.+)
     pipeline_stages:
+    - match:
+        selector: '{host="USW_MINI"} |~ ".*Send normal inform to.*"'
+        action: drop
+        drop_counter_reason: promtail_noisy_error
     - metrics:
         log_lines_total:
           type: Counter
@@ -112,4 +118,3 @@ scrape_configs:
 #     labels:
 #       job: varlogs
 #       __path__: /var/log/*log
-

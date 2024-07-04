@@ -17,7 +17,16 @@ server:
   http_server_read_timeout: 310s
   log_level: info
 
+# SOURCE: https://community.grafana.com/t/loki-error-on-port-9095-error-contacting-scheduler/67263/2
 common:
+  #instance_interface_names:
+  #- eth0
+  #temp disable to see if it fixes the read servers
+  #ring:
+  #  instance_interface_names:
+  #    - eth0
+  #  kvstore:
+  #    store: memberlist
   storage:
     s3:
       endpoint: minio:9000
@@ -57,6 +66,29 @@ distributor:
     # CLI flag: -distributor.rate-store.ingester-request-timeout
     ingester_request_timeout: 500ms
 
+ruler:
+  query_stats_enabled: true
+  storage:
+    type: local
+    local:
+      directory: /loki/rules
+  enable_api: true
+  alertmanager_url: http://alertmanager:9093
+  enable_alertmanager_v2: true
+  enable_sharding: true
+  ring:
+    kvstore:
+      store: memberlist
+  rule_path: /loki/prom-rules
+  remote_write:
+    enabled: true
+    clients:
+      local:
+        url: http://prometheus:9090/api/v1/write
+        queue_config:
+          # send immediately as soon as a sample is generated
+          capacity: 1
+          batch_send_deadline: 0s
 # ruler:
 #   enable_api: true
 #   wal:
@@ -77,24 +109,50 @@ distributor:
 #             batch_send_deadline: 0s
 
 schema_config:
+  # configs:
+  # - from: 2018-04-15
+  #   store: boltdb-shipper
+  #   object_store: s3
+  #   schema: v11
+  #   index:
+  #     prefix: index_
+  #     period: 24h
   configs:
-  - from: 2018-04-15
+  - from: 2020-08-01
     store: boltdb-shipper
     object_store: s3
     schema: v11
     index:
       prefix: index_
       period: 24h
+  - from: 2023-07-11
+    store: tsdb
+    object_store: s3
+    schema: v12
+    index:
+      prefix: index_
+      period: 24h
 
 storage_config:
+  index_queries_cache_config:
+    embedded_cache:
+      enabled: true
   boltdb_shipper:
     shared_store: s3
     active_index_directory: /tmp/index
     cache_location: /tmp/boltdb-cache
     resync_interval: 5s
+  # New tsdb-shipper configuration
+  tsdb_shipper:
+    active_index_directory: /tmp/tsdb-index
+    cache_location: /tmp/tsdb-cache
+    shared_store: s3
 
 
 limits_config:
+  # Maximum number of concurrent tail requests.
+  # CLI flag: -querier.max-concurrent-tail-requests
+  max_concurrent_tail_requests: 20
   # Whether the ingestion rate limit should be applied individually to each
   # distributor instance (local), or evenly shared across the cluster (global).
   # The ingestion rate strategy cannot be overridden on a per-tenant basis.
@@ -110,7 +168,7 @@ limits_config:
   ingestion_rate_strategy: global
   query_timeout: 300s
   max_query_parallelism: 24
-  split_queries_by_interval: 15m
+  split_queries_by_interval: 48h
   # increment_duplicate_timestamp: true
   max_cache_freshness_per_query: '10m'
   # Enforce every sample has a metric name.
@@ -154,15 +212,24 @@ limits_config:
   # within the allowed time range. The default value of 0 does not set a limit.
   # CLI flag: -querier.max-query-lookback
   max_query_lookback: 336h
+  # volume_enabled: true
 
 
 chunk_store_config:
-  max_look_back_period: 336h
+  chunk_cache_config:
+    embedded_cache:
+      enabled: true
+
+  # max_look_back_period: 336h
   #embedded_cache:
   #  enabled: true
   #  max_size_mb: 500
 
 query_range:
+  results_cache:
+    cache:
+      embedded_cache:
+        enabled: true
   # make queries more cache-able by aligning them with their step intervals
   # Mutate incoming queries to align their start and end with their step.
   # CLI flag: -querier.align-querier-with-step
@@ -250,14 +317,25 @@ frontend_worker:
     max_send_msg_size: 104857600
 
 query_scheduler:
-  max_outstanding_requests_per_tenant: 1024
+  # https://grafana.com/docs/loki/latest/operations/storage/tsdb/
+  # the TSDB index dispatches many more, but each individually smaller, requests.
+  # We increase the pending request queue sizes to compensate.
+  max_outstanding_requests_per_tenant: 32768
+  use_scheduler_ring: true
+  scheduler_ring:
+    kvstore:
+      store: memberlist
 
 querier:
-  max_concurrent: 10
+  # Each `querier` component process runs a number of parallel workers to process queries simultaneously.
+  # You may want to adjust this up or down depending on your resource usage
+  # (more available cpu and memory can tolerate higher values and vice versa),
+  # but we find the most success running at around `16` with tsdb
+  max_concurrent: 25
   # worker_match_max_concurrent: true
-  # query_timeout: 300s
-  # engine:
-  #   timeout: 300s
+  engine:
+    timeout: 300s
+    max_look_back_period: 2m
   # Time to wait before sending more than the minimum successful query requests.
   # CLI flag: -querier.extra-query-delay
   extra_query_delay: 0s
@@ -270,6 +348,7 @@ querier:
   tail_max_duration: 1h
 
 ingester:
+  autoforget_unhealthy: true
   lifecycler:
     join_after: 10s
     observe_period: 5s

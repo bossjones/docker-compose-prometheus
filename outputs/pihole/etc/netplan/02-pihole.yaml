@@ -1,0 +1,158 @@
+# SOURCE: https://netplan.readthedocs.io/en/latest/netplan-yaml/
+# Let NetworkManager manage all devices on this system
+network:
+  version: 2
+  renderer: "NetworkManager"
+  ethernets:
+    enp0s25:
+        # Add static addresses to the interface in addition to the ones received through DHCP or RA. Each sequence entry is in CIDR notation, i.e. of the form addr/prefixlen. addr is an IPv4 or IPv6 address as recognised by inet_pton(3) and prefixlen the number of bits of the subnet.
+        # For virtual devices (bridges, bonds, VLAN) if there is no address configured and DHCP is disabled, the interface may still be brought online, but will not be addressable from the network.
+        # In addition to the addresses themselves one can specify configuration parameters as mappings. Current supported options are:
+      # addresses:
+      # - "192.168.1.0/24"
+      # - "192.168.2.0/24"
+      # - "192.168.3.0/24"
+      # This setting enables DHCP for IPv4 on the ens160 interface, allowing it to automatically obtain an IP address, subnet mask, gateway, and DNS settings from a DHCP server.
+      dhcp4: true
+      # This key allows for overriding specific DHCP settings.
+      dhcp4-overrides:
+        # This setting within dhcp4-overrides disables the use of DNS settings provided by the DHCP server. Instead, it will use the DNS settings specified in the nameservers section.
+        use-dns: false
+      nameservers:
+        addresses:
+        # - 127.0.0.1
+        - 192.168.3.1
+        # - 127.0.0.53
+        - 1.1.1.2
+        # - 1.0.0.2
+        search:
+        - scarlettlab.home
+        - lan
+        - hole
+      routes:
+      - to: default
+        via: 192.168.3.1
+
+# FIXME: https://github.com/systemd/systemd/issues/13432
+# FIXME: https://github.com/systemd/systemd/issues/13432
+# FIXME: https://github.com/systemd/systemd/issues/13432
+# FIXME: https://github.com/systemd/systemd/issues/13432
+# FIXME: https://github.com/systemd/systemd/issues/13432
+# FIXME: https://github.com/systemd/systemd/issues/13432
+# FIXME: https://github.com/systemd/systemd/issues/13432
+# FIXME: https://github.com/systemd/systemd/issues/13432
+# FIXME: https://github.com/systemd/systemd/issues/13432
+# FIXME: https://github.com/systemd/systemd/issues/13432
+# FIXME: https://github.com/systemd/systemd/issues/13432
+# FIXME: https://github.com/systemd/systemd/issues/13432
+# FIXME: https://github.com/systemd/systemd/issues/13432
+# FIXME: https://github.com/systemd/systemd/issues/13432
+# FIXME: https://github.com/systemd/systemd/issues/13432
+# FIXME: https://github.com/systemd/systemd/issues/13432
+# FIXME: https://github.com/systemd/systemd/issues/13432
+# FIXME: https://github.com/systemd/systemd/issues/13432
+# FIXME: https://github.com/systemd/systemd/issues/13432
+# FIXME: https://github.com/systemd/systemd/issues/13432
+# FIXME: https://github.com/systemd/systemd/issues/13432
+# FIXME: https://github.com/systemd/systemd/issues/13432
+# network:
+#   version: 2
+#   ethernets:
+#     enp5s0:
+#       addresses:
+#       - "192.168.0.9/24"
+#       nameservers:
+#         addresses:
+#         - 192.168.0.9 # This is Pihole Server
+#         - 8.8.8.8     # This what I add to solve the issue.
+#         search:
+#         - fritz.box
+#       gateway4: 192.168.0.1
+
+# pi@boss-monitor ~/dev/bossjones/docker-compose-prometheus/outputs feature-perf* ⇣
+# ❯ cat /etc/netplan/01-network-manager-all.yaml
+# # Let NetworkManager manage all devices on this system
+# network:
+#   version: 2
+#   renderer: NetworkManager
+
+
+# routes:
+
+# The routes block defines standard static routes for an interface. At least to must be specified. If type is local or nat a default scope of host is assumed. If type is unicast and no gateway (via) is given or type is broadcast, multicast or anycast a default scope of link is assumed. Otherwise, a global scope is the default setting.
+
+# For from, to and via, both IPv4 and IPv6 addresses are recognised, and must be in the form addr/prefixlen or addr.
+
+# from (scalar)
+
+# Set a source IP address for traffic going through the route. (NetworkManager: as of v1.8.0)
+
+# to (scalar)
+
+# Destination address for the route.
+
+# via (scalar)
+
+# Address to the gateway to use for this route.
+
+# on-link (boolean)
+
+# When set to true, specifies that the route is directly connected to the interface. (NetworkManager: as of v1.12.0 for IPv4 and v1.18.0 for IPv6)
+
+# metric (scalar)
+
+# The relative priority of the route. Must be a positive integer value.
+
+# type (scalar)
+
+# The type of route. Valid options are unicast (default), anycast, blackhole, broadcast, local, multicast, nat, prohibit, throw, unreachable or xresolve.
+
+# scope (scalar)
+
+# The route scope, how wide-ranging it is to the network. Possible values are global, link, or host. Applies to IPv4 only.
+
+# table (scalar)
+
+# The table number to use for the route. In some scenarios, it may be useful to set routes in a separate routing table. It may also be used to refer to routing policy rules which also accept a table parameter. Allowed values are positive integers starting from 1. Some values are already in use to refer to specific routing tables: see /etc/iproute2/rt_tables. (NetworkManager: as of v1.10.0)
+
+# mtu (scalar) - since 0.101
+
+# The MTU to be used for the route, in bytes. Must be a positive integer value.
+
+# congestion-window (scalar) - since 0.102
+
+# The congestion window to be used for the route, represented by number of segments. Must be a positive integer value.
+
+# advertised-receive-window (scalar) - since 0.102
+
+# The receive window to be advertised for the route, represented by number of segments. Must be a positive integer value.
+
+# routing-policy (mapping)
+
+# The routing-policy block defines extra routing policy for a network, where traffic may be handled specially based on the source IP, firewall marking, etc.
+
+# For from, to, both IPv4 and IPv6 addresses are recognised, and must be in the form addr/prefixlen or addr.
+
+# from (scalar)
+
+# Set a source IP address to match traffic for this policy rule.
+
+# to (scalar)
+
+# Match on traffic going to the specified destination.
+
+# table (scalar)
+
+# The table number to match for the route. In some scenarios, it may be useful to set routes in a separate routing table. It may also be used to refer to routes which also accept a table parameter. Allowed values are positive integers starting from 1. Some values are already in use to refer to specific routing tables: see /etc/iproute2/rt_tables.
+
+# priority (scalar)
+
+# Specify a priority for the routing policy rule, to influence the order in which routing rules are processed. A higher number means lower priority: rules are processed in order by increasing priority number.
+
+# mark (scalar)
+
+# Have this routing policy rule match on traffic that has been marked by the iptables firewall with this value. Allowed values are positive integers starting from 1.
+
+# type-of-service (scalar)
+
+# Match this policy rule based on the type of service number applied to the traffic.

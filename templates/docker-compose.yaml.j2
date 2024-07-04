@@ -1,4 +1,4 @@
-version: '3.8'
+# version: '3.8'
 
 networks:
   loki:
@@ -24,46 +24,181 @@ volumes:
     chronograf-storage:
     grafana-storage:
     alertmanager-data:
+    pushgateway-data:
+    loki:
+    pihole_etc:
+    pihole_dnsmasq:
+    portainer_data:
 {% endraw %}
 
-{% raw %}
 services:
-#   # SOURCE: https://doc.traefik.io/traefik/user-guides/docker-compose/basic-example/
-#   # SOURCE: https://doc.traefik.io/traefik/user-guides/docker-compose/basic-example/
-#   traefik:
-#     image: "traefik:latest"
-#     container_name: "traefik"
-#     command:
-#       # - "--log.level=DEBUG"
-#       - "--api.insecure=true"
-#       - "--providers.docker=true"
-#       - "--providers.docker.exposedbydefault=false"
-#       - "--entrypoints.web.address=:80"
-#       - "--metrics.prometheus=true"
-#     ports:
-#       - "80:80"
-#       - "8080:8080"
-#     volumes:
-#       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-#     networks:
-#     - loki
-#     logging:
-#       driver: json-file
-#       options:
-#         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% if traefik_feature_flag %}
+  # SOURCE: https://doc.traefik.io/traefik/user-guides/docker-compose/basic-example/
+  # SOURCE: https://doc.traefik.io/traefik/user-guides/docker-compose/basic-example/
+  traefik:
+    image: "traefik:v2.10.4"
+    container_name: "traefik"
+    # environment:
+    # # SOURCE: https://community.traefik.io/t/docker-compose-static-config-issue/10987
+    command:
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.traefik.address=:8989"
+      - "--metrics.prometheus=true"
+      - "--metrics.prometheus.addrouterslabels=true"
+      - "--api=true"
+      - "--api.insecure=true"
+      - "--providers.docker.network=loki"
+      - "--ping=true"
+      - "--ping.entrypoint=traefik"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.file.directory=/etc/traefik/dynamic"
+      - "--providers.file.filename=/etc/traefik/dynamic/dynamic.yaml"
+      - "--providers.file.watch=true"
+      - "--configFile=/etc/traefik/traefik.yaml"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8989:8989"
+      - "8082:8082"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - ./traefik/traefik.yaml:/etc/traefik/traefik.yaml:ro
+      - ./traefik/dynamic:/etc/traefik/dynamic
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.{{ fqdn }}`)"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.entrypoints=web"
+      - "traefik.http.services.traefik.loadbalancer.server.port=8989"
+      - "traefik.port=8989"
+      - "traefik.docker.network=loki"
+    networks:
+      loki: null
+    # - loki
+    extra_hosts:
+      - host.docker.internal:172.17.0.1
+    restart: unless-stopped
+{% raw %}
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
+{% endif %}
+
+# SEE: https://github.com/pi-hole/pi-hole/issues/4816#issuecomment-1883994394
+# SEE: https://github.com/pi-hole/pi-hole/issues/5635
+{% if portainer_feature_flag %}
+  portainer:
+    image: "portainer/portainer-ce:2.20.3"
+    command: -H unix:///var/run/docker.sock --admin-password '$$2y$$05$$cRSKE60ksnVWUXwsvXu1HO/dQVXEZ0W.ImbTSokLdQ58ASu.gG7j2' --http-enabled
+    container_name: "portainer"
+    ports:
+      # - "8000:8000/tcp"
+      - "0.0.0.0:49443:9443"
+      - "0.0.0.0:49000:9000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.{{ fqdn }}`)"
+      - "traefik.http.routers.portainer.entrypoints=web"
+      - "traefik.http.routers.portainer.service=portainer"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9443"
+      - "traefik.port=49443"
+    expose:
+    - 49443
+    - 49000
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - 'portainer_data:/data'
+    restart: always
+    networks:
+    - loki
+{% raw %}
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
+{% endif %}
+
   loki-gateway:
-    image: nginx:1.19
+    image: nginx:1.25.3-perl
     container_name: "loki-gateway"
     depends_on:
       - 'loki-read'
       - 'loki-write'
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    restart: unless-stopped
     ports:
       - "8080:80"
       - "3100:3100"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.loki-gateway-http.rule=Host(`loki-gateway.{{ fqdn }}`)"
+      - "traefik.http.routers.loki-gateway-http.entrypoints=web"
+      - "traefik.http.routers.loki-gateway-http.service=loki-gateway-http"
+      - "traefik.http.services.loki-gateway-http.loadbalancer.server.port=80"
+      - "traefik.port=8080"
     networks:
       - loki
+{% raw %}
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
+
+  # SOURCE: https://github.com/robozmey/roomkn-sre/blob/179ec407ae7e6ddf2135af8d2d3811950448ec85/docker-compose.yml#L82
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:1.0.0
+    container_name: "nginx-exporter"
+    depends_on:
+      - 'loki-gateway'
+    restart: unless-stopped
+    command:
+      - '--nginx.scrape-uri=http://loki-gateway/nginx_status'
+    ports:
+      - "9113:9113"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx-exporter-http.rule=Host(`nginx-exporter.{{ fqdn }}`)"
+      - "traefik.http.routers.nginx-exporter-http.entrypoints=web"
+      - "traefik.http.routers.nginx-exporter-http.service=nginx-exporter-http"
+      - "traefik.http.services.nginx-exporter-http.loadbalancer.server.port=9113"
+      - "traefik.port=9113"
+    networks:
+      - loki
+{% raw %}
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
+
+  # SOURCE: https://github.com/robozmey/roomkn-sre/blob/179ec407ae7e6ddf2135af8d2d3811950448ec85/docker-compose.yml#L82
+  speedtest-exporter:
+    image: miguelndecarvalho/speedtest-exporter
+    container_name: "speedtest-exporter"
+    restart: unless-stopped
+    ports:
+      - "9798:9798"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.speedtest-exporter-http.rule=Host(`speedtest-exporter.{{ fqdn }}`)"
+      - "traefik.http.routers.speedtest-exporter-http.entrypoints=web"
+      - "traefik.http.routers.speedtest-exporter-http.service=speedtest-exporter-http"
+      - "traefik.http.services.speedtest-exporter-http.loadbalancer.server.port=9798"
+      - "traefik.port=9798"
+    networks:
+      - loki
+{% raw %}
     logging:
       driver: json-file
       options:
@@ -74,7 +209,7 @@ services:
   # Loki would not have permissions to create the directories.
   # Therefore the init container changes permissions of the mounted directory.
   init:
-    image: grafana/loki:2.8.0
+    image: grafana/loki:2.8.3
     user: root
     entrypoint:
       - "chown"
@@ -109,10 +244,18 @@ services:
     ports:
       - "9000:9000"
       - "9001:9001"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.minio-http.rule=Host(`minio.{{ fqdn }}`)"
+      - "traefik.http.routers.minio-http.entrypoints=web"
+      - "traefik.http.routers.minio-http.service=minio-http"
+      - "traefik.http.services.minio-http.loadbalancer.server.port=9000"
+      - "traefik.port=9000"
     volumes:
       - ./.data/minio:/data
     networks:
       - loki
+    restart: unless-stopped
 
 {% if log_generator_feature_flag %}
   # for testing purposes only, disable in production
@@ -137,7 +280,9 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.whoami.rule=Host(`whoami.{{ fqdn }}`)"
       - "traefik.http.routers.whoami.entrypoints=web"
+      - "traefik.http.routers.whoami.service=whoami"
       - "traefik.http.services.whoami.loadbalancer.server.port=10080"
+      - "traefik.port=10080"
     expose:
       - 10080
     environment:
@@ -148,12 +293,211 @@ services:
     - 10080:10080
     networks:
     - loki
+    restart: unless-stopped
 {% raw %}
     logging:
       driver: json-file
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
+
+{% if weave_scope_feature_flag %}
+  scope:
+    image: "weaveworks/scope:1.13.2"
+    network_mode: "host"
+    pid: "host"
+    privileged: true
+    labels:
+      - "works.weave.role=system"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:rw"
+    command:
+      - "--probe.docker=true"
+      - "--weave=false"
+      - "--app.http.address=:4041"
+    container_name: scope
+    cap_add:
+      - NET_ADMIN # Required if you are using Pi-hole as your DHCP server, else not needed
+    restart: unless-stopped
+{% raw %}
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
+{% endif %}
+
+# SEE: https://github.com/pi-hole/pi-hole/issues/4816#issuecomment-1883994394
+# SEE: https://github.com/pi-hole/pi-hole/issues/5635
+{% if pihole_feature_flag %}
+  pihole:
+    build:
+      context: ./pihole
+    # image: "pihole/pihole:2023.11.0"
+    # For DHCP it is recommended to remove these ports and instead add: network_mode: "host"
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      # - "67:67/udp" # Only required if you are using Pi-hole as your DHCP server
+      - "81:80/tcp"
+      - "4711:4711/tcp"
+    container_name: pihole
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pihole.rule=Host(`pihole.{{ fqdn }}`)"
+      - "traefik.http.routers.pihole.entrypoints=web"
+      - "traefik.http.routers.pihole.service=pihole"
+      - "traefik.http.services.pihole.loadbalancer.server.port=80"
+      - "traefik.port=80"
+    # Volumes store your data between container upgrades
+    expose:
+    - 81
+    volumes:
+      - 'pihole_etc:/etc/pihole'
+      - 'pihole_dnsmasq:/etc/dnsmasq.d'
+      # - 'pihole/var/etc/lighttpd/conf-enabled/whateverfile.conf:/etc/lighttpd/conf-enabled/whateverfile.conf'
+    #   https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
+    cap_add:
+      - NET_ADMIN # Required if you are using Pi-hole as your DHCP server, else not needed
+      - SYS_NICE  # CAP_SYS_NICE
+      - CHOWN
+      - NET_RAW
+      - NET_BIND_SERVICE
+      # - CAP_NET_BIND_SERVICE
+      # - CAP_NET_RAW
+      # - CAP_NET_ADMIN
+      # - CAP_SYS_NICE
+      # - CAP_CHOWN
+    restart: unless-stopped
+    # NOTE: https://github.com/pi-hole/docs/blob/release/v6.0/docs/ftldns/configfile.md#local_ipv4-unset-by-default-pr-1293-local_ipv4-data-toc-labelforce-local-a-reply
+    environment:
+    # - BLOCKING_ENABLED=true
+    - INSTALL_WEB_SERVER=true
+    - INSTALL_WEB_INTERFACE=true
+    # SOURCE: https://github.com/ElPoshoX/pihole-dns-stack/blob/89e05bf357b56132ff7a93ea7c4aeb742aa026aa/docker-compose.yml#L45
+    # Customize the options with which dnsmasq gets started. e.g. no-daemon -- --dns-forward-max 300 to increase max. number of concurrent dns queries on high load setups.
+    # - FTL_CMD='no-daemon -- --dns-forward-max 5096 --min-cache-ttl 300'
+    - QUERY_LOGGING=true
+    - TZ=America/New_York
+    - WEBPASSWORD=raspberry
+    # Use the Pi-hole web UI to change the DNS settings Interface listening behavior to "Listen on all interfaces, permit all origins", if using Docker's default bridge network setting. (This can also be achieved by setting the environment variable DNSMASQ_LISTENING to all)
+    - DNSMASQ_USER=root
+    - DNSMASQ_LISTENING=all
+    # - PIHOLE_UID=0
+    # Set the cache size for dnsmasq. Useful for increasing the default cache size or to set it to 0. Note that when DNSSEC is "true", then this setting is ignored.
+    - CUSTOM_CACHE_SIZE=10000
+    - PIHOLE_DNS_=127.0.0.1#5335;1.1.1.2;1.0.0.2
+    - NETWORK_ACCESS=internal
+    - VIRTUAL_HOST=pi.hole
+    - PROXY_LOCATION=pi.hole
+    - FTLCONF_REPLY_ADDR4={{ prometheus_server_ip }}
+    # - VIRTUAL_PORT=80
+    # **************************************************************************************************
+    # Set to your server's LAN IP, used by web block modes.
+    # SOURCE: https://github.com/pi-hole/docker-pi-hole/issues/1244
+    # I´m using pihole as DNS and DHCP server.
+    # Therefore, I have configured host networking for the docker container.
+    # I noticed, that the docker host itself cannot be resolved by the DNS server, although added to the local DNS records.
+    # The hostname always gets resolved to IP 0.0.0.0 and the IP to pi.hole.
+    #
+    # As suggested, this can be solved by setting the environment variable FTLCONF_LOCAL_IPV4 to the IP of the docker host.
+    # Then, the name resolution is working as expected.
+    #
+    # But now, the WebUI of pihole is not reachable by Traefik container anymore, as these containers are connected via docker bridge network, # and     the lighttpd listens only on the primary host and loopback interface.
+    #
+    # When setting FTLCONF_LOCAL_IPV4 to 0.0.0.0, proxy is working, but name resolution of docker host not.
+    # LOCAL_IPV4= (unset by default, PR #1293)
+    # By default, FTL determines the address of the interface a query arrived on and uses this address for replying to A queries with the most suitable address for the requesting client. This setting can be used to use a fixed, rather than the dynamically obtained, address when Pi-hole responds to the following names:
+
+    # pi.hole
+    # <the device's hostname>
+    # pi.hole.<local domain>
+    # <the device's hostname>.<local domain>
+    # **************************************************************************************************
+    - FTLCONF_LOCAL_IPV4={{ prometheus_server_ip }}
+    # - FTLCONF_RATE_LIMIT=0/0
+    # SOURCE: https://docs.pi-hole.net/ftldns/configfile/#rate_limit
+    - FTLCONF_RATE_LIMIT=5000/60
+    # - FTLCONF_RATE_LIMIT=0/0
+    # - LOCAL_IPV4={{ prometheus_server_ip }}
+    - WEBLOGS_STDOUT=1
+    - DHCP_ACTIVE=false
+    - DNSSEC=true
+    # - IPv6=false
+    - TEMPERATUREUNIT=f
+    # ************************************************************************************
+    # Set a password to access the web interface. Not setting one will result in a random password being assigned
+    # NOTE: Get all exported environment variables starting with FTLCONF_ as a prefix and call the changeFTLsetting
+    # function with the environment variable's suffix as the key. This allows applying any pihole-FTL.conf
+    # setting defined here: https://docs.pi-hole.net/ftldns/configfile/
+    # ************************************************************************************
+    - FTLCONF_dns_upstreams=127.0.0.1#5335;1.1.1.2;1.0.0.2
+    - FTLCONF_webserver_api_password=raspberry
+    - FTLCONF_dns_dnssec=true
+    - FTLCONF_TAIL_FTL_LOG=1
+    - FTLCONF_dns_listeningMode=all
+    - ADDITIONAL_PACKAGES="systemd vim curl man-db python3-dev screen gdb py3-pip"
+    - FTLCONF_DEBUG_ALL=true
+    - FTLCONF_DEBUG_DATABASE=true
+    - FTLCONF_DEBUG_NETWORKING=true
+    - FTLCONF_DEBUG_EDNS0=true
+    - FTLCONF_DEBUG_QUERIES=true
+    # SOCKET_LISTENING=localonly|all socket_listening data-toc-label='Socket Listening'
+    # Listen only for local socket connections or permit all connections
+    - FTLCONF_SOCKET_LISTENING=all
+    - PH_VERBOSE=4
+    - FTLCONF_DEBUG_CAPS=true
+
+    dns:
+      - "127.0.0.1"
+      - "1.1.1.2"
+      - "1.0.0.2"
+    networks:
+    - loki
+{% raw %}
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
+
+  pihole-exporter:
+    image: "ekofr/pihole-exporter:latest"
+    # For DHCP it is recommended to remove these ports and instead add: network_mode: "host"
+    hostname: 'pihole-exporter'
+    ports:
+      - "9617:9617/tcp"
+    container_name: pihole-exporter
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pihole-exporter.rule=Host(`pihole-exporter.{{ fqdn }}`)"
+      - "traefik.http.routers.pihole-exporter.entrypoints=web"
+      - "traefik.http.routers.pihole-exporter.service=pihole-exporter"
+      - "traefik.http.services.pihole-exporter.loadbalancer.server.port=9617"
+      - "traefik.port=9617"
+      # - "traefik.docker.network=loki"
+    # Volumes store your data between container upgrades
+    expose:
+    - 9617
+    restart: unless-stopped
+    environment:
+    - TZ=America/New_York
+    - PORT=9617
+    - PIHOLE_PASSWORD=raspberry
+    - PIHOLE_HOSTNAME=pihole
+    - PIHOLE_PORT=80
+    # - PIHOLE_PROTOCOL="http"
+    networks:
+    - loki
+    depends_on:
+      - pihole
+{% raw %}
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
+{% endif %}
 
   influxdb:
     restart: always
@@ -163,7 +507,9 @@ services:
     - "traefik.enable=true"
     - "traefik.http.routers.influxdb.rule=Host(`influxdb.{{ fqdn }}`)"
     - "traefik.http.routers.influxdb.entrypoints=web"
+    - "traefik.http.routers.influxdb.service=influxdb"
     - "traefik.http.services.influxdb.loadbalancer.server.port=8086"
+    - "traefik.port=8086"
     ports:
       - '8086:8086'
     volumes:
@@ -223,7 +569,9 @@ services:
     - "traefik.enable=true"
     - "traefik.http.routers.chronograf.rule=Host(`chronograf.{{ fqdn }}`)"
     - "traefik.http.routers.chronograf.entrypoints=web"
+    - "traefik.http.routers.chronograf.service=chronograf"
     - "traefik.http.services.chronograf.loadbalancer.server.port=8888"
+    - "traefik.port=8888"
     ports:
       - '8888:8888'
     volumes:
@@ -251,11 +599,6 @@ services:
   prometheus:
     image: prom/prometheus:v2.31.1
     container_name: prometheus
-    labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.prometheus.rule=Host(`prometheus.{{ fqdn }}`)"
-    - "traefik.http.routers.prometheus.entrypoints=web"
-    - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
     expose:
     - 9090
     tty: true
@@ -273,24 +616,74 @@ services:
       - '--enable-feature=remote-write-receiver'
       - '--query.lookback-delta=30s'
     ports:
-      - 9090:9090
+      - 9092:9090
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.{{ fqdn }}`)"
+      - "traefik.http.routers.prometheus.entrypoints=web"
+      - "traefik.http.routers.prometheus.service=prometheus"
+      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+      - "traefik.port=9090"
     links:
 {% if cadvisor_feature_flag %}
       - cadvisor:cadvisor
 {% endif %}
       - alertmanager:alertmanager
       - loki-gateway:loki-gateway
+      - pihole-exporter:pihole-exporter
     depends_on:
 {% if cadvisor_feature_flag %}
       - cadvisor
 {% endif %}
       - alertmanager
+      - loki-gateway
+      - pihole-exporter
+      - pushgateway
     restart: always
 
     # environment:
     #- TZ=UTC
     # SEE: https://stackoverflow.com/questions/31324981/how-to-access-host-port-from-docker-container/43541732#43541732
     # https://stackoverflow.com/questions/56909896/prometheus-in-docker-container-cannot-scrape-target-on-host/56910057
+    networks:
+    - loki
+{% raw %}
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
+
+
+  # docker pull prom/pushgateway:v1.8.0
+  pushgateway:
+    image: prom/pushgateway:v1.8.0
+    container_name: pushgateway
+    expose:
+    - 9091
+    tty: true
+    stdin_open: true
+    restart: always
+    ports:
+      - 0.0.0.0:9091:9091
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pushgateway.rule=Host(`pushgateway.{{ fqdn }}`)"
+      - "traefik.http.routers.pushgateway.entrypoints=web"
+      - "traefik.http.routers.pushgateway.service=pushgateway"
+      - "traefik.http.services.pushgateway.loadbalancer.server.port=9091"
+      - "traefik.port=9091"
+    volumes:
+      - pushgateway-data:/data
+    command:
+      - '--log.level={{ pushgateway_log_level }}'
+      - '--web.listen-address=0.0.0.0:9091'
+      # - '--web.listen-address=0.0.0.0:9091'
+      - '--web.enable-admin-api'
+    # environment:
+    #- TZ=UTC
+    # SEE: https://stackoverflow.com/questions/31324981/how-to-access-host-port-from-docker-container/43541732#43541732
+    # https://stackoverflow.com/questions/56909896/pushgateway-in-docker-container-cannot-scrape-target-on-host/56910057
     networks:
     - loki
 {% raw %}
@@ -307,7 +700,9 @@ services:
     - "traefik.enable=true"
     - "traefik.http.routers.node-exporter.rule=Host(`node-exporter.{{ fqdn }}`)"
     - "traefik.http.routers.node-exporter.entrypoints=web"
+    - "traefik.http.routers.node-exporter.service=node-exporter"
     - "traefik.http.services.node-exporter.loadbalancer.server.port=9100"
+    - "traefik.port=9100"
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -345,23 +740,60 @@ services:
     - "traefik.enable=true"
     - "traefik.http.routers.alertmanager.rule=Host(`alertmanager.{{ fqdn }}`)"
     - "traefik.http.routers.alertmanager.entrypoints=web"
-    - "traefik.http.services.prometheus.loadbalancer.server.port=9093"
+    - "traefik.http.routers.alertmanager.service=alertmanager"
+    - "traefik.http.services.alertmanager.loadbalancer.server.port=9093"
+    - "traefik.port=9093"
     tty: true
     stdin_open: true
     expose:
     - 9093
     ports:
-      - 9093:9093
+      - 0.0.0.0:9093:9093
     volumes:
       - ./alertmanager/:/etc/alertmanager/
       - alertmanager-data:/data
     restart: always
+    depends_on:
+    - alertmanager-telegram
+    links:
+    - alertmanager-telegram:alertmanager-telegram
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
       - '--log.level={{ alertmanager_log_level }}'
     # environment:
     #- TZ=UTC
+    networks:
+    - loki
+{% raw %}
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
+
+
+  alertmanager-telegram:
+    build:
+      context: ./alertmanager_telegram
+    # image: ghcr.io/janw/alertmanager-telegram:latest
+    container_name: alertmanager-telegram
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.alertmanager-telegram.rule=Host(`alertmanager-telegram.{{ fqdn }}`)"
+    - "traefik.http.routers.alertmanager-telegram.entrypoints=web"
+    - "traefik.http.routers.alertmanager-telegram.service=alertmanager-telegram"
+    - "traefik.http.services.alertmanager-telegram.loadbalancer.server.port=8585"
+    - "traefik.port=8585"
+    tty: true
+    stdin_open: true
+    expose:
+    - 8585
+    ports:
+      - "8585:8080"
+    restart: always
+    env_file:
+      - ./env
     networks:
     - loki
 {% raw %}
@@ -383,7 +815,9 @@ services:
     - "traefik.enable=true"
     - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.{{ fqdn }}`)"
     - "traefik.http.routers.cadvisor.entrypoints=web"
+    - "traefik.http.routers.cadvisor.service=cadvisor"
     - "traefik.http.services.cadvisor.loadbalancer.server.port=8081"
+    - "traefik.port=8081"
     volumes:
         - /:/rootfs:ro
         - /var/run:/var/run:ro
@@ -391,6 +825,9 @@ services:
         - /var/lib/docker/:/var/lib/docker:ro
         - /dev/disk/:/dev/disk:ro
         - /etc/machine-id/:/etc/machine-id:ro
+        # SOURCE: https://dev.to/cloudx/taming-cadvisors-high-cpu-usage-1nm5
+        - /sys/fs/cgroup:/cgroup:ro
+        - /etc/localtime:/etc/localtime:ro
     devices:
         - /dev/kmsg:/dev/kmsg:ro
     ports:
@@ -408,7 +845,7 @@ services:
       # - '--enable_load_reader=true'
       - '--machine_id_file="/etc/machine-id"'
       - '--enable_metrics=advtcp,app,cpu,cpu_topology,cpuset,disk,diskIO,hugetlb,memory,memory_numa,network,oom_event,percpu,perf_event,process,resctrl,sched,tcp,udp'
-      - '--disable_metrics=referenced_memory,cpuLoad'
+      # - '--disable_metrics=referenced_memory,cpuLoad'
       # - "--housekeeping_interval=30s"
       # - "--max_housekeeping_interval=35s"
       # - "--event_storage_event_limit=default=0"
@@ -421,6 +858,10 @@ services:
       # - "--disable_metrics=percpu,process,sched,tcp,udp,diskIO,disk,network"
       # - "--allow_dynamic_housekeeping=true"
       # - "--storage_duration=1m0s"
+      # SOURCE: https://dev.to/cloudx/taming-cadvisors-high-cpu-usage-1nm5
+      - "--housekeeping_interval=30s"
+      - "--docker_only=true"
+      - "--disable_metrics=percpu,sched,tcp,udp,disk,diskIO,hugetlb,referenced_memory,cpu_topology,resctrl,cpuLoad"
     env_file:
       - ./env
     # devices:
@@ -445,7 +886,9 @@ services:
     - "traefik.enable=true"
     - "traefik.http.routers.blackbox.rule=Host(`blackbox.{{ fqdn }}`)"
     - "traefik.http.routers.blackbox.entrypoints=web"
+    - "traefik.http.routers.blackbox.service=blackbox"
     - "traefik.http.services.blackbox.loadbalancer.server.port=9115"
+    - "traefik.port=9115"
     tty: true
     stdin_open: true
     ports:
@@ -458,7 +901,8 @@ services:
     command:
       - '--config.file=/config/blackbox.yml'
       - '--web.listen-address=:9115'
-
+    cap_add:
+      - NET_ADMIN # Required if you are using Pi-hole as your DHCP server, else not needed
     restart: always
     deploy:
       mode: global
@@ -466,46 +910,19 @@ services:
     #- TZ=UTC
     networks:
     - loki
+    depends_on:
+    - pihole
+    dns:
+      - "192.168.3.16"
+      - "1.1.1.2"
+      - "1.0.0.2"
+
 {% raw %}
     logging:
       driver: json-file
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
-
-#   heimdall:
-#     image: linuxserver/heimdall
-#     build: ./docker-heimdall
-#     container_name: heimdall
-#     restart: always
-#     environment:
-#       - PUID=1000
-#       - PGID=1000
-#       #- TZ=UTC
-#     volumes:
-#       - ./docker-heimdall/config:/config
-#     ports:
-#       - 4040:4040
-#       - 4443:4443
-#     labels:
-#     - "traefik.enable=true"
-#     - "traefik.http.routers.heimdall.rule=Host(`heimdall.{{ fqdn }}`)"
-#     - "traefik.http.routers.heimdall.entrypoints=web"
-#     - "traefik.http.services.heimdall.loadbalancer.server.port=4040"
-#     tty: true
-#     stdin_open: true
-#     expose:
-#     - 4040
-#     - 4443
-#     networks:
-#     - loki
-{% raw %}
-#     logging:
-#       driver: json-file
-#       options:
-#         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
-{% endraw %}
-
 
   unifi-poller:
     restart: always
@@ -515,6 +932,8 @@ services:
       - "9130:9130/tcp"
       - "9130:9130/udp"
       - "37288:37288"
+    expose:
+    - 9130
     container_name: unifi-poller
     tty: true
     stdin_open: true
@@ -526,7 +945,9 @@ services:
     - "traefik.enable=true"
     - "traefik.http.routers.unifipoller.rule=Host(`unifi-poller.{{ fqdn }}`)"
     - "traefik.http.routers.unifipoller.entrypoints=web"
+    - "traefik.http.routers.unifipoller.service=unifipoller"
     - "traefik.http.services.unifipoller.loadbalancer.server.port=37288"
+    - "traefik.port=37288"
     depends_on:
       - grafana
       - influxdb
@@ -545,13 +966,14 @@ services:
     - UP_UNIFI_DEFAULT_URL=${UNIFI_URL}
     - UP_POLLER_DEBUG=${POLLER_DEBUG}
     - UP_UNIFI_DEFAULT_SAVE_DPI=${POLLER_SAVE_DPI}
+    - UP_PROMETHEUS_NAMESPACE=unifipoller
     networks:
     - loki
 
 
   loki-read:
     user: "1000"
-    image: grafana/loki:2.8.0
+    image: grafana/loki:2.8.3
     volumes:
       # - ./config:/etc/loki/
       # - ./loki/etc/loki:/etc/loki/
@@ -570,7 +992,7 @@ services:
     #  - SYS_PTRACE
     #security_opt:
     #  - apparmor=unconfined
-    command: "-config.file=/loki/loki-config.yaml -log.level={{ loki_log_level }} -target=read"
+    command: "-config.file=/loki/loki-config.yaml -log.level={{ loki_log_level }} -target=read -legacy-read-mode=false"
     env_file:
       - ./env
     networks:
@@ -591,7 +1013,7 @@ services:
 
   loki-write:
     user: "1000"
-    image: grafana/loki:2.8.0
+    image: grafana/loki:2.8.3
     volumes:
       # - ./config:/etc/loki/
       - ./loki/etc/loki:/loki:rw
@@ -625,9 +1047,45 @@ services:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
 
+  loki-backend:
+    user: "1000"
+    image: grafana/loki:2.8.3
+    volumes:
+      # - ./config:/etc/loki/
+      - ./loki/etc/loki:/loki:rw
+    ports:
+      - "9095"
+      #- "3102:3100"
+      - "3100"
+      - "7946"
+      # uncomment to use interactive debugging
+      # - "50000-50002:40000" # makes the replicas available on ports 50000, 50001, 50002
+    #cap_add:
+    #  - SYS_PTRACE
+    #security_opt:
+    #  - apparmor=unconfined
+    # command: "-config.file=/loki/loki-config.yaml -log.level={{ loki_log_level }} -target=write -frontend.downstream-url=http://loki-gateway:3100 -querier.frontend-address=http://loki-write:9095"
+    command: "-config.file=/loki/loki-config.yaml -log.level={{ loki_log_level }} -target=backend -legacy-read-mode=false"
+    env_file:
+      - ./env
+    networks:
+      - loki
+    depends_on:
+      - minio
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 3
+{% raw %}
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
+
 #   loki:
 #     restart: always
-#     image: grafana/loki:2.8.0
+#     image: grafana/loki:2.8.3
 #     ports:
 #       - "3100:3100/tcp"
 #       - "9096:9096"
@@ -643,6 +1101,7 @@ services:
 #     - "traefik.http.routers.loki.rule=Host(`loki.{{ fqdn }}`)"
 #     - "traefik.http.routers.loki.entrypoints=web"
 #     - "traefik.http.services.loki.loadbalancer.server.port=3100"
+#     - "traefik.http.services.loki.loadbalancer.server.port=3100"
 #     command: -config.file=/loki/loki-config.yaml
 #     networks:
 #     - loki
@@ -653,16 +1112,17 @@ services:
 #         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
 
-
+{% if promtail_feature_flag %}
   promtail:
     # SOURCE: https://github.com/gilmrt/docker-compose/blob/5d8d7b3746fba48ba5f559f9913e56ae3d881eee/metrics/docker-compose.yml
     container_name: promtail
-    image: grafana/promtail:2.8.0
+    image: grafana/promtail:2.8.3
     restart: always
     depends_on:
       - 'loki-gateway'
       - 'loki-read'
       - 'loki-write'
+      - 'loki-backend'
     volumes:
       # - /var/log:/var/log:ro
       - ./promtail/promtail-gateway.yaml:/etc/promtail/promtail-gateway.yaml:ro
@@ -697,11 +1157,14 @@ services:
     - "traefik.enable=true"
     - "traefik.http.routers.promtail.rule=Host(`promtail.{{ fqdn }}`)"
     - "traefik.http.routers.promtail.entrypoints=web"
+    - "traefik.http.routers.promtail.service=promtail"
     - "traefik.http.services.promtail.loadbalancer.server.port=9080"
+    - "traefik.port=9080"
     # depends_on:
     # - loki
     networks:
     - loki
+{% endif %}
 
   grafana:
     image: grafana/grafana:10.0.1
@@ -710,7 +1173,9 @@ services:
     - "traefik.enable=true"
     - "traefik.http.routers.grafana.rule=Host(`grafana.{{ fqdn }}`)"
     - "traefik.http.routers.grafana.entrypoints=web"
+    - "traefik.http.routers.grafana.service=grafana"
     - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+    - "traefik.port=3000"
     depends_on:
       - prometheus
       - loki-gateway
@@ -759,16 +1224,20 @@ services:
     - GF_LOG_LEVEL={{ grafana_log_level }}
     - GF_DATAPROXY_LOGGING=true
     - GF_EXPLORE_ENABLED=true
+    - GF_PATHS_CONFIG=/etc/grafana/grafana.ini
     networks:
     - loki
 
+{% if syslog_ng_feature_flag %}
   # https://github.com/lux4rd0/grafana-loki-syslog-aio/blob/main/docker-compose-with-generator.yml
   syslog-ng:
     image: balabit/syslog-ng:latest
     container_name: syslog-ng
     command: -edv --control /syslog-ng/syslog-ng.ctl
+{% if promtail_feature_flag %}
     depends_on:
     - promtail
+{% endif %}
     networks:
       loki: null
     ports:
@@ -782,6 +1251,7 @@ services:
     volumes:
     - ./syslog-ng/syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf:ro
     - ./syslog-ng:/syslog-ng:rw
+{% endif %}
 
 {% if syslog_ng_exporter_feature_flag %}
   syslog_ng_exporter:
@@ -817,3 +1287,43 @@ services:
     networks:
       loki: null
 {% endif %}
+
+  pve-exporter:
+    image: prompve/prometheus-pve-exporter
+    container_name: pve-exporter
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.pve-exporter.rule=Host(`pve-exporter.{{ fqdn }}`)"
+    - "traefik.http.routers.pve-exporter.entrypoints=web"
+    - "traefik.http.routers.pve-exporter.service=pve-exporter"
+    - "traefik.http.services.pve-exporter.loadbalancer.server.port=9221"
+    - "traefik.port=9221"
+    tty: true
+    stdin_open: true
+    ports:
+    - "9221:9221/tcp"
+    expose:
+    - 9221
+    volumes:
+      - ./pve_exporter/pve_exporter/pve.yaml:/etc/prometheus/pve.yml
+    restart: always
+    deploy:
+      mode: global
+    env_file:
+      - ./env
+    command:
+    - '--collector.status'
+    - '--collector.version'
+    - '--collector.node'
+    - '--collector.cluster'
+    - '--collector.resources'
+    #environment:
+    #- TZ=UTC
+    networks:
+    - loki
+{% raw %}
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}

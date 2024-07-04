@@ -14,7 +14,8 @@ global:
 
 # Load and evaluate rules in this file every 'evaluation_interval' seconds.
 rule_files:
-  - 'alert.rules'
+  - 'alerts.yml'
+  - rules.yml
 
 # alert
 alerting:
@@ -45,6 +46,35 @@ alerting:
 # Replace localhost with the IP of your unpoller host, and replace unifi.controller and another.controller with the IPs of your controllers.
 # *********************************************************
 scrape_configs:
+  - job_name: 'pve-exporter'
+    static_configs:
+      - targets:
+        - '{{ pve_ip }}'  # Proxmox VE node.
+    metrics_path: /pve
+    params:
+      module: [default]
+      cluster: ['1']
+      node: ['1']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: '{{ prometheus_server_ip }}:9221'  # PVE exporter.
+      - regex: '(.+)'
+        replacement: k3d
+        source_labels:
+        - __name__
+        target_label: cluster
+    metric_relabel_configs:
+    - regex: (.+)
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+
   - job_name: 'unifipoller'
     scrape_interval: 30s
     static_configs:
@@ -57,17 +87,91 @@ scrape_configs:
     - source_labels: [__param_target]
       target_label: instance
     - target_label: __address__
-      replacement: {{ prometheus_server_ip }}:9130
+      replacement: localhost:9130
+    - regex: '(.+)'
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    metric_relabel_configs:
+    - regex: (.+)
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
   # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
 
+
+  - job_name: 'traefik'
+    # Override the global default and scrape targets from this job every 5 seconds.
+    scrape_interval: 30s
+    dns_sd_configs:
+      - names:
+          - 'traefik'
+        type: A
+        port: 8082
+    relabel_configs:
+    - regex: '(.+)'
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    metric_relabel_configs:
+    - regex: (.+)
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
 
   - job_name: 'prometheus'
 
     # Override the global default and scrape targets from this job every 5 seconds.
     scrape_interval: 5s
 
+    # static_configs:
+    #     - targets: ['{{ prometheus_server_ip }}:9090']
+    dns_sd_configs:
+      - names:
+          - 'prometheus'
+        type: A
+        port: 9090
+    relabel_configs:
+    - regex: '(.+)'
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    metric_relabel_configs:
+    - regex: (.+)
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+
+{% if pihole_feature_flag %}
+  - job_name: 'pihole-exporter'
+    # Override the global default and scrape targets from this job every 5 seconds.
+    scrape_interval: 5s
     static_configs:
-        - targets: ['{{ prometheus_server_ip }}:9090']
+      - targets: ['pihole-exporter:9617']
+    # dns_sd_configs:
+    #   - names:
+    #       - 'pihole-exporter'
+    #     type: A
+    #     port: 9617
+    relabel_configs:
+    - regex: '(.+)'
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    metric_relabel_configs:
+    - regex: (.+)
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+{% endif %}
 
   - job_name: 'node-exporter'
     metrics_path: /metrics
@@ -75,26 +179,25 @@ scrape_configs:
     # Override the global default and scrape targets from this job every 5 seconds.
     scrape_interval: 5s
 
-    static_configs:
-        - targets: ['{{ prometheus_server_ip }}:9100']
-
-  # - job_name: 'loki'
-  #   metrics_path: /metrics
-
-  #   # Override the global default and scrape targets from this job every 5 seconds.
-  #   scrape_interval: 5s
-
-  #   static_configs:
-  #       - targets: ['{{ prometheus_server_ip }}:3100']
-
-  # - job_name: 'promtail'
-  #   metrics_path: /metrics
-
-  #   # Override the global default and scrape targets from this job every 5 seconds.
-  #   scrape_interval: 5s
-
-  #   static_configs:
-  #       - targets: ['{{ prometheus_server_ip }}:9080']
+    # static_configs:
+    #    - targets: ['{{ prometheus_server_ip }}:9100']
+    dns_sd_configs:
+      - names:
+          - 'node-exporter'
+        type: A
+        port: 9100
+    relabel_configs:
+    - regex: '(.+)'
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    metric_relabel_configs:
+    - regex: (.+)
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
 
   - job_name: 'docker'
     metrics_path: /metrics
@@ -104,15 +207,65 @@ scrape_configs:
 
     static_configs:
         - targets: ['{{ prometheus_server_ip }}:9323']
+    relabel_configs:
+    - regex: '(.+)'
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    metric_relabel_configs:
+    - regex: (.+)
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+
+  - job_name: 'unbound'
+    metrics_path: /metrics
+    # Override the global default and scrape targets from this job every 5 seconds.
+    scrape_interval: 5s
+    static_configs:
+        - targets: ['{{ prometheus_server_ip }}:9167']
+    relabel_configs:
+    - regex: '(.+)'
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    metric_relabel_configs:
+    - regex: (.+)
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
 
   - job_name: 'cadvisor'
     metrics_path: /metrics
+    relabel_configs:
+    - regex: '(.+)'
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    metric_relabel_configs:
+    - regex: (.+)
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
 
+    # SOURCE: https://github.com/google/cadvisor/issues/2523#issuecomment-785094428
     # Override the global default and scrape targets from this job every 5 seconds.
-    scrape_interval: 5s
+    #scrape_interval: 5s
+    scrape_interval: 15s
 
-    static_configs:
-        - targets: ['{{ prometheus_server_ip }}:8081']
+    #static_configs:
+    #  - targets: ['{{ prometheus_server_ip }}:8081']
+    dns_sd_configs:
+      - names:
+          - cadvisor
+        type: A
+        port: 8081
 
   - job_name: 'snmp-exporter'
     static_configs:
@@ -151,7 +304,18 @@ scrape_configs:
 
     metrics_path: /api/v1/allmetrics
     params:
-      format: [ prometheus ]
+      # format: prometheus | prometheus_all_hosts
+      # You can use `prometheus_all_hosts` if you want Prometheus to set the `instance` to your hostname instead of IP
+      format: [ prometheus_all_hosts ]
+      #
+      # sources: as-collected | raw | average | sum | volume
+      # default is: average
+      #source: [as-collected]
+      #
+      # server name for this prometheus - the default is the client IP
+      # for Netdata to uniquely identify it
+      #server: ['prometheus1']
+    honor_labels: true
 
     static_configs:
       - targets: ['{{ prometheus_server_ip }}:19999']
@@ -215,6 +379,7 @@ scrape_configs:
       - names:
           - loki-read
           - loki-write
+          - loki-backend
         type: A
         port: 3100
     relabel_configs:
@@ -226,6 +391,44 @@ scrape_configs:
       target_label: dns_srv_record_port
     - source_labels: [__meta_dns_mx_record_target]
       target_label: dns_mx_record_target
+    - regex: '(.+)'
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    metric_relabel_configs:
+    - regex: (.+)
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+
+  - job_name: 'nginx-exporter'
+    dns_sd_configs:
+      - names:
+          - nginx-exporter
+        type: A
+        port: 9113
+    relabel_configs:
+    - source_labels: [__meta_dns_name]
+      target_label: service
+    - source_labels: [__meta_dns_srv_record_target]
+      target_label: dns_srv_record_target
+    - source_labels: [__meta_dns_srv_record_port]
+      target_label: dns_srv_record_port
+    - source_labels: [__meta_dns_mx_record_target]
+      target_label: dns_mx_record_target
+    - regex: '(.+)'
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    metric_relabel_configs:
+    - regex: (.+)
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
 
   - job_name: 'promtail'
     dns_sd_configs:
@@ -233,17 +436,80 @@ scrape_configs:
           - promtail
         type: A
         port: 9080
+    relabel_configs:
+    - source_labels: [__meta_dns_name]
+      target_label: service
+    - source_labels: [__meta_dns_srv_record_target]
+      target_label: dns_srv_record_target
+    - source_labels: [__meta_dns_srv_record_port]
+      target_label: dns_srv_record_port
+    - source_labels: [__meta_dns_mx_record_target]
+      target_label: dns_mx_record_target
+    - regex: '(.+)'
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    metric_relabel_configs:
+    - regex: (.+)
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
 
   - job_name: grafana
     scheme: http
     static_configs:
     - targets: [grafana:3000]
+    relabel_configs:
+    - regex: '(.+)'
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    metric_relabel_configs:
+    - regex: (.+)
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+
+  - job_name: speedtest-exporter
+    scheme: http
+    scrape_interval: 1h
+    scrape_timeout: 1m
+    static_configs:
+    - targets: [speedtest-exporter:9798]
+    relabel_configs:
+    - regex: '(.+)'
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    metric_relabel_configs:
+    - regex: (.+)
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
 
 {% if syslog_ng_exporter_feature_flag %}
   - job_name: syslog_ng_exporter
     scheme: http
     static_configs:
     - targets: [syslog_ng_exporter:9577]
+    relabel_configs:
+    - regex: '(.+)'
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    metric_relabel_configs:
+    - regex: (.+)
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
 {% endif %}
 
   - job_name: minio-cluster
@@ -251,9 +517,101 @@ scrape_configs:
     scheme: http
     static_configs:
     - targets: [minio:9000]
+    relabel_configs:
+    - regex: '(.+)'
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    metric_relabel_configs:
+    - regex: (.+)
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
 
   - job_name: minio-node
     metrics_path: /minio/v2/metrics/node
     scheme: http
     static_configs:
     - targets: [minio:9000]
+    relabel_configs:
+    - regex: '(.+)'
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    metric_relabel_configs:
+    - regex: (.+)
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+
+
+
+  - job_name: 'pushgateway'
+    honor_labels: true
+    static_configs:
+    - targets: ['pushgateway:9091']
+    relabel_configs:
+    - regex: '(.+)'
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    metric_relabel_configs:
+    - regex: (.+)
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+
+
+  - job_name: 'node-exporter-remote'
+    scrape_interval: 30s
+    static_configs:
+      - targets:
+        - '192.168.2.6:9100'
+    metrics_path: /metrics
+    relabel_configs:
+    - regex: '(.+)'
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    metric_relabel_configs:
+    - regex: (.+)
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    # - source_labels: [exported_job]
+    #   action: replace
+    #   replacement: ''
+    #   target_label: exported_job
+    # - source_labels: [exported_instance]
+    #   action: replace
+    #   target_label: instance
+    # - source_labels: [exported_instance]
+    #   action: replace
+    #   replacement: ''
+    #   target_label: exported_instance
+
+  - job_name: 'pve-vector'
+    static_configs:
+      - targets:
+        - '{{ pve_ip }}:9598'  # Proxmox VE node.
+    metrics_path: /metrics
+    relabel_configs:
+    - regex: '(.+)'
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster
+    metric_relabel_configs:
+    - regex: (.+)
+      replacement: k3d
+      source_labels:
+      - __name__
+      target_label: cluster

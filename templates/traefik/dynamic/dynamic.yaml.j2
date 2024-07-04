@@ -1,0 +1,8 @@
+# Dynamic configuration
+http:
+  routers:
+    # Expose Traefik UI
+    traefik:
+      rule: Host(`traefik.localhost`)
+      service: api@internal
+      entryPoints: web

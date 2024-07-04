@@ -1,0 +1,5 @@
+default:
+    user: "{{ lookup ('env', 'PVE_USER') }}"
+    password: "{{ lookup ('env', 'PVE_PASSWORD') }}"
+    # Optional: set to false to skip SSL/TLS verification
+    verify_ssl: false
