@@ -24,3 +24,9 @@ GeoLite2-Country.mmdb
 pve.yaml
 venv.bak
 pihole.log
+
+
+file.out
+nmcli.yaml
+resolv.conf.bak
+system.scap
