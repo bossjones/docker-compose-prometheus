@@ -181,3 +181,15 @@ journal-resolved:
 # Show the network data exchanged with the host 192.168.0.1
 sysdig-network-localhost:
 	sudo sysdig -s2000 -A -c echo_fds fd.cip=127.0.0.1
+
+# View the list of containers running on the machine and their resource usage
+sysdig-view-containers:
+  sudo csysdig -vcontainers
+
+# View the list of processes with container context
+sysdig-view-container-processes:
+  sudo csysdig -pc
+
+# View the CPU usage of the processes running inside the pihole container
+sysdig-view-container-cpu-pihole:
+  sudo sysdig -pc -c topprocs_cpu container.name=pihole
