@@ -160,3 +160,9 @@ netplan-apply:
 # SOURCE: https://gist.github.com/deviantony/62c009b41bde5e078b1a7de9f11f5e55
 generate-pass:
 	docker run --rm httpd:2.4-alpine htpasswd -nbB admin password | cut -d ":" -f 2 | sed 's/\$/\$\$/g'
+
+journal-networkd:
+	sudo journalctl -b -u systemd-networkd | ccze -A
+
+journal-resolved:
+	sudo journalctl -b -u systemd-resolved | ccze -A
