@@ -383,7 +383,7 @@ services:
     - FTLCONF_dns_dnssec=true
     - FTLCONF_TAIL_FTL_LOG=1
     - FTLCONF_dns_listeningMode=all
-    - ADDITIONAL_PACKAGES="systemd vim curl"
+    - ADDITIONAL_PACKAGES="systemd vim curl man-db python3-dev screen gdb py3-pip"
     - FTLCONF_DEBUG_ALL=true
     - FTLCONF_DEBUG_DATABASE=true
     - FTLCONF_DEBUG_NETWORKING=true
