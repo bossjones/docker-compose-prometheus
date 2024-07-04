@@ -136,6 +136,22 @@ litecli:
 netplan-apply:
 	sudo resolvectl log-level debug
 	sudo systemctl status NetworkManager.service
+
+	# Setting custom DNS servers in a connection (nmcli / connection file)
+	To setup DNS Servers per connection, you can use the dns field (and the associated dns-search and dns-options) in the connection settings.
+	# If method is set to auto (when you use DHCP), you need to set ignore-auto-dns to yes.
+
+	# NOTE: via https://wiki.archlinux.org/title/dnsmasq
+	# NOTE: via https://wiki.archlinux.org/title/NetworkManager
+	sudo nmcli connection modify 'netplan-enp0s25' ipv4.dns-options trust-ad
+	sudo nmcli connection modify 'netplan-enp0s25' ipv4.ignore-auto-dns yes
+	sudo nmcli connection modify 'netplan-enp0s25' ipv6.dns ::1
+	sudo nmcli connection modify 'netplan-enp0s25' ipv6.dns-options trust-ad
+	sudo nmcli connection modify 'netplan-enp0s25' ipv6.ignore-auto-dns yes
+	sudo nmcli general reload
+	sudo systemctl restart NetworkManager.service
+	sleep 10
+
 	sudo mkdir -p /etc/systemd/resolved.conf.d
 	sudo sh -c 'echo "[Resolve]" > /etc/systemd/resolved.conf.d/disable-stub.conf'
 	sudo sh -c 'echo "DNSStubListener=no" >> /etc/systemd/resolved.conf.d/disable-stub.conf'
