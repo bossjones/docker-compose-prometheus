@@ -15,6 +15,7 @@ cadvisor_feature_flag: true
 traefik_feature_flag: true
 log_generator_feature_flag: false
 syslog_ng_exporter_feature_flag: false
+syslog_ng_feature_flag: false
 weave_scope_feature_flag: false
 pihole_feature_flag: true
 loki_log_level: 'info'
