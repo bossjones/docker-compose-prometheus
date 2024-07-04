@@ -184,12 +184,35 @@ sysdig-network-localhost:
 
 # View the list of containers running on the machine and their resource usage
 sysdig-view-containers:
-  sudo csysdig -vcontainers
+	sudo csysdig -vcontainers
 
 # View the list of processes with container context
 sysdig-view-container-processes:
-  sudo csysdig -pc
+	sudo csysdig -pc
 
 # View the CPU usage of the processes running inside the pihole container
 sysdig-view-container-cpu-pihole:
-  sudo sysdig -pc -c topprocs_cpu container.name=pihole
+	sudo sysdig -pc -c topprocs_cpu container.name=pihole
+
+
+# made by chatgpt
+
+# This task displays the network bandwidth usage of the processes running inside the pihole container.
+view-network-bandwidth:
+	sudo sysdig -pc -c topprocs_net container.name=pihole
+
+# This task displays the processes using the most network bandwidth inside the pihole container.
+view-top-bandwidth-processes:
+	sudo sysdig -pc -c topprocs_net container.name=pihole
+
+# This task shows the top files in terms of I/O bytes inside the pihole container.
+view-top-io-files:
+	sudo sysdig -pc -c topfiles_bytes container.name=pihole
+
+# This task displays the top network connections inside the pihole container.
+view-top-network-connections:
+	sudo sysdig -pc -c topconns container.name=pihole
+
+# This task shows all the interactive commands executed inside the pihole container.
+view-interactive-commands:
+	sudo sysdig -pc -c spy_users container.name=pihole
