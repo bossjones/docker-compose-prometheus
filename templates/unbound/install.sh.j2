@@ -33,6 +33,7 @@ sudo chown unbound:unbound /usr/local/etc/unbound/
 # Setup or update of the root trust anchor for DNSSEC validation
 # sudo chown unbound:unbound /etc/unbound/unbound_control.key
 # unbound-anchor -a /etc/unbound/unbound_control.key
+sudo -u unbound unbound-anchor -a /usr/local/etc/unbound/root.key
 unbound-anchor -a /var/lib/unbound/root.key
 sudo chown unbound:unbound /var/lib/unbound/root.key
 
