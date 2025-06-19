@@ -1,0 +1,35 @@
+name: Multipass VM Test
+on: [push, pull_request]
+
+jobs:
+  multipass-test:
+    runs-on: [ubuntu-22.04]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Multipass
+        run: |
+          sudo apt-get update
+#           sudo apt-get install snapd sudo -y
+#           sudo snap install multipass
+#           snap info multipass
+
+#       - name: Launch Ubuntu VMs with Multipass
+#         run: |
+#           multipass launch -n vm1 22.04
+#           multipass launch -n vm2 22.04
+
+#       - name: Run commands on VM1
+#         run: |
+#           multipass exec vm1 -- bash -c "sudo apt-get update && echo Hello from VM1"
+
+#       - name: Run commands on VM2
+#         run: |
+#           multipass exec vm2 -- bash -c "sudo apt-get update && echo Hello from VM2"
+
+#       - name: Cleanup VMs
+#         if: always()
+#         run: |
+#           multipass delete vm1 vm2
+#           multipass purge

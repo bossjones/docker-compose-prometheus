@@ -372,23 +372,11 @@ scrape_configs:
         # replacement: 192.168.1.102:9115  # The blackbox exporter's real hostname:port.
         replacement: 192.168.3.16:9115  # The blackbox exporter's real hostname:port.
 
-  - job_name: 'loki'
-    dns_sd_configs:
-      - names:
-          - loki-read
-          - loki-write
-          - loki-backend
-        type: A
-        port: 3100
+  - job_name: 'pushgateway'
+    honor_labels: true
+    static_configs:
+    - targets: ['pushgateway:9091']
     relabel_configs:
-    - source_labels: [__meta_dns_name]
-      target_label: service
-    - source_labels: [__meta_dns_srv_record_target]
-      target_label: dns_srv_record_target
-    - source_labels: [__meta_dns_srv_record_port]
-      target_label: dns_srv_record_port
-    - source_labels: [__meta_dns_mx_record_target]
-      target_label: dns_mx_record_target
     - regex: '(.+)'
       replacement: k3d
       source_labels:
@@ -400,6 +388,7 @@ scrape_configs:
       source_labels:
       - __name__
       target_label: cluster
+
 
   - job_name: 'nginx-exporter'
     dns_sd_configs:
@@ -428,32 +417,6 @@ scrape_configs:
       - __name__
       target_label: cluster
 
-  - job_name: 'promtail'
-    dns_sd_configs:
-      - names:
-          - promtail
-        type: A
-        port: 9080
-    relabel_configs:
-    - source_labels: [__meta_dns_name]
-      target_label: service
-    - source_labels: [__meta_dns_srv_record_target]
-      target_label: dns_srv_record_target
-    - source_labels: [__meta_dns_srv_record_port]
-      target_label: dns_srv_record_port
-    - source_labels: [__meta_dns_mx_record_target]
-      target_label: dns_mx_record_target
-    - regex: '(.+)'
-      replacement: k3d
-      source_labels:
-      - __name__
-      target_label: cluster
-    metric_relabel_configs:
-    - regex: (.+)
-      replacement: k3d
-      source_labels:
-      - __name__
-      target_label: cluster
 
   - job_name: grafana
     scheme: http
@@ -491,61 +454,6 @@ scrape_configs:
       - __name__
       target_label: cluster
 
-
-  - job_name: minio-cluster
-    metrics_path: /minio/v2/metrics/cluster
-    scheme: http
-    static_configs:
-    - targets: [minio:9000]
-    relabel_configs:
-    - regex: '(.+)'
-      replacement: k3d
-      source_labels:
-      - __name__
-      target_label: cluster
-    metric_relabel_configs:
-    - regex: (.+)
-      replacement: k3d
-      source_labels:
-      - __name__
-      target_label: cluster
-
-  - job_name: minio-node
-    metrics_path: /minio/v2/metrics/node
-    scheme: http
-    static_configs:
-    - targets: [minio:9000]
-    relabel_configs:
-    - regex: '(.+)'
-      replacement: k3d
-      source_labels:
-      - __name__
-      target_label: cluster
-    metric_relabel_configs:
-    - regex: (.+)
-      replacement: k3d
-      source_labels:
-      - __name__
-      target_label: cluster
-
-
-
-  - job_name: 'pushgateway'
-    honor_labels: true
-    static_configs:
-    - targets: ['pushgateway:9091']
-    relabel_configs:
-    - regex: '(.+)'
-      replacement: k3d
-      source_labels:
-      - __name__
-      target_label: cluster
-    metric_relabel_configs:
-    - regex: (.+)
-      replacement: k3d
-      source_labels:
-      - __name__
-      target_label: cluster
 
 
   - job_name: 'node-exporter-remote'

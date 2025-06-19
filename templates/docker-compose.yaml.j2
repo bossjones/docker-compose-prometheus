@@ -36,7 +36,7 @@ services:
   # SOURCE: https://doc.traefik.io/traefik/user-guides/docker-compose/basic-example/
   # SOURCE: https://doc.traefik.io/traefik/user-guides/docker-compose/basic-example/
   traefik:
-    image: "traefik:v2.10.4"
+    image: "traefik:{{ image_tags.traefik }}"
     container_name: "traefik"
     # environment:
     # # SOURCE: https://community.traefik.io/t/docker-compose-static-config-issue/10987
@@ -62,10 +62,10 @@ services:
       - "--providers.file.watch=true"
       - "--configFile=/etc/traefik/traefik.yaml"
     ports:
-      - "80:80"
-      - "443:443"
-      - "8989:8989"
-      - "8082:8082"
+      - "{{ ports.traefik.http }}:80"
+      - "{{ ports.traefik.https }}:443"
+      - "{{ ports.traefik.api }}:8989"
+      - "{{ ports.traefik.web }}:8082"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - ./traefik/traefik.yaml:/etc/traefik/traefik.yaml:ro
@@ -82,7 +82,7 @@ services:
       loki: null
     # - loki
     extra_hosts:
-      - host.docker.internal:172.17.0.1
+      - host.docker.internal:{{ network.docker_host_internal }}
     restart: unless-stopped
 {% raw %}
     logging:
@@ -96,14 +96,14 @@ services:
 # SEE: https://github.com/pi-hole/pi-hole/issues/5635
 {% if portainer_feature_flag %}
   portainer:
-    image: "portainer/portainer-ce:2.20.3"
+    image: "portainer/portainer-ce:{{ image_tags.portainer }}"
     # command: -H unix:///var/run/docker.sock --admin-password '$$2y$$05$$cRSKE60ksnVWUXwsvXu1HO/dQVXEZ0W.ImbTSokLdQ58ASu.gG7j2' --http-enabled --log-level "DEBUG"
     command: ['--host', 'unix:///var/run/docker.sock','--admin-password', '$$$$2y$$$$05$$$$bsb.XmF.r2DU6/9oVUaDxu3.Lxhmg1R8M0NMLK6JJKUiqUcaNjvdu', '--http-enabled', '--log-level', "DEBUG"]
     container_name: "portainer"
     ports:
       # - "8000:8000/tcp"
-      - "0.0.0.0:49443:9443"
-      - "0.0.0.0:49000:9000"
+      - "0.0.0.0:{{ ports.portainer.secure }}:9443"
+      - "0.0.0.0:{{ ports.portainer.standard }}:9000"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.portainer.rule=Host(`portainer.{{ fqdn }}`)"
@@ -128,8 +128,9 @@ services:
 {% endraw %}
 {% endif %}
 
+{% if loki_feature_flag %}
   loki-gateway:
-    image: nginx:1.25.3-perl
+    image: nginx:{{ image_tags.nginx }}
     container_name: "loki-gateway"
     depends_on:
       - 'loki-read'
@@ -138,8 +139,8 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     restart: unless-stopped
     ports:
-      - "8080:80"
-      - "3100:3100"
+      - "{{ ports.nginx_gateway.http }}:80"
+      - "{{ ports.nginx_gateway.loki_api }}:3100"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.loki-gateway-http.rule=Host(`loki-gateway.{{ fqdn }}`)"
@@ -155,10 +156,37 @@ services:
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
+{% else %}
+  nginx-gateway:
+    image: nginx:{{ image_tags.nginx }}
+    container_name: "nginx-gateway"
+    volumes:
+      - ./nginx/nginx-no-loki.conf:/etc/nginx/nginx.conf
+    restart: unless-stopped
+    ports:
+      - "{{ ports.nginx_gateway.http }}:80"
+      - "{{ ports.nginx_gateway.loki_api }}:3100"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx-gateway-http.rule=Host(`nginx-gateway.{{ fqdn }}`)"
+      - "traefik.http.routers.nginx-gateway-http.entrypoints=web"
+      - "traefik.http.routers.nginx-gateway-http.service=nginx-gateway-http"
+      - "traefik.http.services.nginx-gateway-http.loadbalancer.server.port=80"
+      - "traefik.port=8080"
+    networks:
+      - loki
+{% raw %}
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
+{% endif %}
 
+{% if loki_feature_flag %}
   # SOURCE: https://github.com/robozmey/roomkn-sre/blob/179ec407ae7e6ddf2135af8d2d3811950448ec85/docker-compose.yml#L82
   nginx-exporter:
-    image: nginx/nginx-prometheus-exporter:1.0.0
+    image: nginx/nginx-prometheus-exporter:{{ image_tags.nginx_exporter }}
     container_name: "nginx-exporter"
     depends_on:
       - 'loki-gateway'
@@ -166,7 +194,7 @@ services:
     command:
       - '--nginx.scrape-uri=http://loki-gateway/nginx_status'
     ports:
-      - "9113:9113"
+      - "{{ ports.nginx_exporter }}:9113"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.nginx-exporter-http.rule=Host(`nginx-exporter.{{ fqdn }}`)"
@@ -182,14 +210,42 @@ services:
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
+{% else %}
+  # SOURCE: https://github.com/robozmey/roomkn-sre/blob/179ec407ae7e6ddf2135af8d2d3811950448ec85/docker-compose.yml#L82
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:{{ image_tags.nginx_exporter }}
+    container_name: "nginx-exporter"
+    depends_on:
+      - 'nginx-gateway'
+    restart: unless-stopped
+    command:
+      - '--nginx.scrape-uri=http://nginx-gateway/nginx_status'
+    ports:
+      - "{{ ports.nginx_exporter }}:9113"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx-exporter-http.rule=Host(`nginx-exporter.{{ fqdn }}`)"
+      - "traefik.http.routers.nginx-exporter-http.entrypoints=web"
+      - "traefik.http.routers.nginx-exporter-http.service=nginx-exporter-http"
+      - "traefik.http.services.nginx-exporter-http.loadbalancer.server.port=9113"
+      - "traefik.port=9113"
+    networks:
+      - loki
+{% raw %}
+    logging:
+      driver: json-file
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+{% endraw %}
+{% endif %}
 
   # SOURCE: https://github.com/robozmey/roomkn-sre/blob/179ec407ae7e6ddf2135af8d2d3811950448ec85/docker-compose.yml#L82
   speedtest-exporter:
-    image: miguelndecarvalho/speedtest-exporter
+    image: miguelndecarvalho/speedtest-exporter:{{ image_tags.speedtest_exporter }}
     container_name: "speedtest-exporter"
     restart: unless-stopped
     ports:
-      - "9798:9798"
+      - "{{ ports.speedtest_exporter }}:9798"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.speedtest-exporter-http.rule=Host(`speedtest-exporter.{{ fqdn }}`)"
@@ -206,11 +262,12 @@ services:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
 
+{% if loki_feature_flag %}
   # Since the Loki containers are running as user 10001 and the mounted data volume is owned by root,
   # Loki would not have permissions to create the directories.
   # Therefore the init container changes permissions of the mounted directory.
   init:
-    image: grafana/loki:2.8.3
+    image: grafana/loki:{{ image_tags.loki }}
     user: root
     entrypoint:
       - "chown"
@@ -221,9 +278,11 @@ services:
       - ./loki:/loki
     networks:
       - loki
+{% endif %}
 
+{% if loki_feature_flag %}
   minio:
-    image: minio/minio:RELEASE.2023-06-29T05-12-28Z
+    image: minio/minio:{{ image_tags.minio }}
     container_name: minio
     entrypoint:
       - sh
@@ -243,8 +302,8 @@ services:
       # - MINIO_ACCESS_KEY=admin
       # - MINIO_SECRET_KEY=password
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "{{ ports.minio.api }}:9000"
+      - "{{ ports.minio.console }}:9001"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.minio-http.rule=Host(`minio.{{ fqdn }}`)"
@@ -257,6 +316,7 @@ services:
     networks:
       - loki
     restart: unless-stopped
+{% endif %}
 
 {% if log_generator_feature_flag %}
   # for testing purposes only, disable in production
@@ -386,8 +446,8 @@ services:
     - DNSMASQ_LISTENING=all
     # - PIHOLE_UID=0
     # Set the cache size for dnsmasq. Useful for increasing the default cache size or to set it to 0. Note that when DNSSEC is "true", then this setting is ignored.
-    - CUSTOM_CACHE_SIZE=10000
-    - PIHOLE_DNS_=127.0.0.1#5335;1.1.1.2;1.0.0.2
+    - CUSTOM_CACHE_SIZE={{ performance.pihole_cache_size }}
+    - PIHOLE_DNS_={{ network.pihole_dns }}
     - NETWORK_ACCESS=internal
     - VIRTUAL_HOST=pi.hole
     - PROXY_LOCATION=pi.hole
@@ -432,7 +492,7 @@ services:
     # function with the environment variable's suffix as the key. This allows applying any pihole-FTL.conf
     # setting defined here: https://docs.pi-hole.net/ftldns/configfile/
     # ************************************************************************************
-    - FTLCONF_dns_upstreams=127.0.0.1#5335;1.1.1.2;1.0.0.2
+    - FTLCONF_dns_upstreams={{ network.pihole_dns }}
     - FTLCONF_webserver_api_password=raspberry
     - FTLCONF_dns_dnssec=true
     - FTLCONF_TAIL_FTL_LOG=1
@@ -451,8 +511,8 @@ services:
 
     dns:
       - "127.0.0.1"
-      - "1.1.1.2"
-      - "1.0.0.2"
+      - "{{ network.dns_cloudflare.primary }}"
+      - "{{ network.dns_cloudflare.secondary }}"
     networks:
     - loki
 {% raw %}
@@ -598,7 +658,7 @@ services:
 
   # docker pull prom/prometheus:v2.31.1
   prometheus:
-    image: prom/prometheus:v2.31.1
+    image: prom/prometheus:{{ image_tags.prometheus }}
     container_name: prometheus
     expose:
     - 9090
@@ -617,7 +677,7 @@ services:
       - '--enable-feature=remote-write-receiver'
       - '--query.lookback-delta=30s'
     ports:
-      - 9092:9090
+      - {{ ports.prometheus }}:9090
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.prometheus.rule=Host(`prometheus.{{ fqdn }}`)"
@@ -630,14 +690,18 @@ services:
       - cadvisor:cadvisor
 {% endif %}
       - alertmanager:alertmanager
+{% if loki_feature_flag %}
       - loki-gateway:loki-gateway
-      - pihole-exporter:pihole-exporter
+{% endif %}
+      - pihole-exporter
     depends_on:
 {% if cadvisor_feature_flag %}
       - cadvisor
 {% endif %}
       - alertmanager
+{% if loki_feature_flag %}
       - loki-gateway
+{% endif %}
       - pihole-exporter
       - pushgateway
     restart: always
@@ -658,7 +722,7 @@ services:
 
   # docker pull prom/pushgateway:v1.8.0
   pushgateway:
-    image: prom/pushgateway:v1.8.0
+    image: prom/pushgateway:{{ image_tags.pushgateway }}
     container_name: pushgateway
     expose:
     - 9091
@@ -666,7 +730,7 @@ services:
     stdin_open: true
     restart: always
     ports:
-      - 0.0.0.0:9091:9091
+      - 0.0.0.0:{{ ports.pushgateway }}:9091
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.pushgateway.rule=Host(`pushgateway.{{ fqdn }}`)"
@@ -695,7 +759,7 @@ services:
 {% endraw %}
 
   node-exporter:
-    image: prom/node-exporter:latest
+    image: prom/node-exporter:{{ image_tags.node_exporter }}
     container_name: node-exporter
     labels:
     - "traefik.enable=true"
@@ -719,7 +783,7 @@ services:
     expose:
     - 9100
     ports:
-      - 9100:9100
+      - {{ ports.node_exporter }}:9100
     restart: always
     deploy:
       mode: global
@@ -735,7 +799,7 @@ services:
 {% endraw %}
 
   alertmanager:
-    image: prom/alertmanager
+    image: prom/alertmanager:{{ image_tags.alertmanager }}
     container_name: alertmanager
     labels:
     - "traefik.enable=true"
@@ -749,7 +813,7 @@ services:
     expose:
     - 9093
     ports:
-      - 0.0.0.0:9093:9093
+      - 0.0.0.0:{{ ports.alertmanager }}:9093
     volumes:
       - ./alertmanager/:/etc/alertmanager/
       - alertmanager-data:/data
@@ -791,7 +855,7 @@ services:
     expose:
     - 8585
     ports:
-      - "8585:8080"
+      - "{{ ports.alertmanager_telegram }}:8080"
     restart: always
     env_file:
       - ./env
@@ -807,7 +871,7 @@ services:
 {% if cadvisor_feature_flag %}
   cadvisor:
     # SOURCE: https://github.com/rafaribe/home-ops/blob/d9e283fd3ddc42a9891c8a12fe82fa128657798a/provision/ansible/backup-server/roles/syncthing/templates/agent.yml
-    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    image: gcr.io/cadvisor/cadvisor:{{ image_tags.cadvisor }}
     container_name: cadvisor
     privileged: true
     userns_mode: "host"
@@ -832,14 +896,14 @@ services:
     devices:
         - /dev/kmsg:/dev/kmsg:ro
     ports:
-        - "8081:8081"
+        - "{{ ports.cadvisor }}:8081"
     expose:
       - 8081
     restart: always
     entrypoint:
       - /usr/bin/cadvisor
       # - --v=6
-      - '--max_procs=2'
+      - '--max_procs={{ performance.cadvisor_max_procs }}'
       - '--listen_ip=0.0.0.0'
       - '--port=8081'
       - '--logtostderr'
@@ -860,7 +924,7 @@ services:
       # - "--allow_dynamic_housekeeping=true"
       # - "--storage_duration=1m0s"
       # SOURCE: https://dev.to/cloudx/taming-cadvisors-high-cpu-usage-1nm5
-      - "--housekeeping_interval=30s"
+      - "--housekeeping_interval={{ performance.cadvisor_housekeeping_interval }}"
       - "--docker_only=true"
       - "--disable_metrics=percpu,sched,tcp,udp,disk,diskIO,hugetlb,referenced_memory,cpu_topology,resctrl,cpuLoad"
     env_file:
@@ -880,7 +944,7 @@ services:
 {% endif %}
 
   blackbox:
-    image: prom/blackbox-exporter
+    image: prom/blackbox-exporter:{{ image_tags.blackbox }}
     privileged: true
     container_name: blackbox
     labels:
@@ -893,8 +957,8 @@ services:
     tty: true
     stdin_open: true
     ports:
-    - "9115:9115/tcp"
-    - "9115:9115/udp"
+    - "{{ ports.blackbox }}:9115/tcp"
+    - "{{ ports.blackbox }}:9115/udp"
     expose:
     - 9115
     volumes:
@@ -914,9 +978,9 @@ services:
     depends_on:
     - pihole
     dns:
-      - "192.168.3.16"
-      - "1.1.1.2"
-      - "1.0.0.2"
+      - "{{ network.dns_primary }}"
+      - "{{ network.dns_cloudflare.primary }}"
+      - "{{ network.dns_cloudflare.secondary }}"
 
 {% raw %}
     logging:
@@ -972,9 +1036,10 @@ services:
     - loki
 
 
+{% if loki_feature_flag %}
   loki-read:
     user: "1000"
-    image: grafana/loki:2.8.3
+    image: grafana/loki:{{ image_tags.loki }}
     volumes:
       # - ./config:/etc/loki/
       # - ./loki/etc/loki:/etc/loki/
@@ -1003,7 +1068,7 @@ services:
     restart: always
     deploy:
       mode: replicated
-      replicas: 3
+      replicas: {{ performance.loki_replicas }}
     # only needed for interactive debugging with dlv
 {% raw %}
     logging:
@@ -1011,10 +1076,12 @@ services:
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
+{% endif %}
 
+{% if loki_feature_flag %}
   loki-write:
     user: "1000"
-    image: grafana/loki:2.8.3
+    image: grafana/loki:{{ image_tags.loki }}
     volumes:
       # - ./config:/etc/loki/
       - ./loki/etc/loki:/loki:rw
@@ -1040,17 +1107,19 @@ services:
     restart: always
     deploy:
       mode: replicated
-      replicas: 3
+      replicas: {{ performance.loki_replicas }}
 {% raw %}
     logging:
       driver: json-file
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
+{% endif %}
 
+{% if loki_feature_flag %}
   loki-backend:
     user: "1000"
-    image: grafana/loki:2.8.3
+    image: grafana/loki:{{ image_tags.loki }}
     volumes:
       # - ./config:/etc/loki/
       - ./loki/etc/loki:/loki:rw
@@ -1076,44 +1145,16 @@ services:
     restart: always
     deploy:
       mode: replicated
-      replicas: 3
+      replicas: {{ performance.loki_replicas }}
 {% raw %}
     logging:
       driver: json-file
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
+{% endif %}
 
-#   loki:
-#     restart: always
-#     image: grafana/loki:2.8.3
-#     ports:
-#       - "3100:3100/tcp"
-#       - "9096:9096"
-#     container_name: loki
-#     tty: true
-#     stdin_open: true
-#     env_file:
-#       - ./env
-#     volumes:
-#     - ./loki/etc/loki:/loki
-#     labels:
-#     - "traefik.enable=true"
-#     - "traefik.http.routers.loki.rule=Host(`loki.{{ fqdn }}`)"
-#     - "traefik.http.routers.loki.entrypoints=web"
-#     - "traefik.http.services.loki.loadbalancer.server.port=3100"
-#     - "traefik.http.services.loki.loadbalancer.server.port=3100"
-#     command: -config.file=/loki/loki-config.yaml
-#     networks:
-#     - loki
-{% raw %}
-#     logging:
-#       driver: json-file
-#       options:
-#         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
-{% endraw %}
-
-{% if promtail_feature_flag %}
+{% if loki_feature_flag and promtail_feature_flag %}
   promtail:
     # SOURCE: https://github.com/gilmrt/docker-compose/blob/5d8d7b3746fba48ba5f559f9913e56ae3d881eee/metrics/docker-compose.yml
     container_name: promtail
@@ -1168,7 +1209,7 @@ services:
 {% endif %}
 
   grafana:
-    image: grafana/grafana:10.0.1
+    image: grafana/grafana:{{ image_tags.grafana }}
     container_name: grafana
     labels:
     - "traefik.enable=true"
@@ -1179,16 +1220,20 @@ services:
     - "traefik.port=3000"
     depends_on:
       - prometheus
+{% if loki_feature_flag %}
       - loki-gateway
+{% endif %}
     links:
       - prometheus:prometheus
+{% if loki_feature_flag %}
       - loki-gateway:loki-gateway
+{% endif %}
       - alertmanager:alertmanager
       - influxdb:influxdb
     expose:
     - 3000
     ports:
-      - 3000:3000
+      - {{ ports.grafana }}:3000
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/etc/grafana/grafana.ini:/etc/grafana/grafana.ini
@@ -1290,7 +1335,7 @@ services:
 {% endif %}
 
   pve-exporter:
-    image: prompve/prometheus-pve-exporter
+    image: prompve/prometheus-pve-exporter:{{ image_tags.pve_exporter }}
     container_name: pve-exporter
     labels:
     - "traefik.enable=true"

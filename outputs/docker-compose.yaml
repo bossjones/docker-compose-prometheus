@@ -93,7 +93,7 @@ services:
   portainer:
     image: "portainer/portainer-ce:2.20.3"
     # command: -H unix:///var/run/docker.sock --admin-password '$$2y$$05$$cRSKE60ksnVWUXwsvXu1HO/dQVXEZ0W.ImbTSokLdQ58ASu.gG7j2' --http-enabled --log-level "DEBUG"
-    command: ['--host', 'unix:///var/run/docker.sock','--admin-password', '$$$$2y$$$$05$$$$bsb.XmF.r2DU6/9oVUaDxu3.Lxhmg1R8M0NMLK6JJKUiqUcaNjvdu', '--http-enabled ', '--log-level', "DEBUG"]
+    command: ['--host', 'unix:///var/run/docker.sock','--admin-password', '$$$$2y$$$$05$$$$bsb.XmF.r2DU6/9oVUaDxu3.Lxhmg1R8M0NMLK6JJKUiqUcaNjvdu', '--http-enabled', '--log-level', "DEBUG"]
     container_name: "portainer"
     ports:
       # - "8000:8000/tcp"
@@ -121,24 +121,21 @@ services:
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
-  loki-gateway:
+  nginx-gateway:
     image: nginx:1.25.3-perl
-    container_name: "loki-gateway"
-    depends_on:
-      - 'loki-read'
-      - 'loki-write'
+    container_name: "nginx-gateway"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/nginx-no-loki.conf:/etc/nginx/nginx.conf
     restart: unless-stopped
     ports:
       - "8080:80"
       - "3100:3100"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.loki-gateway-http.rule=Host(`loki-gateway.scarlettlab.home`)"
-      - "traefik.http.routers.loki-gateway-http.entrypoints=web"
-      - "traefik.http.routers.loki-gateway-http.service=loki-gateway-http"
-      - "traefik.http.services.loki-gateway-http.loadbalancer.server.port=80"
+      - "traefik.http.routers.nginx-gateway-http.rule=Host(`nginx-gateway.scarlettlab.home`)"
+      - "traefik.http.routers.nginx-gateway-http.entrypoints=web"
+      - "traefik.http.routers.nginx-gateway-http.service=nginx-gateway-http"
+      - "traefik.http.services.nginx-gateway-http.loadbalancer.server.port=80"
       - "traefik.port=8080"
     networks:
       - loki
@@ -153,10 +150,10 @@ services:
     image: nginx/nginx-prometheus-exporter:1.0.0
     container_name: "nginx-exporter"
     depends_on:
-      - 'loki-gateway'
+      - 'nginx-gateway'
     restart: unless-stopped
     command:
-      - '--nginx.scrape-uri=http://loki-gateway/nginx_status'
+      - '--nginx.scrape-uri=http://nginx-gateway/nginx_status'
     ports:
       - "9113:9113"
     labels:
@@ -176,7 +173,7 @@ services:
 
   # SOURCE: https://github.com/robozmey/roomkn-sre/blob/179ec407ae7e6ddf2135af8d2d3811950448ec85/docker-compose.yml#L82
   speedtest-exporter:
-    image: miguelndecarvalho/speedtest-exporter
+    image: miguelndecarvalho/speedtest-exporter:latest
     container_name: "speedtest-exporter"
     restart: unless-stopped
     ports:
@@ -196,57 +193,7 @@ services:
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
-  # Since the Loki containers are running as user 10001 and the mounted data volume is owned by root,
-  # Loki would not have permissions to create the directories.
-  # Therefore the init container changes permissions of the mounted directory.
-  init:
-    image: grafana/loki:2.8.3
-    user: root
-    entrypoint:
-      - "chown"
-      # - "10001:10001"
-      - "1000:1000"
-      - "/loki"
-    volumes:
-      - ./loki:/loki
-    networks:
-      - loki
 
-  minio:
-    image: minio/minio:RELEASE.2023-06-29T05-12-28Z
-    container_name: minio
-    entrypoint:
-      - sh
-      - -euc
-      - |
-        mkdir -p /data/loki-data && \
-        mkdir -p /data/loki-ruler &&
-        minio server /data --address ":9000" --console-address ":9001"
-    environment:
-      - MINIO_ROOT_USER=loki
-      - MINIO_ROOT_PASSWORD=supersecret
-      - MINIO_PROMETHEUS_AUTH_TYPE=public
-      - MINIO_UPDATE=off
-      - MINIO_PROMETHEUS_URL=http://prometheus:9090
-      - MINIO_PROMETHEUS_JOB_ID=minio-cluster
-      - MINIO_BROWSER=on
-      # - MINIO_ACCESS_KEY=admin
-      # - MINIO_SECRET_KEY=password
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.minio-http.rule=Host(`minio.scarlettlab.home`)"
-      - "traefik.http.routers.minio-http.entrypoints=web"
-      - "traefik.http.routers.minio-http.service=minio-http"
-      - "traefik.http.services.minio-http.loadbalancer.server.port=9000"
-      - "traefik.port=9000"
-    volumes:
-      - ./.data/minio:/data
-    networks:
-      - loki
-    restart: unless-stopped
 
 
   whoami:
@@ -571,12 +518,10 @@ services:
     links:
       - cadvisor:cadvisor
       - alertmanager:alertmanager
-      - loki-gateway:loki-gateway
-      - pihole-exporter:pihole-exporter
+      - pihole-exporter
     depends_on:
       - cadvisor
       - alertmanager
-      - loki-gateway
       - pihole-exporter
       - pushgateway
     restart: always
@@ -671,7 +616,7 @@ services:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
   alertmanager:
-    image: prom/alertmanager
+    image: prom/alertmanager:latest
     container_name: alertmanager
     labels:
     - "traefik.enable=true"
@@ -811,7 +756,7 @@ services:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
   blackbox:
-    image: prom/blackbox-exporter
+    image: prom/blackbox-exporter:latest
     privileged: true
     container_name: blackbox
     labels:
@@ -902,142 +847,8 @@ services:
     - loki
 
 
-  loki-read:
-    user: "1000"
-    image: grafana/loki:2.8.3
-    volumes:
-      # - ./config:/etc/loki/
-      # - ./loki/etc/loki:/etc/loki/
-      - ./loki/etc/loki:/loki:rw
-      - ./rules:/loki/rules:ro
-    ports:
-      # - 3101:3100
-      # - 7946
-      - "9095"
-      #- "3101:3100"
-      - "3100"
-      - "7946"
-      # uncomment to use interactive debugging
-      # - "40000-40002:40000" # # makes the replicas available on ports 40000, 40001, 40002
-    #cap_add:
-    #  - SYS_PTRACE
-    #security_opt:
-    #  - apparmor=unconfined
-    command: "-config.file=/loki/loki-config.yaml -log.level=info -target=read -legacy-read-mode=false"
-    env_file:
-      - ./env
-    networks:
-      - loki
-    depends_on:
-      - minio
-    restart: always
-    deploy:
-      mode: replicated
-      replicas: 3
-    # only needed for interactive debugging with dlv
 
-    logging:
-      driver: json-file
-      options:
-        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
-  loki-write:
-    user: "1000"
-    image: grafana/loki:2.8.3
-    volumes:
-      # - ./config:/etc/loki/
-      - ./loki/etc/loki:/loki:rw
-    ports:
-      - "9095"
-      #- "3102:3100"
-      - "3100"
-      - "7946"
-      # uncomment to use interactive debugging
-      # - "50000-50002:40000" # makes the replicas available on ports 50000, 50001, 50002
-    #cap_add:
-    #  - SYS_PTRACE
-    #security_opt:
-    #  - apparmor=unconfined
-    # command: "-config.file=/loki/loki-config.yaml -log.level=info -target=write -frontend.downstream-url=http://loki-gateway:3100 -querier.frontend-address=http://loki-write:9095"
-    command: "-config.file=/loki/loki-config.yaml -log.level=info -target=write -frontend.downstream-url=http://loki-gateway"
-    env_file:
-      - ./env
-    networks:
-      - loki
-    depends_on:
-      - minio
-    restart: always
-    deploy:
-      mode: replicated
-      replicas: 3
-
-    logging:
-      driver: json-file
-      options:
-        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
-
-  loki-backend:
-    user: "1000"
-    image: grafana/loki:2.8.3
-    volumes:
-      # - ./config:/etc/loki/
-      - ./loki/etc/loki:/loki:rw
-    ports:
-      - "9095"
-      #- "3102:3100"
-      - "3100"
-      - "7946"
-      # uncomment to use interactive debugging
-      # - "50000-50002:40000" # makes the replicas available on ports 50000, 50001, 50002
-    #cap_add:
-    #  - SYS_PTRACE
-    #security_opt:
-    #  - apparmor=unconfined
-    # command: "-config.file=/loki/loki-config.yaml -log.level=info -target=write -frontend.downstream-url=http://loki-gateway:3100 -querier.frontend-address=http://loki-write:9095"
-    command: "-config.file=/loki/loki-config.yaml -log.level=info -target=backend -legacy-read-mode=false"
-    env_file:
-      - ./env
-    networks:
-      - loki
-    depends_on:
-      - minio
-    restart: always
-    deploy:
-      mode: replicated
-      replicas: 3
-
-    logging:
-      driver: json-file
-      options:
-        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
-
-#   loki:
-#     restart: always
-#     image: grafana/loki:2.8.3
-#     ports:
-#       - "3100:3100/tcp"
-#       - "9096:9096"
-#     container_name: loki
-#     tty: true
-#     stdin_open: true
-#     env_file:
-#       - ./env
-#     volumes:
-#     - ./loki/etc/loki:/loki
-#     labels:
-#     - "traefik.enable=true"
-#     - "traefik.http.routers.loki.rule=Host(`loki.scarlettlab.home`)"
-#     - "traefik.http.routers.loki.entrypoints=web"
-#     - "traefik.http.services.loki.loadbalancer.server.port=3100"
-#     - "traefik.http.services.loki.loadbalancer.server.port=3100"
-#     command: -config.file=/loki/loki-config.yaml
-#     networks:
-#     - loki
-
-#     logging:
-#       driver: json-file
-#       options:
-#         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
 
   grafana:
@@ -1052,10 +863,8 @@ services:
     - "traefik.port=3000"
     depends_on:
       - prometheus
-      - loki-gateway
     links:
       - prometheus:prometheus
-      - loki-gateway:loki-gateway
       - alertmanager:alertmanager
       - influxdb:influxdb
     expose:
@@ -1106,7 +915,7 @@ services:
 
 
   pve-exporter:
-    image: prompve/prometheus-pve-exporter
+    image: prompve/prometheus-pve-exporter:latest
     container_name: pve-exporter
     labels:
     - "traefik.enable=true"
