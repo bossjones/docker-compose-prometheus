@@ -173,7 +173,7 @@ services:
 
   # SOURCE: https://github.com/robozmey/roomkn-sre/blob/179ec407ae7e6ddf2135af8d2d3811950448ec85/docker-compose.yml#L82
   speedtest-exporter:
-    image: miguelndecarvalho/speedtest-exporter
+    image: miguelndecarvalho/speedtest-exporter:latest
     container_name: "speedtest-exporter"
     restart: unless-stopped
     ports:
@@ -616,7 +616,7 @@ services:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
   alertmanager:
-    image: prom/alertmanager
+    image: prom/alertmanager:latest
     container_name: alertmanager
     labels:
     - "traefik.enable=true"
@@ -756,7 +756,7 @@ services:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
   blackbox:
-    image: prom/blackbox-exporter
+    image: prom/blackbox-exporter:latest
     privileged: true
     container_name: blackbox
     labels:
@@ -915,7 +915,7 @@ services:
 
 
   pve-exporter:
-    image: prompve/prometheus-pve-exporter
+    image: prompve/prometheus-pve-exporter:latest
     container_name: pve-exporter
     labels:
     - "traefik.enable=true"

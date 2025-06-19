@@ -6,7 +6,12 @@
       "Bash(grep:*)",
       "Bash(ls:*)",
       "Bash(find:*)",
-      "Bash(docker-compose config:*)"
+      "Bash(docker-compose config:*)",
+      "mcp__mcp-server-jinja2-tools__fetch_jinja2_tools_documentation",
+      "mcp__mcp-server-jinja2-tools__search_jinja2_tools_documentation",
+      "mcp__mcp-server-jinja2-tools__search_jinja2_tools_code",
+      "mcp__mcp-server-jinja2-tools__fetch_generic_url_content",
+      "Bash(rg:*)"
     ],
     "deny": []
   }

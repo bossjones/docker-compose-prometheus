@@ -29,3 +29,67 @@ vector_feature_flag: false
 promtail_feature_flag: false
 portainer_feature_flag: true
 loki_feature_flag: false
+
+# Image versions
+image_tags:
+  traefik: "v2.10.4"
+  portainer: "2.20.3"
+  nginx: "1.25.3-perl"
+  nginx_exporter: "1.0.0"
+  speedtest_exporter: "latest"
+  loki: "2.8.3"
+  minio: "RELEASE.2023-06-29T05-12-28Z"
+  prometheus: "v2.31.1"
+  pushgateway: "v1.8.0"
+  node_exporter: "latest"
+  alertmanager: "latest"
+  cadvisor: "v0.47.2"
+  blackbox: "latest"
+  grafana: "10.0.1"
+  pve_exporter: "latest"
+
+# Port configurations
+ports:
+  traefik:
+    http: 80
+    https: 443
+    api: 8989
+    web: 8082
+  portainer:
+    secure: 49443
+    standard: 49000
+  nginx_gateway:
+    http: 8080
+    loki_api: 3100
+  loki_gateway:
+    http: 8080
+    loki_api: 3100
+  nginx_exporter: 9113
+  speedtest_exporter: 9798
+  minio:
+    api: 9000
+    console: 9001
+  prometheus: 9092
+  pushgateway: 9091
+  node_exporter: 9100
+  alertmanager: 9093
+  cadvisor: 8081
+  blackbox: 9115
+  grafana: 3000
+  alertmanager_telegram: 8585
+
+# Network settings
+network:
+  docker_host_internal: "172.17.0.1"
+  dns_primary: "192.168.3.16"
+  dns_cloudflare:
+    primary: "1.1.1.2"
+    secondary: "1.0.0.2"
+  pihole_dns: "127.0.0.1#5335;1.1.1.2;1.0.0.2"
+
+# Performance settings
+performance:
+  cadvisor_max_procs: 2
+  cadvisor_housekeeping_interval: "30s"
+  loki_replicas: 3
+  pihole_cache_size: 10000
