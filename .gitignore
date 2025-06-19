@@ -25,6 +25,11 @@ pve.yaml
 venv.bak
 pihole.log
 
+# Backup files created by dev-setup script
+*.backup.*
+.env.backup.*
+env.backup.*
+.envrc.backup.*
 
 file.out
 nmcli.yaml

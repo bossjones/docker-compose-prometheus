@@ -127,3 +127,9 @@ clean:
 
 sort-yaml:
 	dyff yaml --restructure	--in-place templates/loki/etc/loki/rules/fake/rules.yml.j2
+
+.PHONY: dev-setup
+dev-setup: ## ** Set up development environment (creates venv, installs deps, renders templates)
+	@echo "$$ASCILOGO"
+	@echo "Setting up development environment..."
+	bash ./scripts/dev-setup.sh
