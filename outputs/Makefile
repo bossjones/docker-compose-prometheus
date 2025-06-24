@@ -132,8 +132,26 @@ network-status:
 litecli:
 	docker exec -it pihole bash -c litecli --help
 
+# Doctor target to check for required binaries and system prerequisites
+doctor:
+	@echo "Checking system prerequisites..."
+	@command -v sudo >/dev/null 2>&1 || { echo "Error: sudo is required but not installed"; exit 1; }
+	@command -v systemctl >/dev/null 2>&1 || { echo "Error: systemctl is required but not installed"; exit 1; }
+	@command -v nmcli >/dev/null 2>&1 || { echo "Error: nmcli is required but not installed"; exit 1; }
+	@command -v netplan >/dev/null 2>&1 || { echo "Error: netplan is required but not installed"; exit 1; }
+	@command -v resolvectl >/dev/null 2>&1 || { echo "Error: resolvectl is required but not installed"; exit 1; }
+	@command -v docker >/dev/null 2>&1 || { echo "Error: docker is required but not installed"; exit 1; }
+	@command -v ss >/dev/null 2>&1 || { echo "Error: ss is required but not installed"; exit 1; }
+	@command -v ping >/dev/null 2>&1 || { echo "Error: ping is required but not installed"; exit 1; }
+	@test -f /etc/netplan/01-network-manager-all.yaml || { echo "Warning: /etc/netplan/01-network-manager-all.yaml does not exist"; }
+	@test -d /etc/systemd/system || { echo "Error: systemd system directory not found"; exit 1; }
+	@test -d pihole/etc/netplan || { echo "Error: pihole/etc/netplan directory not found"; exit 1; }
+	@test -f pihole/etc/netplan/02-pihole.yaml || { echo "Error: pihole/etc/netplan/02-pihole.yaml not found"; exit 1; }
+	@test -f pihole/dnsmasq.d/02-systemd-override.conf || { echo "Error: pihole/dnsmasq.d/02-systemd-override.conf not found"; exit 1; }
+	@echo "All prerequisites check passed!"
+
 # NOTE: https://github.com/systemd/systemd/issues/13432
-netplan-apply:
+netplan-apply: doctor
 	sudo resolvectl log-level debug
 	sudo systemctl status NetworkManager.service
 
