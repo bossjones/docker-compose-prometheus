@@ -128,6 +128,7 @@ services:
 {% endraw %}
 {% endif %}
 
+{% if loki_feature_flag %}
   loki-gateway:
     image: nginx:1.25.3-perl
     container_name: "loki-gateway"
@@ -182,6 +183,7 @@ services:
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
+{% endif %}
 
   # SOURCE: https://github.com/robozmey/roomkn-sre/blob/179ec407ae7e6ddf2135af8d2d3811950448ec85/docker-compose.yml#L82
   speedtest-exporter:
@@ -206,6 +208,7 @@ services:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
 
+{% if loki_feature_flag %}
   # Since the Loki containers are running as user 10001 and the mounted data volume is owned by root,
   # Loki would not have permissions to create the directories.
   # Therefore the init container changes permissions of the mounted directory.
@@ -257,6 +260,7 @@ services:
     networks:
       - loki
     restart: unless-stopped
+{% endif %}
 
 {% if log_generator_feature_flag %}
   # for testing purposes only, disable in production
@@ -972,6 +976,7 @@ services:
     - loki
 
 
+{% if loki_feature_flag %}
   loki-read:
     user: "1000"
     image: grafana/loki:2.8.3
@@ -1083,6 +1088,7 @@ services:
       options:
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
+{% endif %}
 
 #   loki:
 #     restart: always
