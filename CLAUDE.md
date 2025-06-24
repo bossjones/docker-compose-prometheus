@@ -98,3 +98,23 @@ The project includes a Makefile with various targets:
 - Added conditional wrapping for all Loki-related services using `{% if loki_feature_flag %}`
 - This allows for easy enabling/disabling of the entire Loki logging stack
 - The Loki network and volume remain static (not wrapped in conditionals) as they may be used by other services
+- Fixed service dependencies to be conditional:
+  - Prometheus: `loki-gateway` dependency is now wrapped with `{% if loki_feature_flag %}`
+  - Grafana: `loki-gateway` dependency is now wrapped with `{% if loki_feature_flag %}`
+  - Promtail: Now requires BOTH `promtail_feature_flag` AND `loki_feature_flag` to be enabled
+  - Syslog-ng: Dependency on promtail also checks for both flags
+
+## Important Notes on Feature Flags
+
+### Loki Dependencies
+When `loki_feature_flag` is set to `false`:
+- All Loki services (loki-gateway, nginx-exporter, init, minio, loki-read, loki-write, loki-backend) will not be deployed
+- Services that depend on Loki will automatically have their dependencies removed
+- Promtail will not be deployed even if `promtail_feature_flag` is true (since it requires Loki)
+
+### Service Dependencies
+The following services have conditional dependencies on Loki:
+- **Prometheus**: Can run without Loki but won't have log correlation features
+- **Grafana**: Can run without Loki but won't have log visualization capabilities
+- **Promtail**: Cannot run without Loki (enforced by requiring both flags)
+- **Syslog-ng**: Can run without Promtail/Loki for local log collection

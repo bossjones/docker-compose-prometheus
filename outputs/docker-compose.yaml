@@ -468,12 +468,10 @@ services:
     links:
       - cadvisor:cadvisor
       - alertmanager:alertmanager
-      - loki-gateway:loki-gateway
       - pihole-exporter:pihole-exporter
     depends_on:
       - cadvisor
       - alertmanager
-      - loki-gateway
       - pihole-exporter
       - pushgateway
     restart: always
@@ -841,10 +839,8 @@ services:
     - "traefik.port=3000"
     depends_on:
       - prometheus
-      - loki-gateway
     links:
       - prometheus:prometheus
-      - loki-gateway:loki-gateway
       - alertmanager:alertmanager
       - influxdb:influxdb
     expose:

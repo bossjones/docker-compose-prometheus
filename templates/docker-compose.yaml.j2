@@ -634,14 +634,18 @@ services:
       - cadvisor:cadvisor
 {% endif %}
       - alertmanager:alertmanager
+{% if loki_feature_flag %}
       - loki-gateway:loki-gateway
+{% endif %}
       - pihole-exporter:pihole-exporter
     depends_on:
 {% if cadvisor_feature_flag %}
       - cadvisor
 {% endif %}
       - alertmanager
+{% if loki_feature_flag %}
       - loki-gateway
+{% endif %}
       - pihole-exporter
       - pushgateway
     restart: always
@@ -1119,7 +1123,7 @@ services:
 #         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 {% endraw %}
 
-{% if promtail_feature_flag %}
+{% if promtail_feature_flag and loki_feature_flag %}
   promtail:
     # SOURCE: https://github.com/gilmrt/docker-compose/blob/5d8d7b3746fba48ba5f559f9913e56ae3d881eee/metrics/docker-compose.yml
     container_name: promtail
@@ -1185,10 +1189,14 @@ services:
     - "traefik.port=3000"
     depends_on:
       - prometheus
+{% if loki_feature_flag %}
       - loki-gateway
+{% endif %}
     links:
       - prometheus:prometheus
+{% if loki_feature_flag %}
       - loki-gateway:loki-gateway
+{% endif %}
       - alertmanager:alertmanager
       - influxdb:influxdb
     expose:
@@ -1241,7 +1249,7 @@ services:
     image: balabit/syslog-ng:latest
     container_name: syslog-ng
     command: -edv --control /syslog-ng/syslog-ng.ctl
-{% if promtail_feature_flag %}
+{% if promtail_feature_flag and loki_feature_flag %}
     depends_on:
     - promtail
 {% endif %}
