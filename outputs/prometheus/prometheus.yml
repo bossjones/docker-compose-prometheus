@@ -61,7 +61,7 @@ scrape_configs:
       - source_labels: [__param_target]
         target_label: instance
       - target_label: __address__
-        replacement: '192.168.3.16:9221'  # PVE exporter.
+        replacement: '192.168.2.28:9221'  # PVE exporter.
       - regex: '(.+)'
         replacement: k3d
         source_labels:
@@ -129,7 +129,7 @@ scrape_configs:
     scrape_interval: 5s
 
     # static_configs:
-    #     - targets: ['192.168.3.16:9090']
+    #     - targets: ['192.168.2.28:9090']
     dns_sd_configs:
       - names:
           - 'prometheus'
@@ -178,7 +178,7 @@ scrape_configs:
     scrape_interval: 5s
 
     # static_configs:
-    #    - targets: ['192.168.3.16:9100']
+    #    - targets: ['192.168.2.28:9100']
     dns_sd_configs:
       - names:
           - 'node-exporter'
@@ -204,7 +204,7 @@ scrape_configs:
     scrape_interval: 5s
 
     static_configs:
-        - targets: ['192.168.3.16:9323']
+        - targets: ['192.168.2.28:9323']
     relabel_configs:
     - regex: '(.+)'
       replacement: k3d
@@ -223,7 +223,7 @@ scrape_configs:
     # Override the global default and scrape targets from this job every 5 seconds.
     scrape_interval: 5s
     static_configs:
-        - targets: ['192.168.3.16:9167']
+        - targets: ['192.168.2.28:9167']
     relabel_configs:
     - regex: '(.+)'
       replacement: k3d
@@ -258,7 +258,7 @@ scrape_configs:
     scrape_interval: 15s
 
     #static_configs:
-    #  - targets: ['192.168.3.16:8081']
+    #  - targets: ['192.168.2.28:8081']
     dns_sd_configs:
       - names:
           - cadvisor
@@ -291,7 +291,7 @@ scrape_configs:
   #     - targets:
   #         - traefik:8080
   #       labels:
-  #         host: 192.168.3.16
+  #         host: 192.168.2.28
   #   metric_relabel_configs:
   #     # Only keep data that is used in graphs to reduce size
   #     - source_labels: [__name__]
@@ -316,7 +316,7 @@ scrape_configs:
     honor_labels: true
 
     static_configs:
-      - targets: ['192.168.3.16:19999']
+      - targets: ['192.168.2.28:19999']
 
   - job_name: 'blackbox'
     metrics_path: /probe
@@ -370,7 +370,7 @@ scrape_configs:
         target_label: __param_target
       - target_label: __address__
         # replacement: 192.168.1.102:9115  # The blackbox exporter's real hostname:port.
-        replacement: 192.168.3.16:9115  # The blackbox exporter's real hostname:port.
+        replacement: 192.168.2.28:9115  # The blackbox exporter's real hostname:port.
 
   - job_name: 'loki'
     dns_sd_configs:

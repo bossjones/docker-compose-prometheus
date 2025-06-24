@@ -159,7 +159,7 @@ netplan-apply: doctor
 	sudo mkdir -p /etc/systemd/resolved.conf.d
 	sudo sh -c 'echo "[Resolve]" > /etc/systemd/resolved.conf.d/disable-stub.conf'
 	sudo sh -c 'echo "DNSStubListener=no" >> /etc/systemd/resolved.conf.d/disable-stub.conf'
-	sudo sh -c 'echo "DNS=192.168.3.16" >> /etc/systemd/resolved.conf.d/disable-stub.conf'
+	sudo sh -c 'echo "DNS=192.168.2.28" >> /etc/systemd/resolved.conf.d/disable-stub.conf'
 	sudo sh -c 'echo "FallbackDNS=" >> /etc/systemd/resolved.conf.d/disable-stub.conf'
 	sudo sh -c 'echo "Domains=~." >> /etc/systemd/resolved.conf.d/disable-stub.conf'
 	sudo sh -c 'echo "DNSSEC=no" >> /etc/systemd/resolved.conf.d/disable-stub.conf'

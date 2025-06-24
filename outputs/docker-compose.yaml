@@ -339,7 +339,7 @@ services:
     - NETWORK_ACCESS=internal
     - VIRTUAL_HOST=pi.hole
     - PROXY_LOCATION=pi.hole
-    - FTLCONF_REPLY_ADDR4=192.168.3.16
+    - FTLCONF_REPLY_ADDR4=192.168.2.28
     # - VIRTUAL_PORT=80
     # **************************************************************************************************
     # Set to your server's LAN IP, used by web block modes.
@@ -363,12 +363,12 @@ services:
     # pi.hole.<local domain>
     # <the device's hostname>.<local domain>
     # **************************************************************************************************
-    - FTLCONF_LOCAL_IPV4=192.168.3.16
+    - FTLCONF_LOCAL_IPV4=192.168.2.28
     # - FTLCONF_RATE_LIMIT=0/0
     # SOURCE: https://docs.pi-hole.net/ftldns/configfile/#rate_limit
     - FTLCONF_RATE_LIMIT=5000/60
     # - FTLCONF_RATE_LIMIT=0/0
-    # - LOCAL_IPV4=192.168.3.16
+    # - LOCAL_IPV4=192.168.2.28
     - WEBLOGS_STDOUT=1
     - DHCP_ACTIVE=false
     - DNSSEC=true
